@@ -22,8 +22,18 @@ export function moonPhaseLabel(phase: number): string {
 
 function litPath(phase: number): string {
   const rx = R * Math.abs(1 - 2 * phase);
-  /* crescent: the terminator curves into the lit half. gibbous: away. */
-  const sweep = phase < 0.5 ? 1 : 0;
+  /* The first arc runs down the lit limb clockwise, so the terminator returns
+     bottom to top. Counter-clockwise (0) brings it back through the lit half
+     and carves a crescent; clockwise (1) swings it through the dark half and
+     fills out a gibbous.
+
+     Sanity check the ends rather than trusting the reading: at phase 0 the
+     return arc has rx = R and retraces the first arc exactly, enclosing
+     nothing. At phase 1 it sweeps the other semicircle and closes the full
+     disc. Getting this backwards renders a new moon as full, which is what it
+     did until the night picker put a 21% crescent on screen next to the
+     number and the two disagreed. */
+  const sweep = phase < 0.5 ? 0 : 1;
   return [
     `M ${C},${C - R}`,
     `A ${R},${R} 0 0 1 ${C},${C + R}`,

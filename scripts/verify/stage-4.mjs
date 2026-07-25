@@ -219,7 +219,11 @@ await withServer(async (BASE) => {
     await page.goto(BASE, { waitUntil: "load" });
     await page.waitForTimeout(1500);
     const ambient = await page.evaluate(() => {
-      const specks = [...document.querySelectorAll(".ambient-star")];
+      /* Section 5 puts the field on the hero AND on any full-ink section, so
+         a landing page carrying the night picker has more than one layer.
+         The 40-60 count is per layer, not per page. */
+      const layers = [...document.querySelectorAll(".ambient-drift")];
+      const specks = [...layers[0].querySelectorAll(".ambient-star")];
       const chart = document.querySelector('svg[aria-label^="Star chart"]').getBoundingClientRect();
       const overlapping = specks.filter((s) => {
         const r = s.getBoundingClientRect();
@@ -231,6 +235,8 @@ await withServer(async (BASE) => {
       const durations = specks.map((s) => parseFloat(getComputedStyle(s).animationDuration));
       return {
         count: specks.length,
+        layers: layers.length,
+        perLayer: layers.map((l) => l.querySelectorAll(".ambient-star").length),
         overlapping: overlapping.length,
         minWidth: Math.min(...widths),
         maxWidth: Math.max(...widths),
@@ -240,9 +246,9 @@ await withServer(async (BASE) => {
       };
     });
     record(
-      "5a. 40 to 60 specks, per section 5",
-      ambient.count >= 40 && ambient.count <= 60,
-      `${ambient.count} specks`,
+      "5a. 40 to 60 specks per layer, per section 5",
+      ambient.perLayer.every((n) => n >= 40 && n <= 60),
+      `${ambient.layers} layer(s) on this page, ${ambient.perLayer.join(" and ")} specks each`,
     );
     record(
       "5b. specks are 1 to 2 device pixels",

@@ -21,3 +21,9 @@ export const HERO: HeroContent = {
   primary: { label: "Pick a night", href: "/tonight" },
   secondary: { label: "See the sites", href: "/sites" },
 };
+
+export const NIGHT_PICKER: { eyebrow: string; headingLines: string[]; sub: string } = {
+  eyebrow: "Pick a night",
+  headingLines: ["The sky is different", "every night you are here."],
+  sub: "A full moon washes out everything faint. A new moon puts the Milky Way over the rocks. Choose a date to see which one your trip lands on.",
+};

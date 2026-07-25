@@ -155,6 +155,35 @@ html.lenis body {
   }
 }
 
+/* The night picker, section 6 motion 3. Each date cell fills its sky-quality
+   colour from the bottom, staggered by row. Gated on .js so the grid is
+   already filled and readable if the script never runs. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .cell-fill {
+    transform: scaleY(0);
+    animation: cell-fill 350ms var(--ease) forwards;
+  }
+
+  /* The detail panel on a state change: fade and an 8px rise, 200ms. Keyed
+     on the selection, so it plays once per change rather than per render. */
+  .js .panel-enter {
+    animation: panel-enter 200ms var(--ease);
+  }
+}
+
+@keyframes cell-fill {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
 @keyframes chart-draw {
   to {
     stroke-dashoffset: 0;

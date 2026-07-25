@@ -27,20 +27,30 @@ function required(name: string, value: string | undefined): string {
   return value;
 }
 
-let browserClient: SuhailClient | null = null;
+let publicClient: SuhailClient | null = null;
 
-/** For client components and anything running in the browser. */
-export function supabaseBrowser(): SuhailClient {
-  /* one instance per tab: a new client per render leaks sockets */
-  if (browserClient) return browserClient;
+/**
+ * The anon client. Safe anywhere, browser or server, because everything it
+ * can do is bounded by the RLS policies.
+ *
+ * Server code reading the public catalogue should use this rather than
+ * supabaseServer(): the catalogue is anon-readable by policy, so there is no
+ * reason to reach for a key that bypasses row-level security to read it.
+ */
+export function supabasePublic(): SuhailClient {
+  /* one instance per process or tab: a new client per render leaks sockets */
+  if (publicClient) return publicClient;
 
-  browserClient = createClient<Database>(
+  publicClient = createClient<Database>(
     required("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL),
     required("NEXT_PUBLIC_SUPABASE_ANON_KEY", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     { auth: { persistSession: false } },
   );
-  return browserClient;
+  return publicClient;
 }
+
+/** The same anon client, named for use from client components. */
+export const supabaseBrowser = supabasePublic;
 
 /** Server components, route handlers and server actions only. Bypasses RLS. */
 export function supabaseServer(): SuhailClient {
