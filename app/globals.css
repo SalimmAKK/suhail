@@ -79,6 +79,33 @@
   --ease: var(--ease-move);
 }
 
+/* The launch intro's pre-hydration backdrop. Set by the inline script in the
+   root layout and cleared by LaunchIntro once its own overlay has painted, so
+   the two never both show and never leave a gap between them. */
+html[data-intro="play"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: var(--color-ink);
+}
+
+/* Lenis (components/layout/SmoothScroll.tsx) needs these to own the scroll
+   position. The classes are only ever on <html> while Lenis is running, so
+   under reduced motion none of this applies. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
 /* Reveal's pre-animation state. Scoped to .js (set by an inline script in the
    root layout) and to motion being allowed, so content is only ever hidden
    when the script that reveals it is running. Kept outside @layer so it is
