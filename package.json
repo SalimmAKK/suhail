@@ -10,7 +10,8 @@
     "verify:stage-2": "node scripts/verify/stage-2.mjs",
     "seed": "node scripts/seed.mjs",
     "verify:stage-3": "node --import=./scripts/verify/lib/register.mjs scripts/verify/stage-3.mjs",
-    "verify:stage-3:live": "node --import=./scripts/verify/lib/register.mjs scripts/verify/stage-3-live.mjs"
+    "verify:stage-3:live": "node --import=./scripts/verify/lib/register.mjs scripts/verify/stage-3-live.mjs",
+    "verify:stage-4": "node scripts/verify/stage-4.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.8",

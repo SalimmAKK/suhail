@@ -9,6 +9,7 @@ import { LineReveal } from "@/components/ui/LineReveal";
 import { MoonPhase } from "@/components/ui/MoonPhase";
 import { Reveal } from "@/components/ui/Reveal";
 import { SkyPip } from "@/components/ui/SkyPip";
+import { StarChart } from "@/components/sections/StarChart";
 
 /* BUILD_PLAN stage 1, task 6. Every primitive in isolation, on both the cream
    and the ink section backgrounds it has to survive. Delete before the demo. */
@@ -212,6 +213,20 @@ export default function Styleguide() {
               </div>
             </div>
           </Card>
+        </div>
+      </Section>
+
+      {/* BUILD_PLAN stage 4 verification: the chart has to hold up on both
+          section backgrounds, so both are rendered here to be compared. */}
+      <Section title="Star chart on cream">
+        <div className="mx-auto max-w-[520px]">
+          <StarChart date={new Date()} tone="cream" />
+        </div>
+      </Section>
+
+      <Section title="Star chart on ink" tone="light">
+        <div className="mx-auto max-w-[520px]">
+          <StarChart date={new Date()} tone="ink" />
         </div>
       </Section>
 

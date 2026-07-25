@@ -150,6 +150,89 @@ export function formatSiderealTime(hours: number): string {
   )}m ${pad(totalSeconds % 60)}s`;
 }
 
+/* ---------------------------------------------------------------- projection
+
+   Turning a star's catalogue position into a point on the chart.
+
+   Two steps. First equatorial (right ascension, declination) to horizontal
+   (altitude, azimuth), which needs the observer's latitude and the sidereal
+   time, because what is overhead depends on where and when you are. Then a
+   zenith-centred stereographic projection onto the page.
+
+   Stereographic is the projection printed planispheres use. It preserves the
+   shape of constellations, which matters more here than preserving area: a
+   traveller has to recognise Orion on the page and then find the same shape
+   overhead. */
+
+const RAD = Math.PI / 180;
+
+export type Horizontal = {
+  /** degrees above the horizon. negative means below it. */
+  alt: number;
+  /** degrees clockwise from north. 90 is due east. */
+  az: number;
+};
+
+export function equatorialToHorizontal(
+  raHours: number,
+  decDeg: number,
+  lstHours: number,
+  latDeg: number = ALULA_LAT,
+): Horizontal {
+  /* hour angle: how far the star is past the meridian */
+  const H = (lstHours - raHours) * 15 * RAD;
+  const dec = decDeg * RAD;
+  const lat = latDeg * RAD;
+
+  const sinAlt = Math.sin(dec) * Math.sin(lat) + Math.cos(dec) * Math.cos(lat) * Math.cos(H);
+  const alt = Math.asin(Math.min(1, Math.max(-1, sinAlt)));
+
+  const az = Math.atan2(
+    -Math.cos(dec) * Math.sin(H),
+    Math.sin(dec) * Math.cos(lat) - Math.cos(dec) * Math.sin(lat) * Math.cos(H),
+  );
+
+  return { alt: alt / RAD, az: ((az / RAD) % 360 + 360) % 360 };
+}
+
+export type ChartPoint = { x: number; y: number; alt: number };
+
+/**
+ * Zenith-centred stereographic projection onto a circle of radius `radius`.
+ *
+ * The zenith lands at the centre and the horizon on the rim, so the whole
+ * visible sky fits the disc. North is up and east is to the left, which looks
+ * inverted on paper and correct when you hold the chart over your head.
+ */
+export function projectToChart(
+  { alt, az }: Horizontal,
+  cx: number,
+  cy: number,
+  radius: number,
+): ChartPoint {
+  const zenithDistance = (90 - alt) * RAD;
+  const r = radius * Math.tan(zenithDistance / 2);
+  return {
+    x: cx - r * Math.sin(az * RAD),
+    y: cy - r * Math.cos(az * RAD),
+    alt,
+  };
+}
+
+/**
+ * The instant the chart is drawn for: 21:00 in AlUla on the given date.
+ *
+ * Fixed rather than "now" so the chart is the same whether it renders on the
+ * server in one timezone or in a browser in another, and so a date in the
+ * night picker means the evening of that date rather than the moment it was
+ * clicked. Saudi Arabia is UTC+3 and does not observe daylight saving.
+ */
+export function alulaEvening(date: Date): Date {
+  return new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 21 - 3, 0, 0),
+  );
+}
+
 /* ----------------------------------------------------------------- calendars
 
    The night picker works in whole dates, so everything downstream shares one

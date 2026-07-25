@@ -120,6 +120,78 @@ html.lenis body {
   overflow: clip;
 }
 
+/* The star chart's draw-in, section 6 motion 2. Constellation lines draw
+   themselves, their stars fade in behind them, the whole sequence inside
+   900ms with a per-constellation stagger set inline.
+
+   Gated on .js for the same reason Reveal is: without the script, the chart
+   renders finished rather than blank. Gated on motion for the obvious one.
+   pathLength="1" on every line makes one dasharray work for all of them
+   regardless of how long the segment actually is. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .chart-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: chart-draw 560ms var(--ease) forwards;
+  }
+
+  .js .chart-star {
+    opacity: 0;
+    animation: chart-fade 260ms var(--ease) forwards;
+  }
+
+  /* Section 6 motion 8. The whole field drifts 8px over 60 seconds and each
+     speck twinkles on its own cycle. The only continuous background motion
+     in the product. */
+  .ambient-drift {
+    animation: ambient-drift 60s ease-in-out infinite alternate;
+  }
+
+  .ambient-star {
+    animation-name: ambient-twinkle;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+}
+
+@keyframes chart-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chart-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+/* The resting state, outside the motion query: under reduced motion, or
+   before the animation applies, a speck sits at its low opacity rather than
+   fully opaque. */
+.ambient-star {
+  opacity: var(--twinkle-low, 0.3);
+}
+
+@keyframes ambient-drift {
+  from {
+    transform: translateX(-4px);
+  }
+  to {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes ambient-twinkle {
+  from {
+    opacity: var(--twinkle-low);
+  }
+  to {
+    opacity: var(--twinkle-high);
+  }
+}
+
 /* Reveal's pre-animation state. Scoped to .js (set by an inline script in the
    root layout) and to motion being allowed, so content is only ever hidden
    when the script that reveals it is running. Kept outside @layer so it is

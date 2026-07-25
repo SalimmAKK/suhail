@@ -1,25 +1,17 @@
-import Link from "next/link";
-import { Shell } from "@/components/layout/Shell";
-import { CoordinateTag } from "@/components/ui/CoordinateTag";
-import { Eyebrow } from "@/components/ui/Eyebrow";
+import { Hero } from "@/components/sections/Hero";
+import { HERO } from "@/data/home";
 
-/* Stage 1 placeholder. The create-next-app boilerplate is gone because it
-   referenced tokens the palette no longer has. The real landing page, hero
-   and star chart arrive in stage 4 per BUILD_PLAN.md. */
+/* Stage 4: hero and star chart. The night picker, the sites and the
+   credibility strip follow in stages 5, 6 and 9.
+
+   Server component. The chart is derived from the date, and rendering it here
+   keeps it out of the client bundle and free of layout shift.
+
+   force-dynamic because the chart and the moon are for tonight. A statically
+   prerendered page would freeze whichever night the build happened to run on
+   and quietly show the wrong sky from then on. */
+export const dynamic = "force-dynamic";
 
 export default function Home() {
-  return (
-    <Shell className="flex flex-col justify-center gap-6 pb-32 pt-[calc(var(--nav-clearance)+4rem)]">
-      <Eyebrow>Stage 1</Eyebrow>
-      <h1 className="text-pull">Suhail</h1>
-      <CoordinateTag items={["26.61°N", "ALULA, KSA", "DESIGN SYSTEM PORTED"]} />
-      <p className="max-w-[46ch] text-muted">
-        The palette, type scale and UI primitives are in place. The landing page is built in
-        stage 4.
-      </p>
-      <Link href="/styleguide" className="font-mono text-label uppercase tracking-label text-gold-deep underline underline-offset-4">
-        View the styleguide
-      </Link>
-    </Shell>
-  );
+  return <Hero content={HERO} date={new Date()} />;
 }
