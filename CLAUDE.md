@@ -286,6 +286,22 @@ fails AA on the one CTA that appears on every page. Ink on gold is roughly
 No outline buttons. No ghost buttons. If it needs to be tapped, it looks
 tappable.
 
+**Shape carries rank.** `Button` takes a `pill` prop, opt-in, never a global
+default. The capsule is Suhail's signature action shape and marks the single
+most important action on a surface:
+
+- **Pill (`rounded-full`)** — the nav CTA, the hero CTA (`Pick a night`), the
+  booking CTA (`Reserve`), the one action a confirmation screen offers. At
+  most one per surface, matching the "one accent per composition" rule.
+- **Default (`rounded-md`)** — everything else. Form submits, buttons inside
+  cards, inline actions, secondary CTAs sitting beside a pill.
+
+Do not reach for `pill` to make a button feel more important than the surface
+warrants. If two buttons on a screen are both pills, one of them is wrong.
+The shape is a hierarchy signal, not decoration, so §2.2 rule 10 applies:
+if you cannot say which single action the pill is pointing at, it should be
+`rounded-md`.
+
 ---
 
 ## 6. Motion

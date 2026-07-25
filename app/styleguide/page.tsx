@@ -162,6 +162,20 @@ export default function Styleguide() {
         </p>
       </Section>
 
+      <Section title="Shape carries rank">
+        <div className="flex flex-wrap items-center gap-4">
+          <Button href="/tonight" variant="accent" pill>
+            Pick a night
+          </Button>
+          <Button href="/styleguide">Add a guest</Button>
+        </div>
+        <p className="mt-6 max-w-[52ch] text-muted">
+          The capsule marks the single most important action on a surface: the nav CTA, the
+          hero CTA, the one that starts a booking. At most one per screen. Everything else
+          stays rounded-md.
+        </p>
+      </Section>
+
       <Section title="Buttons on ink" tone="light">
         <div className="flex flex-wrap items-center gap-4">
           <Button href="/styleguide" variant="light">
