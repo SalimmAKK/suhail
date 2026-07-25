@@ -257,9 +257,19 @@ credibility (cream), footer (ink).
   60 tiny star points scattered across the hero and any full-ink section,
   rendered as a static SVG with a slow ambient drift (motion 8). Star sizes
   1 to 2 px, opacity 30 to 60%. It is atmosphere, not content — the visible
-  star chart in §8.1 is a separate, legible, load-bearing element. The
-  ambient layer never overlaps the star chart's viewBox. If you cannot tell
-  it is there without looking for it, it is doing its job.
+  star chart in §8.1 is a separate, legible, load-bearing element. If you
+  cannot tell it is there without looking for it, it is doing its job.
+
+  **The 30 to 60% figure is for ink sections**, where the specks are light on
+  dark. On cream the layer inverts to ink specks at roughly 10 to 19%. The
+  specified values on cream read as dirt on the page rather than atmosphere.
+  Both variants live in `AmbientStars`, selected by a `tone` prop.
+
+  **The no-overlap rule is the caller's job, not the layer's.** The field is
+  stretched to whatever box it is given, so an exclusion zone expressed in its
+  own coordinates becomes an ellipse on screen and misses. The parent bounds
+  the layer to the region the chart does not occupy, which differs between the
+  stacked and side-by-side layouts.
 - **The star chart.** SVG-rendered constellations over AlUla for a given
   date. The signature centrepiece, see §8.
 - **The moon phase indicator.** Small circular graphic showing tonight's
@@ -440,6 +450,20 @@ chart — like a page from a printed almanac.
 Shows: 8 to 12 named constellations visible from AlUla in the current season,
 star points sized by magnitude, constellation lines drawn in gold at 40%
 opacity, star names in mono at small sizes. Draws in on load (motion 2).
+
+Each figure also carries its own name in mono, set under its bounding box
+rather than at its centroid, which is where the stars are. Without them the
+chart reads as a scatter of points instead of a page from an almanac.
+
+**Star radius is `3.9 - mag * 0.5`, clamped to 1.2 - 4.0.** The original
+`3.5 - mag * 0.5` clamped at 0.7 was correct in shape but too small in
+practice: at the size the hero renders the chart, anything under about 1.2
+user units disappeared into the cream. Same magnitude relationship, shifted
+up. Do not revert it to the smaller clamp.
+
+On cream the line colour is `gold-deep` at 55 to 70% rather than `gold` at
+40%. The 40% figure is calibrated for ink, where it is correct, and the ink
+variant is the stronger of the two.
 
 **It must never look like a screensaver.** No twinkling, no parallax, no
 mouse-tracked stars. This is a diagram, not an effect.
