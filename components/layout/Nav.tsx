@@ -1,19 +1,24 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Shell } from "@/components/layout/Shell";
 import { cn, focusRing } from "@/lib/cn";
 import { useNavTone } from "@/lib/useNavTone";
 
-/* CLAUDE.md section 5, the glass nav. This is the one glass surface in the
-   product: backdrop-blur over a translucent base, hairline bottom border, and
-   it re-tones itself when a full-ink section passes behind it.
+/* CLAUDE.md section 5, the glass nav, as a floating pill rather than a bar.
 
-   Under md the link list drops out and the bottom nav (MobileNav) takes over
-   navigation, but the bar itself stays so every viewport keeps the wordmark
-   and the one CTA. */
+   It is fixed, not sticky. Sticky reserves its own space in the flow, which
+   means nothing ever passes underneath it and backdrop-blur has nothing to
+   blur: the glass reads as flat cream and the ink sections never reach the
+   band the tone observer watches. Fixed puts the page behind it, which is the
+   whole point of the surface.
+
+   Because it is fixed, the first section of every page owes it clearance.
+   Sections pad their content down (--nav-clearance in globals.css) and run
+   their background to the top of the page, so the ink is behind the glass at
+   rest rather than starting below it. */
 
 const LINKS = [
   { href: "/tonight", label: "Tonight" },
@@ -24,21 +29,24 @@ const LINKS = [
 
 export function Nav() {
   const pathname = usePathname();
-  const tone = useNavTone();
+  const ref = useRef<HTMLElement>(null);
+  const tone = useNavTone(ref);
   const onInk = tone === "ink";
 
   return (
     <header
+      ref={ref}
       className={cn(
-        "sticky top-0 z-50 border-b backdrop-blur-md transition-colors duration-300 ease-move",
-        onInk ? "border-moon/15 bg-ink/40" : "border-line bg-cream/60",
+        "fixed inset-x-4 top-4 z-50 rounded-full border shadow-lift backdrop-blur-md md:inset-x-6 md:top-6",
+        "transition-colors duration-300 ease-move",
+        onInk ? "border-moon/15 bg-ink/50" : "border-line bg-cream/70",
       )}
     >
-      <Shell className="flex h-16 items-center justify-between gap-6">
+      <div className="flex h-14 items-center justify-between gap-4 pl-6 pr-2 md:h-16 md:grid md:grid-cols-[1fr_auto_1fr] md:pl-8 md:pr-3">
         <Link
           href="/"
           className={cn(
-            "rounded-sm font-display text-xl font-medium tracking-display transition-colors duration-200 ease-move",
+            "rounded-full font-display text-xl font-medium tracking-display transition-colors duration-200 ease-move md:justify-self-start",
             focusRing,
             onInk ? "text-moon" : "text-ink",
           )}
@@ -55,7 +63,7 @@ export function Nav() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-sm font-mono text-label uppercase tracking-label transition-colors duration-200 ease-move",
+                  "rounded-full font-mono text-label uppercase tracking-label transition-colors duration-200 ease-move",
                   focusRing,
                   active
                     ? onInk
@@ -74,10 +82,10 @@ export function Nav() {
 
         {/* The only route into booking in v1 is choosing a night first, so the
             CTA and the Tonight link share a destination. */}
-        <Button href="/tonight" variant="accent" size="sm">
+        <Button href="/tonight" variant="accent" size="sm" pill className="md:justify-self-end">
           Book a night
         </Button>
-      </Shell>
+      </div>
     </header>
   );
 }

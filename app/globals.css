@@ -79,6 +79,20 @@
   --ease: var(--ease-move);
 }
 
+/* The nav is a fixed floating pill, so it is out of the flow entirely. Every
+   page's first section pads its content down by this much, while its
+   background still runs to the top of the page. That is what puts something
+   behind the glass at rest. Pill inset plus pill height plus breathing room. */
+:root {
+  --nav-clearance: 6rem;
+}
+
+@media (width >= 48rem) {
+  :root {
+    --nav-clearance: 7rem;
+  }
+}
+
 /* The launch intro's pre-hydration backdrop. Set by the inline script in the
    root layout and cleared by LaunchIntro once its own overlay has painted, so
    the two never both show and never leave a gap between them. */

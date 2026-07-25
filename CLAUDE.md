@@ -235,12 +235,24 @@ credibility (cream), footer (ink).
 ### Structural devices
 - **The coordinate tag.** Mono row like `26.85°N · ALULA · 692M · BORTLE 2`.
   Used under section headings and site names. Data as ornament.
-- **The glass nav.** The desktop and mobile navs use frosted glass —
-  `backdrop-blur-md` over a warm-cream 60% translucent base on light
-  sections, and an ink 40% translucent base on dark sections. Hairline
-  bottom border in `line`. This is the one glass surface in the product —
-  every other component is opaque. The glass says "the sky is behind
-  everything on this page" without being a full-screen effect.
+- **The glass nav.** The desktop and mobile navs are floating pills, not
+  bars: `fixed`, inset 16px from the top and sides (24px at `md`),
+  `rounded-full`, hairline border in `line`, and a soft shadow lifting them
+  off the page. Frosted glass — `backdrop-blur-md` over a warm-cream 70%
+  translucent base on light sections, and an ink 50% translucent base on
+  dark sections. This is the one glass surface in the product — every other
+  component is opaque. The glass says "the sky is behind everything on this
+  page" without being a full-screen effect.
+
+  The pill must be `fixed`, never `sticky`. Sticky reserves its own space in
+  the flow, so nothing ever passes beneath it, `backdrop-blur` has nothing to
+  blur, and the glass degrades to a flat opaque bar.
+
+  Because it is out of the flow, **a section's background runs to the top of
+  the page and the section pads its own content down by `--nav-clearance`**
+  (globals.css). Never put top padding on `<main>` — that pushes the
+  backgrounds down too and empties the glass. Full-ink sections carry
+  `data-nav-tone="ink"` so the pill re-tones over them (`lib/useNavTone.ts`).
 - **The ambient starfield.** A very subtle, non-interactive layer of ~40 to
   60 tiny star points scattered across the hero and any full-ink section,
   rendered as a static SVG with a slow ambient drift (motion 8). Star sizes

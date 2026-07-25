@@ -10,8 +10,9 @@ import { cn, focusRing } from "@/lib/cn";
    what you have booked. Section 2.2 rule 7 is satisfied because removing any
    one of these loses a destination, not decoration.
 
-   Same glass as the desktop nav. It sits at the bottom of the viewport rather
-   than behind page sections, so it does not re-tone. */
+   Same floating pill as the desktop nav, inset from the bottom and the sides
+   rather than docked full width. It clears the home indicator on iOS by
+   adding the safe area inset to its own offset. */
 
 const ITEMS = [
   { href: "/tonight", label: "Sky", Icon: Star },
@@ -25,7 +26,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-cream/60 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 rounded-full border border-line bg-cream/70 shadow-lift backdrop-blur-md md:hidden"
     >
       <ul className="flex items-stretch">
         {ITEMS.map(({ href, label, Icon }) => {
@@ -36,7 +37,7 @@ export function MobileNav() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1.5 py-3 transition-colors duration-200 ease-move",
+                  "flex flex-col items-center gap-1 rounded-full py-2.5 transition-colors duration-200 ease-move",
                   focusRing,
                   active ? "text-gold-deep" : "text-muted",
                 )}

@@ -59,8 +59,13 @@ export default function RootLayout({
         <SmoothScroll />
         <LaunchIntro />
         <Nav />
-        {/* the bottom nav is fixed, so the last section needs room under it */}
-        <main className="flex-1 pb-20 md:pb-0">{children}</main>
+        {/* No top padding here on purpose: section backgrounds have to run
+            under the floating nav for the glass to have anything to blur.
+            Sections pad their own content down by --nav-clearance instead.
+            The bottom pill is a different matter, nothing sits behind it. */}
+        <main className="flex-1 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-0">
+          {children}
+        </main>
         <MobileNav />
       </body>
     </html>

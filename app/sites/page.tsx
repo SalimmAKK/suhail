@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function Sites() {
   return (
-    <section className="py-24">
+    <section className="pb-24 pt-[var(--nav-clearance)]">
       <Shell>
         <Eyebrow className="mb-6">The sites</Eyebrow>
         <h1 className="text-pull">Four places to stand under it.</h1>

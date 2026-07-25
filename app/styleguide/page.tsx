@@ -53,7 +53,12 @@ function Section({
   tone?: "default" | "light";
 }) {
   return (
-    <section className={tone === "light" ? "bg-ink py-16" : "border-t border-line py-16"}>
+    <section
+      /* full-ink sections declare themselves so the glass nav re-tones over
+         them, per lib/useNavTone.ts */
+      data-nav-tone={tone === "light" ? "ink" : undefined}
+      className={tone === "light" ? "bg-ink py-16" : "border-t border-line py-16"}
+    >
       <Shell>
         <Eyebrow tone={tone} className="mb-8">
           {title}
@@ -77,7 +82,7 @@ function Swatch({ token, swatch, note }: { token: string; swatch: string; note: 
 export default function Styleguide() {
   return (
     <>
-      <div className="border-b border-line py-16">
+      <div className="border-b border-line pb-16 pt-[var(--nav-clearance)]">
         <Shell>
           <Eyebrow className="mb-6">Styleguide</Eyebrow>
           <LineReveal as="h1" lines={["Every primitive,", "in isolation."]} className="text-pull" />

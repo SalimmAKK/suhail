@@ -26,6 +26,10 @@ const SIZES: Record<Size, string> = {
 type CommonProps = {
   variant?: Variant;
   size?: Size;
+  /* Fully round, for buttons that sit inside the nav pill. Kept as a prop
+     rather than a className so it cannot lose a specificity fight with the
+     default rounded-md. */
+  pill?: boolean;
   className?: string;
   children: React.ReactNode;
 };
@@ -44,9 +48,10 @@ type NativeProps = CommonProps & {
 };
 
 export function Button(props: AnchorProps | NativeProps) {
-  const { variant = "primary", size = "md", className, children } = props;
+  const { variant = "primary", size = "md", pill = false, className, children } = props;
   const classes = cn(
-    "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors duration-150 ease-move",
+    "inline-flex items-center justify-center gap-2 font-medium transition-colors duration-150 ease-move",
+    pill ? "rounded-full" : "rounded-md",
     focusRing,
     "disabled:cursor-not-allowed disabled:opacity-40",
     VARIANTS[variant],

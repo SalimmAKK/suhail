@@ -9,7 +9,7 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 
 export default function Home() {
   return (
-    <Shell className="flex flex-col justify-center gap-6 py-32">
+    <Shell className="flex flex-col justify-center gap-6 pb-32 pt-[calc(var(--nav-clearance)+4rem)]">
       <Eyebrow>Stage 1</Eyebrow>
       <h1 className="text-pull">Suhail</h1>
       <CoordinateTag items={["26.85°N", "ALULA, KSA", "DESIGN SYSTEM PORTED"]} />

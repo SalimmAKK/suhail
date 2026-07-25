@@ -22,10 +22,12 @@ import { ALULA_LNG, SUHAIL_RA, formatSiderealTime, localSiderealTime } from "@/l
 const KEY = "suhail-intro";
 const WORDMARK = "Suhail";
 
-/* letters land over 500ms, then the coordinate line, hold, and out */
+/* Section 6 budgets the whole sequence at 1400ms: letters over ~500ms, the
+   coordinate line behind them, 300ms hold, 400ms out. HOLD_MS is when the
+   exit starts, so the measured total is HOLD_MS + 400. */
 const LETTER_STAGGER = 0.07;
-const COORD_DELAY = 0.56;
-const HOLD_MS = 1400;
+const COORD_DELAY = 0.5;
+const HOLD_MS = 1020;
 
 function subscribe() {
   return () => {};

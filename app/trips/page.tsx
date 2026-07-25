@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function Trips() {
   return (
-    <section className="py-24">
+    <section className="pb-24 pt-[var(--nav-clearance)]">
       <Shell>
         <Eyebrow className="mb-6">Trips</Eyebrow>
         <h1 className="text-pull">No bookings yet.</h1>

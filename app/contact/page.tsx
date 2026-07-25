@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function Contact() {
   return (
-    <section className="py-24">
+    <section className="pb-24 pt-[var(--nav-clearance)]">
       <Shell>
         <Eyebrow className="mb-6">Contact</Eyebrow>
         <h1 className="text-pull">Operators, partners, and anyone curious.</h1>

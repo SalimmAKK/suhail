@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function Tonight() {
   return (
-    <section data-nav-tone="ink" className="min-h-[80vh] bg-ink py-24">
+    <section data-nav-tone="ink" className="min-h-[80vh] bg-ink pb-24 pt-[var(--nav-clearance)]">
       <Shell>
         <Eyebrow tone="light" className="mb-6">
           Tonight over AlUla
