@@ -537,6 +537,24 @@ bookings
 Every booking creates a real row. Data survives refresh. This is a hard
 requirement from the Ravyn brief.
 
+### Unsourced coordinates on the map
+
+Only AlUla Manara has a published precise position. The other three sites are
+placed from descriptions of where they are, and `data/sites.ts` records that
+in a visible `verify` note per record. Rule 12 governs how the map treats
+them, and it is not "round it off and hope":
+
+- **A site with a `verify` note on its coordinate renders with a distinct
+  marker**: dashed ring rather than solid, and an `approximate location`
+  label in mono. Never hidden, never drawn as certain. A traveller planning a
+  drive deserves to know which pin is a guess.
+- **Wadi Nakhlah stays off the map entirely** until a real coordinate is
+  sourced. Its position is a placeholder, not an approximation, and a
+  placeholder pin is a fabricated fact. The site still gets a list entry and
+  a detail page saying its location is not yet published.
+- **Resolving a coordinate means deleting the note**, in the same commit. A
+  `verify` note that outlives its cause trains everyone to ignore the rest.
+
 ---
 
 ## 11. Room for personality

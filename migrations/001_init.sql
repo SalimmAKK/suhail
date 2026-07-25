@@ -143,3 +143,10 @@ create policy "bookings insertable" on bookings
 -- and no policy, those are denied for anon and authenticated. Reading a
 -- booking back goes through the service role on the server, so a reference
 -- alone never exposes anyone else's contact details to the browser.
+--
+-- One consequence, verified against this database rather than assumed:
+-- `insert ... returning` needs a select policy too, so a client insert that
+-- asks for the row back fails the whole insert with 42501. lib/booking.ts
+-- therefore inserts without .select() and returns only the reference it
+-- generated. Do not "fix" that by adding a select policy here. It would make
+-- every booking readable by anyone holding the anon key.

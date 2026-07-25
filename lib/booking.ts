@@ -37,7 +37,7 @@ export type BookingInput = {
 };
 
 export type BookingResult =
-  | { ok: true; booking: BookingRow }
+  | { ok: true; reference: string }
   | { ok: false; error: string; field?: keyof BookingInput };
 
 /** Enough to catch a typo, not so much that a real address gets rejected. */
@@ -67,11 +67,21 @@ export function validateBooking(input: BookingInput): BookingResult | null {
 }
 
 /**
- * Writes a real row and returns it, reference included.
+ * Writes a real row and returns its reference.
  *
- * Runs in the browser under the anon key, so the row is created as 'pending'
- * whatever the caller asks for. Never fakes success: if the insert fails, the
- * error comes back and the caller shows it.
+ * Returns the reference rather than the row, and that is not a shortcut. The
+ * insert deliberately has no `.select()`: PostgreSQL's `INSERT ... RETURNING`
+ * needs a SELECT policy, bookings has none for anon on purpose, and asking
+ * for the row back fails the whole insert with 42501. Adding a select policy
+ * to make `.select()` work would make every booking in the table readable by
+ * anyone holding the anon key, which is published to the browser.
+ *
+ * So the client learns only the reference it generated. The confirmation
+ * route reads the row back through the server, which is also what makes a
+ * refresh prove persistence rather than replay local state.
+ *
+ * Never fakes success: if the insert fails, the error comes back and the
+ * caller shows it.
  */
 export async function createBooking(input: BookingInput): Promise<BookingResult> {
   const invalid = validateBooking(input);
@@ -82,27 +92,22 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
   /* A collision is a unique-constraint violation, not silent corruption.
      Three attempts against 33.5 million references is plenty. */
   for (let attempt = 0; attempt < 3; attempt++) {
-    const { data, error } = await supabase
-      .from("bookings")
-      .insert({
-        experience_id: input.experienceId,
-        date: input.date,
-        guest_count: input.guestCount,
-        contact_name: input.contactName.trim(),
-        contact_email: input.contactEmail.trim().toLowerCase(),
-        contact_phone: input.contactPhone?.trim() || null,
-        status: "pending",
-        reference: generateReference(),
-      })
-      .select()
-      .single();
+    const reference = generateReference();
+    const { error } = await supabase.from("bookings").insert({
+      experience_id: input.experienceId,
+      date: input.date,
+      guest_count: input.guestCount,
+      contact_name: input.contactName.trim(),
+      contact_email: input.contactEmail.trim().toLowerCase(),
+      contact_phone: input.contactPhone?.trim() || null,
+      status: "pending",
+      reference,
+    });
 
-    if (!error && data) return { ok: true, booking: data };
+    if (!error) return { ok: true, reference };
 
     /* 23505 is unique_violation. Anything else is real and should surface. */
-    if (error && error.code !== "23505") {
-      return { ok: false, error: error.message };
-    }
+    if (error.code !== "23505") return { ok: false, error: error.message };
   }
 
   return { ok: false, error: "Could not generate a unique booking reference. Try again." };
