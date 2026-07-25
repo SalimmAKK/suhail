@@ -10,6 +10,7 @@
  */
 
 import { generateReference, validateBooking } from "@/lib/booking";
+import { equatorialToHorizontal, projectToChart, alulaEvening } from "@/lib/astro";
 import { moonPhase, isWaxing, moonPhaseLabel, skyQuality, visibleConstellations,
          everRises, maxAltitude, localSiderealTime, formatSiderealTime, dateKey,
          upcomingNights, ALULA_LAT } from "@/lib/astro";
@@ -129,6 +130,80 @@ for (const [name, input, field] of cases) {
 check("guest ceiling matches the RLS check constraint",
   validateBooking({...good, guestCount:20}) === null && validateBooking({...good, guestCount:21}) !== null,
   "20 allowed, 21 rejected, same bounds as the insert policy");
+
+
+/* ---- projection, against ground truth rather than internal consistency ----
+
+   The stage-4 browser checks confirmed every star lands inside the horizon
+   disc with finite coordinates. A projection with east and west swapped, or
+   with the hour angle inverted, would pass all of that and still print a
+   mirrored sky. These check positions an almanac could be held against. */
+
+const LAT = ALULA_LAT;
+
+// Polaris sits within a degree of the pole: from any latitude it stands due
+// north at an altitude equal to that latitude. The oldest navigation fact.
+const polaris = equatorialToHorizontal(2.5303, 89.2641, 0, LAT);
+check("Polaris stands due north at an altitude equal to the latitude",
+  near(polaris.alt, LAT, 1) && (near(polaris.az, 0, 1.5) || near(polaris.az, 360, 1.5)),
+  `alt ${polaris.alt.toFixed(2)} deg (latitude is ${LAT.toFixed(2)}), az ${polaris.az.toFixed(2)} deg`);
+
+// Polaris does not move. Six hours of sidereal time later it is still there.
+const polarisLater = equatorialToHorizontal(2.5303, 89.2641, 6, LAT);
+check("Polaris barely moves over six hours",
+  Math.abs(polarisLater.alt - polaris.alt) < 1.5,
+  `alt ${polaris.alt.toFixed(2)} -> ${polarisLater.alt.toFixed(2)} deg`);
+
+// A star on the meridian (hour angle zero) is due south when it is south of
+// the zenith, and its altitude is 90 - lat + dec.
+const meridian = equatorialToHorizontal(12, 0, 12, LAT);
+check("a star crossing the meridian is due south at the predicted altitude",
+  near(meridian.az, 180, 0.5) && near(meridian.alt, 90 - LAT, 0.5),
+  `az ${meridian.az.toFixed(1)} deg, alt ${meridian.alt.toFixed(2)} deg (expected ${(90 - LAT).toFixed(2)})`);
+
+// North of the zenith, the same crossing happens due north instead.
+const overhead = equatorialToHorizontal(12, 70, 12, LAT);
+check("a circumpolar star crosses the meridian due north",
+  near(overhead.az, 0, 0.5) || near(overhead.az, 360, 0.5),
+  `dec +70 at hour angle 0 sits at az ${overhead.az.toFixed(1)} deg`);
+
+// Suhail itself, culminating. The about page claims about ten degrees.
+const suhail = equatorialToHorizontal(6.3992, -52.696, 6.3992, LAT);
+check("Suhail culminates due south, just over ten degrees up",
+  near(suhail.az, 180, 0.5) && near(suhail.alt, 10.7, 0.3),
+  `az ${suhail.az.toFixed(1)} deg, alt ${suhail.alt.toFixed(2)} deg`);
+
+// Before the meridian a star is in the east, after it is in the west. This is
+// the check that catches an inverted hour angle.
+const rising = equatorialToHorizontal(12, 0, 9, LAT);
+const setting = equatorialToHorizontal(12, 0, 15, LAT);
+check("stars rise in the east and set in the west",
+  rising.az > 0 && rising.az < 180 && setting.az > 180 && setting.az < 360,
+  `three hours before transit az ${rising.az.toFixed(1)} (east), three hours after az ${setting.az.toFixed(1)} (west)`);
+
+// And the projection onto the page: zenith centre, horizon rim, north up,
+// east to the LEFT, because the chart is held overhead rather than laid flat.
+const centre = projectToChart({ alt: 90, az: 0 }, 340, 340, 310);
+const rim = projectToChart({ alt: 0, az: 0 }, 340, 340, 310);
+const north = projectToChart({ alt: 45, az: 0 }, 340, 340, 310);
+const east = projectToChart({ alt: 45, az: 90 }, 340, 340, 310);
+const west = projectToChart({ alt: 45, az: 270 }, 340, 340, 310);
+check("the zenith projects to the centre of the disc",
+  near(centre.x, 340, 0.01) && near(centre.y, 340, 0.01),
+  `(${centre.x.toFixed(2)}, ${centre.y.toFixed(2)})`);
+check("the horizon projects to the rim",
+  near(Math.hypot(rim.x - 340, rim.y - 340), 310, 0.01),
+  `radius ${Math.hypot(rim.x - 340, rim.y - 340).toFixed(2)} of 310`);
+check("north is up, and east is to the left as on a held chart",
+  north.y < 340 && near(north.x, 340, 0.01) && east.x < 340 && west.x > 340,
+  `north y=${north.y.toFixed(0)} (above centre), east x=${east.x.toFixed(0)}, west x=${west.x.toFixed(0)} (centre 340)`);
+
+// The evening the chart is drawn for is 21:00 in AlUla, not in the server's
+// timezone, so the same date renders the same sky anywhere.
+const evening = alulaEvening(new Date(2026, 7, 14));
+check("the chart's evening is 21:00 in AlUla regardless of server timezone",
+  evening.getUTCHours() === 18 && evening.getUTCDate() === 14,
+  `${evening.toISOString()} is 21:00 UTC+3`);
 
 console.log(fails ? `\n${fails} FAILED` : "\nstage-3: all data-layer checks passed");
 process.exit(fails ? 1 : 0);

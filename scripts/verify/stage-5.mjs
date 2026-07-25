@@ -81,7 +81,7 @@ await withServer(async (BASE) => {
       await page.waitForTimeout(30);
       const heading = await page.locator("h3").first().innerText();
       const pressed = await cells.nth(i).getAttribute("aria-pressed");
-      if (!heading || heading === "Pick a night." || pressed !== "true") {
+      if (!heading || pressed !== "true") {
         failures.push(`${i}: heading="${heading}" pressed=${pressed}`);
       }
       seenHeadings.add(heading);
@@ -269,7 +269,7 @@ await withServer(async (BASE) => {
     const worksReduced = await page.locator("h3").first().innerText();
     record(
       "6b. the picker still works under reduced motion",
-      worksReduced !== "Pick a night.",
+      worksReduced.length > 0 && /\d/.test(worksReduced),
       `panel shows "${worksReduced}"`,
     );
     await ctx.close();
@@ -350,7 +350,23 @@ await withServer(async (BASE) => {
 
     await page.goto(`${BASE}/tonight`, { waitUntil: "load" });
     await page.waitForTimeout(1800);
-    await page.screenshot({ path: `${ARTIFACTS}/picker-empty.png` });
+    await page.screenshot({ path: `${ARTIFACTS}/picker-on-load.png` });
+
+    const onLoad = await page.evaluate(() => {
+      const pressed = document.querySelectorAll('[role="group"] button[aria-pressed="true"]');
+      const first = document.querySelector('[role="group"] button');
+      return {
+        pressedCount: pressed.length,
+        isFirstCell: pressed[0] === first,
+        heading: document.querySelector(".panel-enter, [class] h3")?.innerText ?? null,
+        animated: !!document.querySelector(".panel-enter"),
+      };
+    });
+    record(
+      "8d. tonight is preselected on arrival, without animating in",
+      onLoad.pressedCount === 1 && onLoad.isFirstCell && !onLoad.animated,
+      `${onLoad.pressedCount} preselected, first cell=${onLoad.isFirstCell}, panel-enter present=${onLoad.animated}`,
+    );
 
     /* pick a genuinely dark night so the panel shows its best case */
     const idx = await page.evaluate(() => {

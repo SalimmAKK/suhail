@@ -69,7 +69,12 @@ export function NightPicker({
   sites: Site[];
   error: string | null;
 }) {
-  const [selected, setSelected] = useState<string | null>(null);
+  /* Tonight is selected on arrival. A visitor who never clicks still sees a
+     real moon phase and real bookable experiences, which sells the idea
+     better than a prompt asking them to do the work first. */
+  const [selected, setSelected] = useState<string | null>(nights[0] ?? null);
+  /* The panel animates on a change, not on the mount that preselects. */
+  const [interacted, setInteracted] = useState(false);
   /* roving tabindex: sixty buttons in the tab order would be a wall */
   const [focusIndex, setFocusIndex] = useState(0);
   const cellRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -80,6 +85,7 @@ export function NightPicker({
      layouts where it is not already beside the grid. */
   const select = useCallback((key: string) => {
     setSelected(key);
+    setInteracted(true);
     if (typeof window === "undefined") return;
     if (!window.matchMedia("(max-width: 1023px)").matches) return;
     const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -194,18 +200,17 @@ export function NightPicker({
       </div>
 
       {/* Panel change animation, motion: fade and 8px rise, 200ms. Keyed on
-          the selection so React remounts it and the CSS runs once per
-          change rather than on every render. */}
-      {/* No animation class until something is selected: the spec asks for
-          this on state change, not on initial mount, and the empty panel is
-          the mount. */}
+          the selection so React remounts it and the CSS runs once per change
+          rather than on every render, and withheld until the visitor has
+          actually picked something: the spec asks for this on state change,
+          not on the mount. */}
       {/* Sticky beside the grid on lg: ten rows is taller than the viewport,
           so a static panel scrolls away from the cells that drive it. */}
       <div
         ref={panelRef}
         className="scroll-mt-[var(--nav-clearance)] lg:sticky lg:top-[var(--nav-clearance)] lg:self-start"
       >
-        <div key={selected ?? "empty"} className={selected ? "panel-enter" : undefined}>
+        <div key={selected ?? "empty"} className={interacted ? "panel-enter" : undefined}>
           {selected ? (
             <NightDetail
               dateKey={selected}
@@ -214,7 +219,7 @@ export function NightPicker({
               error={error}
             />
           ) : (
-            <EmptyPanel count={nights.length} />
+            <EmptyPanel />
           )}
         </div>
       </div>
@@ -222,14 +227,14 @@ export function NightPicker({
   );
 }
 
-function EmptyPanel({ count }: { count: number }) {
+/* Only reachable if the night list is empty, which would mean the calendar
+   window is misconfigured. Says so rather than rendering a blank column. */
+function EmptyPanel() {
   return (
     <div className="flex h-full flex-col justify-center border-t border-moon/15 pt-8 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-0">
-      <h3 className="text-3xl text-moon">Pick a night.</h3>
+      <h3 className="text-3xl text-moon">No nights to show.</h3>
       <p className="mt-4 max-w-[40ch] text-moon/70">
-        Every one of the next {count} nights is rated by how much moon will be in the sky.
-        Choose one and this fills with what will be overhead, where to stand, and what is
-        running.
+        The calendar window came back empty, which is a fault rather than a quiet night.
       </p>
     </div>
   );
