@@ -1,26 +1,122 @@
 @import "tailwindcss";
 
+/* CLAUDE.md section 5. Tailwind v4 is CSS-first: this @theme block is the
+   whole design system. There is no tailwind.config.ts. Every token below
+   generates a utility (--color-gold gives bg-gold, text-gold, border-gold).
+
+   No colour outside this list. Section 5 is explicit about that. */
+@theme {
+  --color-cream: #faf8f3; /* page background. warm paper, not white */
+  --color-paper: #ffffff; /* card backgrounds */
+  --color-sand: #e8dfc9; /* tint for grouped sections */
+  --color-ink: #1a1d2e; /* text, and full dark sections (night sky) */
+  --color-ink-deep: #0f1220; /* primary hover, deepest night */
+  --color-gold: #c9a961; /* primary accent, brass. one per composition */
+  --color-gold-deep: #a8894a; /* accent hover */
+  --color-muted: #6b6b6b; /* secondary text */
+  --color-line: #e4dfd4; /* hairlines */
+  --color-moon: #f5f0e1; /* highlight on dark backgrounds. warm bone */
+
+  /* the sky-quality ramp. moon phase and bortle scale, always semantic,
+     never decorative. sky-1 is the worst night, sky-5 the best. */
+  --color-sky-1: #2a2e45; /* full moon / bright sky */
+  --color-sky-2: #3d416a; /* gibbous */
+  --color-sky-3: #4a5285; /* half moon */
+  --color-sky-4: #5b67a5; /* crescent */
+  --color-sky-5: #a8b5d1; /* new moon / darkest, best for stargazing */
+
+  --color-attention: #e8a33d; /* form errors, focus rings */
+  --color-danger: #c45a4a; /* destructive actions only */
+
+  /* next/font supplies the raw families in app/layout.tsx */
+  --font-display: var(--font-bricolage), sans-serif;
+  --font-body: var(--font-plex-sans), sans-serif;
+  --font-mono: var(--font-plex-mono), monospace;
+
+  --tracking-display: -0.03em;
+  --tracking-label: 0.1em;
+
+  /* section 5: scale with conviction. bigger than edu-hub. */
+  --text-label: 11px;
+  --text-label--line-height: 1.4;
+  --text-body: 17px;
+  --text-body--line-height: 1.6;
+  --text-hero: clamp(48px, 6vw, 84px);
+  --text-hero--line-height: 1.05;
+  --text-hero--letter-spacing: -0.03em;
+  --text-pull: clamp(38px, 4.6vw, 62px);
+  --text-pull--line-height: 1.04;
+  --text-pull--letter-spacing: -0.035em;
+
+  /* section 6: everything that moves uses this */
+  --ease-move: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --shadow-lift: 0 20px 44px -30px rgba(26, 29, 46, 0.45);
+  --shadow-deep: 0 34px 80px -42px rgba(26, 29, 46, 0.5);
+}
+
+/* The token names exactly as CLAUDE.md section 5 writes them, aliased to the
+   theme so raw CSS and inline SVG fills can use either spelling without the
+   two ever drifting apart. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: var(--color-cream);
+  --paper: var(--color-paper);
+  --sand: var(--color-sand);
+  --ink: var(--color-ink);
+  --ink-deep: var(--color-ink-deep);
+  --gold: var(--color-gold);
+  --gold-deep: var(--color-gold-deep);
+  --muted: var(--color-muted);
+  --line: var(--color-line);
+  --moon: var(--color-moon);
+  --sky-1: var(--color-sky-1);
+  --sky-2: var(--color-sky-2);
+  --sky-3: var(--color-sky-3);
+  --sky-4: var(--color-sky-4);
+  --sky-5: var(--color-sky-5);
+  --attention: var(--color-attention);
+  --danger: var(--color-danger);
+  --ease: var(--ease-move);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Reveal's pre-animation state. Scoped to .js (set by an inline script in the
+   root layout) and to motion being allowed, so content is only ever hidden
+   when the script that reveals it is running. Kept outside @layer so it is
+   never purged. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .reveal-hidden {
+    opacity: 0;
+    transform: translateY(16px);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* LineReveal's pre-animation state: the line waits below its clip mask.
+     Same .js gating, so headings are visible without JavaScript. */
+  .js .lr-hidden {
+    transform: translateY(100%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  body {
+    @apply bg-cream font-body text-ink antialiased;
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-medium tracking-display;
+    line-height: 1.05;
+    font-optical-sizing: auto;
+  }
+
+  h1 {
+    font-variation-settings: "opsz" 96;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-attention);
+    outline-offset: 3px;
+  }
 }
