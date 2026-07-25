@@ -28,6 +28,12 @@ export type SkyTarget =
   | "naked-eye"
   | "telescope";
 
+/* How much the coordinate can be trusted. CLAUDE.md section 9 turns this
+   into map behaviour: sourced pins are drawn plainly, approximate pins get a
+   dashed ring and say so, and unsourced sites stay off the map entirely
+   rather than inventing a position a traveller might drive to. */
+export type CoordinatePrecision = "sourced" | "approximate" | "unsourced";
+
 export type Site = {
   slug: string;
   name: string;
@@ -35,6 +41,7 @@ export type Site = {
   lng: number;
   elevationM: number | null;
   bortleClass: number | null;
+  coordinatePrecision: CoordinatePrecision;
   /** One or two sentences. Place-specific, no brochure language. */
   description: string;
   bestFor: SkyTarget[];
@@ -53,6 +60,7 @@ export const SITES: Site[] = [
     lng: 37.81114,
     elevationM: 1209,
     bortleClass: 2,
+    coordinatePrecision: "sourced",
     description:
       "The highest and driest of the four, on the plateau between Gharameel and Harrat Uwayrid. A four-metre telescope and two two-metre telescopes are being built here, alongside a planetarium and a visitor centre. The observatory is not open yet, so nothing is bookable at Manara.",
     bestFor: ["telescope", "deep-sky", "wide-horizon"],
@@ -67,6 +75,7 @@ export const SITES: Site[] = [
     lng: 37.85,
     elevationM: null,
     bortleClass: 2,
+    coordinatePrecision: "approximate",
     description:
       "Sixty kilometres north of AlUla, a field of eroded sandstone fins standing out of open sand. The rock formations give the sky a foreground, which is why almost every photograph of AlUla's night sky was taken here.",
     bestFor: ["milky-way-core", "naked-eye", "wide-horizon"],
@@ -83,6 +92,7 @@ export const SITES: Site[] = [
     lng: 37.98,
     elevationM: null,
     bortleClass: 2,
+    coordinatePrecision: "approximate",
     description:
       "Fifteen hundred square kilometres of canyon and sandstone north-east of Hegra, about forty-five minutes from AlUla's old town. The canyon walls cut the northern horizon, which makes it the better site when the target is low in the south.",
     bestFor: ["southern-sky", "deep-sky", "naked-eye"],
@@ -99,6 +109,7 @@ export const SITES: Site[] = [
     lng: 37.7,
     elevationM: null,
     bortleClass: 2,
+    coordinatePrecision: "unsourced",
     description:
       "Certified alongside Sharaan, with which it shares just over six thousand square kilometres of protected sky. The newest of the four to open to visitors, and the least built on.",
     bestFor: ["wide-horizon", "naked-eye"],

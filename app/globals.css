@@ -155,6 +155,130 @@ html.lenis body {
   }
 }
 
+/* The site map's markers and popovers, section 8.3.
+
+   Mapbox renders markers and popups as its own DOM outside React, so these
+   are plain classes rather than utilities. Kept to the palette: gold pins,
+   ink popovers, hairline borders.
+
+   Section 9: a pin whose coordinate is not sourced is drawn as a dashed ring
+   and labelled, never as a solid pin a traveller would trust to drive to. */
+.suhail-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.suhail-marker-pin {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(250, 248, 243, 0.75);
+  transition: transform 200ms var(--ease);
+}
+
+.suhail-marker:hover .suhail-marker-pin,
+.suhail-marker:focus-visible .suhail-marker-pin {
+  transform: scale(1.25);
+}
+
+.suhail-marker-pin.is-approximate {
+  background: transparent;
+  border: 1.5px dashed var(--color-gold-deep);
+  box-shadow: 0 0 0 3px rgba(250, 248, 243, 0.6);
+}
+
+.suhail-marker-label {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  white-space: nowrap;
+  text-shadow:
+    0 0 3px var(--color-cream),
+    0 0 6px var(--color-cream);
+}
+
+.suhail-marker-note {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-gold-deep);
+  white-space: nowrap;
+}
+
+.suhail-town-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-muted);
+  margin: 0 auto;
+}
+
+.suhail-town-label {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.suhail-popup .mapboxgl-popup-content {
+  background: var(--color-ink);
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-lift);
+}
+
+.suhail-popup .mapboxgl-popup-tip {
+  border-top-color: var(--color-ink);
+  border-bottom-color: var(--color-ink);
+}
+
+.suhail-popup-name {
+  color: var(--color-moon);
+  font-family: var(--font-bricolage), sans-serif;
+  font-size: 17px;
+}
+
+.suhail-popup-coords,
+.suhail-popup-note {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.suhail-popup-coords {
+  color: rgba(245, 240, 225, 0.6);
+}
+
+.suhail-popup-note {
+  color: var(--color-gold);
+}
+
+.suhail-popup-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* The night picker, section 6 motion 3. Each date cell fills its sky-quality
    colour from the bottom, staggered by row. Gated on .js so the grid is
    already filled and readable if the script never runs. */
@@ -190,9 +314,18 @@ html.lenis body {
   }
 }
 
+/* Resting opacity for the chart's stars and labels. A CSS animation ending
+   at a literal 1 beats an opacity presentation attribute, so anything the
+   component wants to hold back, a dimmed constellation on a site page or a
+   figure name meant to sit quietly under its stars, has to travel through
+   this variable or it is silently forced to full. */
+.chart-star {
+  opacity: var(--star-opacity, 1);
+}
+
 @keyframes chart-fade {
   to {
-    opacity: 1;
+    opacity: var(--star-opacity, 1);
   }
 }
 

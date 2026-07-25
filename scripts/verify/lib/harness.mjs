@@ -1,5 +1,6 @@
-import { spawn } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { mkdir, rm } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -17,6 +18,18 @@ import { fileURLToPath } from "node:url";
    port, drives Chromium against it, and shuts the server down again. */
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+
+/* Next loads .env.local for the app, but these scripts run as plain Node and
+   some of them need the same variables to check the app's environment from
+   the outside. */
+try {
+  for (const line of readFileSync(resolve(ROOT, ".env.local"), "utf8").split("\n")) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+  }
+} catch {
+  /* absent in CI, and each script says so itself if it needed a variable */
+}
 export const ARTIFACTS = resolve(ROOT, "scripts/verify/.artifacts");
 
 const PORT = Number(process.env.VERIFY_PORT ?? 4311);
@@ -44,8 +57,26 @@ async function waitForServer(timeoutMs = 60_000) {
   throw new Error(`server did not come up on ${BASE}`);
 }
 
+/* A server left running on this port from an earlier run would answer the
+   readiness probe below, and every check would then quietly run against a
+   stale build. That cost a long debugging detour once already. */
+function freePort() {
+  try {
+    const pids = execSync(`lsof -ti tcp:${PORT}`, { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+    if (!pids) return;
+    console.log(`port ${PORT} was busy, stopping pid(s) ${pids.replace(/\n/g, " ")}`);
+    execSync(`kill -9 ${pids.split("\n").join(" ")}`);
+  } catch {
+    /* lsof exits non-zero when nothing is listening, which is the normal case */
+  }
+}
+
 /** Build, serve, hand the caller a live base URL, then always tear down. */
 export async function withServer(fn) {
+  freePort();
+
   if (process.env.VERIFY_SKIP_BUILD !== "1") {
     console.log("building...");
     await run("npx", ["next", "build"], { stdio: ["ignore", "ignore", "inherit"] });

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import type { SkyTarget } from "@/data/sites";
 import {
   ALULA_LAT,
   alulaEvening,
@@ -56,17 +57,37 @@ export function StarChart({
   date,
   lat = ALULA_LAT,
   tone = "cream",
+  highlight,
   className,
 }: {
   date: Date;
   lat?: number;
   /* which background it sits on. changes stroke weights, not the geometry. */
   tone?: "cream" | "ink";
+  /* A site's targets. Constellations serving them are drawn at full weight
+     and the rest recede, so a site page's chart answers "what is this place
+     good for" rather than repeating the generic sky. Nothing is removed: the
+     sky over Sharaan is the same sky, just read with a different emphasis. */
+  highlight?: SkyTarget[];
   className?: string;
 }) {
   const evening = alulaEvening(date);
   const lst = localSiderealTime(evening);
   const constellations = visibleConstellations(date, lat);
+
+  /* "naked-eye" sits on half the catalogue and on three of the four sites, so
+     matching on it emphasises everything and says nothing. The bias uses only
+     the targets that actually discriminate between one site and another.
+
+     If that leaves a site with nothing to emphasise, as it does for a site
+     whose only advantage is an open horizon, the chart is drawn unbiased
+     rather than dimmed into uniform grey. */
+  /* annotated because the filter otherwise narrows the element type and the
+     comparison below stops type-checking against the full union */
+  const emphasis: SkyTarget[] = (highlight ?? []).filter((t) => t !== "naked-eye");
+  const biased =
+    emphasis.length > 0 &&
+    constellations.some((c) => c.targets.some((t) => emphasis.includes(t)));
 
   const onInk = tone === "ink";
   /* Gold at 40 percent is section 8.1's figure and it reads correctly on ink.
@@ -126,6 +147,8 @@ export function StarChart({
       })}
 
       {constellations.map((constellation, i) => {
+        const emphasised = !biased || constellation.targets.some((t) => emphasis.includes(t));
+        const dim = emphasised ? 1 : 0.32;
         const points = new Map(
           constellation.stars.map((star) => [
             star.id,
@@ -168,7 +191,7 @@ export function StarChart({
                 stroke={lineColor}
                 strokeWidth={lineWidth}
                 strokeLinecap="round"
-                opacity={lineOpacity}
+                opacity={lineOpacity * dim}
                 pathLength={1}
                 className="chart-line"
                 style={{ animationDelay: `${lineDelay}ms` }}
@@ -183,7 +206,10 @@ export function StarChart({
                 r={radiusForMag(star.mag)}
                 fill={starColor}
                 className="chart-star"
-                style={{ animationDelay: `${starDelay}ms` }}
+                style={{
+                  animationDelay: `${starDelay}ms`,
+                  ["--star-opacity" as string]: dim,
+                }}
               />
             ))}
 
@@ -204,15 +230,17 @@ export function StarChart({
                 fontSize={9}
                 letterSpacing="0.16em"
                 fill={labelColor}
-                opacity={0.45}
-                style={{ animationDelay: `${starDelay + 120}ms` }}
+                style={{
+                  animationDelay: `${starDelay + 120}ms`,
+                  ["--star-opacity" as string]: emphasised ? 0.5 : 0.24,
+                }}
               >
                 {constellation.name.toUpperCase()}
               </text>
             ) : null}
 
             {up
-              .filter(({ star }) => star.name && star.mag < NAMED_ABOVE_MAG)
+              .filter(({ star }) => emphasised && star.name && star.mag < NAMED_ABOVE_MAG)
               .map(({ star, x, y }) => (
                 <text
                   key={`${star.id}-label`}
@@ -225,7 +253,10 @@ export function StarChart({
                   fontSize={10}
                   letterSpacing="0.08em"
                   fill={labelColor}
-                  style={{ animationDelay: `${starDelay + 60}ms` }}
+                  style={{
+                    animationDelay: `${starDelay + 60}ms`,
+                    ["--star-opacity" as string]: 0.9,
+                  }}
                 >
                   {star.name}
                 </text>
