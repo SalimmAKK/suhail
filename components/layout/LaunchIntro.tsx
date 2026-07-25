@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ALULA_LNG, SUHAIL_RA, formatSiderealTime, localSiderealTime } from "@/lib/sidereal";
+import { ALULA_LNG, SUHAIL_RA, formatSiderealTime, localSiderealTime } from "@/lib/astro";
 
 /* CLAUDE.md section 6, motion 4. Ink backdrop, the wordmark arrives letter by
    letter over 500ms, the coordinate line fades in under it, 300ms hold, out

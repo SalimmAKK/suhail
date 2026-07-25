@@ -233,7 +233,7 @@ night picker (ink, this is the moment), sites (cream), booking preview (ink),
 credibility (cream), footer (ink).
 
 ### Structural devices
-- **The coordinate tag.** Mono row like `26.85°N · ALULA · 692M · BORTLE 2`.
+- **The coordinate tag.** Mono row like `27.19°N · ALULA MANARA · 1209M · BORTLE 2`.
   Used under section headings and site names. Data as ornament.
 - **The glass nav.** The desktop and mobile navs are floating pills, not
   bars: `fixed`, inset 16px from the top and sides (24px at `md`),

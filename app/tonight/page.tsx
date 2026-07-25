@@ -26,7 +26,7 @@ export default function Tonight() {
         <CoordinateTag
           tone="light"
           className="mt-6"
-          items={["26.85°N", "ALULA, KSA", "NEXT 60 NIGHTS"]}
+          items={["26.61°N", "ALULA, KSA", "NEXT 60 NIGHTS"]}
         />
         <p className="mt-8 max-w-[52ch] text-moon/70">
           Sixty nights, each rated by moon phase and sky darkness, with the experiences running

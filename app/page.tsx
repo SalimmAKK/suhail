@@ -12,7 +12,7 @@ export default function Home() {
     <Shell className="flex flex-col justify-center gap-6 pb-32 pt-[calc(var(--nav-clearance)+4rem)]">
       <Eyebrow>Stage 1</Eyebrow>
       <h1 className="text-pull">Suhail</h1>
-      <CoordinateTag items={["26.85°N", "ALULA, KSA", "DESIGN SYSTEM PORTED"]} />
+      <CoordinateTag items={["26.61°N", "ALULA, KSA", "DESIGN SYSTEM PORTED"]} />
       <p className="max-w-[46ch] text-muted">
         The palette, type scale and UI primitives are in place. The landing page is built in
         stage 4.

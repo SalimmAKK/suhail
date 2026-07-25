@@ -1,0 +1,128 @@
+import { supabaseBrowser, supabaseServer } from "@/lib/supabase";
+import type { BookingRow } from "@/lib/database.types";
+
+/* Creating and reading back a booking.
+
+   BUILD_PLAN stage 7 turns these into a working flow. Stage 3 gets them
+   correct and typed first, so the flow is assembly rather than invention.
+
+   The split is deliberate. createBooking runs in the browser under RLS,
+   which is why the insert policy pins status to 'pending' and constrains the
+   reference format: a client cannot confirm its own booking. getBooking runs
+   on the server under the service role, because anon has no select policy on
+   bookings at all. A reference is a weak secret, and it should never be
+   enough to read a stranger's phone number out of the browser. */
+
+/* No I, O, 0 or 1: a reference gets read aloud and written down. */
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const REFERENCE_PATTERN = /^SUH-[A-Z0-9]{5}$/;
+
+/** `SUH-4X2K9`. 32^5, about 33.5 million, which is ample for a demo. */
+export function generateReference(): string {
+  const bytes = new Uint8Array(5);
+  crypto.getRandomValues(bytes);
+  let out = "";
+  for (const byte of bytes) out += ALPHABET[byte % ALPHABET.length];
+  return `SUH-${out}`;
+}
+
+export type BookingInput = {
+  experienceId: string;
+  /** `2026-07-25` */
+  date: string;
+  guestCount: number;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string;
+};
+
+export type BookingResult =
+  | { ok: true; booking: BookingRow }
+  | { ok: false; error: string; field?: keyof BookingInput };
+
+/** Enough to catch a typo, not so much that a real address gets rejected. */
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function validateBooking(input: BookingInput): BookingResult | null {
+  if (!input.experienceId) {
+    return { ok: false, error: "No experience was selected.", field: "experienceId" };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) {
+    return { ok: false, error: "Pick a night first.", field: "date" };
+  }
+  if (!Number.isInteger(input.guestCount) || input.guestCount < 1 || input.guestCount > 20) {
+    return { ok: false, error: "Between 1 and 20 guests.", field: "guestCount" };
+  }
+  if (input.contactName.trim().length < 2) {
+    return { ok: false, error: "We need a name for the booking.", field: "contactName" };
+  }
+  if (!EMAIL.test(input.contactEmail)) {
+    return {
+      ok: false,
+      error: "That email address does not look right. The confirmation goes there.",
+      field: "contactEmail",
+    };
+  }
+  return null;
+}
+
+/**
+ * Writes a real row and returns it, reference included.
+ *
+ * Runs in the browser under the anon key, so the row is created as 'pending'
+ * whatever the caller asks for. Never fakes success: if the insert fails, the
+ * error comes back and the caller shows it.
+ */
+export async function createBooking(input: BookingInput): Promise<BookingResult> {
+  const invalid = validateBooking(input);
+  if (invalid) return invalid;
+
+  const supabase = supabaseBrowser();
+
+  /* A collision is a unique-constraint violation, not silent corruption.
+     Three attempts against 33.5 million references is plenty. */
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await supabase
+      .from("bookings")
+      .insert({
+        experience_id: input.experienceId,
+        date: input.date,
+        guest_count: input.guestCount,
+        contact_name: input.contactName.trim(),
+        contact_email: input.contactEmail.trim().toLowerCase(),
+        contact_phone: input.contactPhone?.trim() || null,
+        status: "pending",
+        reference: generateReference(),
+      })
+      .select()
+      .single();
+
+    if (!error && data) return { ok: true, booking: data };
+
+    /* 23505 is unique_violation. Anything else is real and should surface. */
+    if (error && error.code !== "23505") {
+      return { ok: false, error: error.message };
+    }
+  }
+
+  return { ok: false, error: "Could not generate a unique booking reference. Try again." };
+}
+
+/**
+ * Reads a booking back by its reference.
+ *
+ * Server only. This is what makes refreshing a confirmation URL prove
+ * persistence rather than replay local state.
+ */
+export async function getBooking(reference: string): Promise<BookingRow | null> {
+  if (!REFERENCE_PATTERN.test(reference)) return null;
+
+  const { data, error } = await supabaseServer()
+    .from("bookings")
+    .select()
+    .eq("reference", reference)
+    .maybeSingle();
+
+  if (error) throw new Error(`Could not load booking ${reference}: ${error.message}`);
+  return data ?? null;
+}

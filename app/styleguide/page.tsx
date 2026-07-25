@@ -140,7 +140,7 @@ export default function Styleguide() {
             <p className="mb-2 font-mono text-label uppercase tracking-label text-muted">
               label 11px / IBM Plex Mono
             </p>
-            <CoordinateTag items={["26.85°N", "ALULA", "692M", "BORTLE 2"]} />
+            <CoordinateTag items={["27.19°N", "ALULA MANARA", "1209M", "BORTLE 2"]} />
           </div>
         </div>
       </Section>
@@ -267,7 +267,7 @@ export default function Styleguide() {
       <Section title="Coordinate tag on ink" tone="light">
         <CoordinateTag
           tone="light"
-          items={["26.85°N", "ALULA, KSA", "ELEVATION 692M", "BORTLE 2"]}
+          items={["27.19°N", "ALULA MANARA", "ELEVATION 1209M", "BORTLE 2"]}
         />
       </Section>
 
