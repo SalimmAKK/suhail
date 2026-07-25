@@ -263,9 +263,13 @@ credibility (cream), footer (ink).
 ### Buttons
 Inherit edu-hub's three-variant system:
 - `primary`: `ink` background, white text, `ink-deep` on hover
-- `accent`: `gold` background, white text, `gold-deep` on hover — used for
+- `accent`: `gold` background, `ink` text, `gold-deep` on hover — used for
   the one primary CTA per page ("Book this night")
-- `light`: `gold` background on a dark section
+- `light`: `gold` background, `ink` text, on a dark section
+
+The gold variants carry ink, not white. White on gold is roughly 2:1 and
+fails AA on the one CTA that appears on every page. Ink on gold is roughly
+7:1, and 5:1 against `gold-deep` on hover.
 
 No outline buttons. No ghost buttons. If it needs to be tapped, it looks
 tappable.

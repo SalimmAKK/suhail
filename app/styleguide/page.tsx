@@ -151,6 +151,10 @@ export default function Styleguide() {
           </Button>
           <Button disabled>Disabled</Button>
         </div>
+        <p className="mt-6 max-w-[52ch] text-muted">
+          Ink on gold, not white on gold. Roughly 7:1 at rest and 5:1 against gold-deep on
+          hover. Primary keeps white on ink.
+        </p>
       </Section>
 
       <Section title="Buttons on ink" tone="light">

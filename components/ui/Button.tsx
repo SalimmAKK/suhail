@@ -3,14 +3,19 @@ import { cn, focusRing } from "@/lib/cn";
 
 /* CLAUDE.md section 5: three variants, no outline and no ghost. `primary` is
    ink and carries most navigation. `accent` is gold and is used once per page
-   for the real CTA. `light` is the same gold sitting on a dark section. */
+   for the real CTA. `light` is the same gold sitting on a dark section.
+
+   Section 5 originally specified white text on all three. The gold variants
+   carry ink instead: white on gold is about 2:1 and fails AA on the one CTA
+   that appears on every page. Ink on gold is about 7:1. Directed change,
+   section 5 updated to match. */
 type Variant = "primary" | "accent" | "light";
 type Size = "sm" | "md";
 
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-ink text-paper hover:bg-ink-deep",
-  accent: "bg-gold text-paper hover:bg-gold-deep",
-  light: "bg-gold text-paper hover:bg-gold-deep",
+  accent: "bg-gold text-ink hover:bg-gold-deep",
+  light: "bg-gold text-ink hover:bg-gold-deep",
 };
 
 const SIZES: Record<Size, string> = {
