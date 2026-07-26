@@ -1,25 +1,24 @@
 import type { Metadata } from "next";
 import { Shell } from "@/components/layout/Shell";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { TripsList } from "@/components/sections/TripsList";
 
 export const metadata: Metadata = {
   title: "Trips / Suhail",
   description: "Bookings made on this device.",
 };
 
-/* Stage 2 placeholder, specified in BUILD_PLAN stage 2 task 2. Stage 7 fills
-   this from the booking references kept on the device. */
+/* The list itself is a client component: with no accounts, the only record of
+   what this browser booked is in its own storage. It reads the references
+   from there and then reads each booking back from the database, so nothing
+   shown here is a stale local copy. */
 
 export default function Trips() {
   return (
     <section className="pb-24 pt-[var(--nav-clearance)]">
       <Shell>
-        <Eyebrow className="mb-6">Trips</Eyebrow>
-        <h1 className="text-pull">No bookings yet.</h1>
-        <p className="mt-8 max-w-[52ch] text-muted">
-          Nights you book will be kept here on this device, so you can find your reference in
-          the desert with no signal.
-        </p>
+        <Eyebrow className="mb-7">Trips</Eyebrow>
+        <TripsList />
       </Shell>
     </section>
   );

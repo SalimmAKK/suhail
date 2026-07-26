@@ -279,6 +279,28 @@ html.lenis body {
   text-underline-offset: 3px;
 }
 
+/* The booking reference on the confirmation screen, section 11's one
+   considered touch for that surface. Characters arrive in sequence rather
+   than cycling through decoys: section 6 bans text scrambles, and the whole
+   reference is in the DOM from the first frame regardless. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .reference-char {
+    opacity: 0;
+    animation: reference-in 260ms var(--ease) forwards;
+  }
+}
+
+@keyframes reference-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.12em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* The night picker, section 6 motion 3. Each date cell fills its sky-quality
    colour from the bottom, staggered by row. Gated on .js so the grid is
    already filled and readable if the script never runs. */

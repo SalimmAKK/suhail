@@ -14,6 +14,11 @@ type FieldProps = {
   error?: string;
   rows?: number;
   className?: string;
+  /* Controlled usage, added in stage 7 for the booking flow. Optional, so
+     every existing uncontrolled call site is untouched. */
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
 };
 
 const LABEL = "block text-[13px] font-medium text-ink";
@@ -39,12 +44,23 @@ export function Field({
   error,
   rows = 4,
   className,
+  value,
+  defaultValue,
+  onValueChange,
 }: FieldProps) {
   const optionalMark = required ? null : (
     <span className="font-normal text-muted"> (optional)</span>
   );
   const errorId = `${name}-error`;
   const describedBy = error ? errorId : undefined;
+  /* No handler unless one was asked for. Field is used from server components
+     too, and a function prop on a DOM element there fails the render outright
+     rather than being ignored. */
+  const change = onValueChange
+    ? { onChange: (e: { target: { value: string } }) => onValueChange(e.target.value) }
+    : {};
+  const controlled =
+    value !== undefined ? { value, ...change } : { defaultValue, ...change };
 
   const messages = (
     <>
@@ -96,6 +112,7 @@ export function Field({
         <select
           id={name}
           name={name}
+          {...controlled}
           required={required}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
@@ -111,6 +128,7 @@ export function Field({
         <textarea
           id={name}
           name={name}
+          {...controlled}
           rows={rows}
           required={required}
           placeholder={placeholder}
@@ -122,6 +140,7 @@ export function Field({
         <input
           id={name}
           name={name}
+          {...controlled}
           type={type}
           required={required}
           placeholder={placeholder}
