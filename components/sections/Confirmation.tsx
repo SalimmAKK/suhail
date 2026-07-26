@@ -55,18 +55,18 @@ export function Confirmation({
         {/* Not every seeded experience runs after dark: the Sharaan safari is
             a daytime drive. Calling that "a night" would be wrong on the one
             page a traveller keeps. */}
-        <h1 className="text-pull">
+        <h1 className="text-h2">
           {experience?.requiresDark === false ? "You are booked" : "You have a night"}
           <br />
           at {experience?.site.name ?? "AlUla"}.
         </h1>
 
-        <div className="mt-10 border-y border-line py-8">
-          <p className="font-mono text-label uppercase tracking-label text-muted">
+        <div className="mt-10 border-y border-divider py-8">
+          <p className="font-display text-label uppercase tracking-label text-neutral-700">
             Booking reference
           </p>
           <p
-            className="mt-3 font-mono text-[clamp(32px,5vw,52px)] tracking-[0.12em] text-ink"
+            className="mt-3 font-display text-[clamp(32px,5vw,52px)] tracking-[0.12em] text-text"
             aria-label={`Booking reference ${booking.reference}`}
           >
             {booking.reference.split("").map((char, i) => (
@@ -80,7 +80,7 @@ export function Confirmation({
               </span>
             ))}
           </p>
-          <p className="mt-4 max-w-[46ch] text-muted">
+          <p className="mt-4 max-w-[46ch] text-neutral-700">
             Keep this. It is how the operator finds your booking, and how this device finds it
             again under Trips. No email is sent in this build.
           </p>
@@ -97,11 +97,11 @@ export function Confirmation({
           <Row label="Status" value={booking.status} />
         </dl>
 
-        <div className="mt-8 rounded-lg border border-attention/50 bg-sand/30 p-5">
-          <p className="font-mono text-label uppercase tracking-label text-gold-deep">
+        <div className="mt-8 border border-accent-2/50 bg-surface/30 p-5">
+          <p className="font-display text-label uppercase tracking-label text-accent-700">
             Demo mode
           </p>
-          <p className="mt-3 max-w-[52ch] text-muted">
+          <p className="mt-3 max-w-[52ch] text-neutral-700">
             This booking is a real row in the database and survives a refresh, which is what
             it is here to demonstrate. No payment was taken and the operator has not been
             notified.
@@ -109,34 +109,34 @@ export function Confirmation({
         </div>
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
-          <Button href="/trips" variant="accent" pill>
+          <Button href="/trips" variant="primary">
             See your trips
           </Button>
           <Link
             href="/tonight"
-            className="font-mono text-label uppercase tracking-label text-gold-deep underline underline-offset-4"
+            className="font-display text-label uppercase tracking-label text-accent-700 underline underline-offset-4"
           >
             Book another night
           </Link>
         </div>
       </div>
 
-      <aside className="lg:sticky lg:top-[var(--nav-clearance)] lg:self-start">
+      <aside className="lg:sticky lg:top-[var(--section-top)] lg:self-start">
         <SkyAtSlot dateKey={booking.date} />
         {experience ? (
-          <div className="mt-6 rounded-lg border border-line bg-paper p-6">
+          <div className="mt-6 border border-divider bg-neutral-100 p-6">
             <h2 className="text-xl">Getting there</h2>
             <CoordinateTag
               className="mt-3"
               items={[experience.site.name.toUpperCase(), experience.operatorName.toUpperCase()]}
             />
-            <p className="mt-4 text-muted">
+            <p className="mt-4 text-neutral-700">
               Meeting point and pickup are arranged by {experience.operatorName}. This build
               does not carry their published meeting details, so it does not guess at them.
             </p>
             <Link
               href={`/sites/${experience.site.slug}`}
-              className="mt-5 inline-block font-mono text-label uppercase tracking-label text-gold-deep underline underline-offset-4"
+              className="mt-5 inline-block font-display text-label uppercase tracking-label text-accent-700 underline underline-offset-4"
             >
               About {experience.site.name}
             </Link>
@@ -149,9 +149,9 @@ export function Confirmation({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-line pb-3">
-      <dt className="font-mono text-label uppercase tracking-label text-muted">{label}</dt>
-      <dd className="text-ink">{value}</dd>
+    <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-divider pb-3">
+      <dt className="font-display text-label uppercase tracking-label text-neutral-700">{label}</dt>
+      <dd className="text-text">{value}</dd>
     </div>
   );
 }

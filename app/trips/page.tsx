@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function Trips() {
   return (
-    <section className="pb-24 pt-[var(--nav-clearance)]">
+    <section className="pb-24 pt-[var(--section-top)]">
       <Shell>
         <Eyebrow className="mb-7">Trips</Eyebrow>
         <TripsList />

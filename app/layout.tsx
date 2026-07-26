@@ -1,34 +1,25 @@
 import type { Metadata } from "next";
-import { Newsreader, Public_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Archivo } from "next/font/google";
 import { LaunchIntro } from "@/components/layout/LaunchIntro";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Nav } from "@/components/layout/Nav";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import "./globals.css";
 
-/* HERO_REDESIGN_BRIEF: Newsreader for display, Public Sans for body. Mono is
-   untouched, and so is the type scale: only the families changed.
+/* DESIGN_SYSTEM_REPLACEMENT.md: one family for everything, Archivo. It
+   replaces Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono. Headings
+   run at 800, and the tracked-caps labels that used to be Plex Mono are now
+   Archivo at 13px with 0.08em tracking.
 
-   Newsreader is loaded as a variable font with its optical-size axis, which
-   the base styles drive through font-optical-sizing. A serif needs that far
-   more than a grotesk did: without it the hero at 84px renders with the same
-   hairlines as body copy and goes thin against cream. */
-const display = Newsreader({
-  subsets: ["latin"],
-  axes: ["opsz"],
-  variable: "--font-newsreader",
-});
+   Loaded as a variable font so the 400 to 800 range is one file.
 
-const body = Public_Sans({
+   The variable class goes on <html>, not <body>: Tailwind emits the theme on
+   :root, and a custom property containing var() is substituted where it is
+   defined. With the class on <body> the reference is undefined at :root and
+   every font-family silently falls back to the system stack. */
+const archivo = Archivo({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-public-sans",
-});
-
-const mono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-plex-mono",
+  variable: "--font-archivo",
 });
 
 export const metadata: Metadata = {
@@ -54,7 +45,7 @@ export default function RootLayout({
        That was true from stage 1 until this commit. */
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      className={archivo.variable}
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col">
@@ -79,10 +70,9 @@ export default function RootLayout({
         <SmoothScroll />
         <LaunchIntro />
         <Nav />
-        {/* No top padding here on purpose: section backgrounds have to run
-            under the floating nav for the glass to have anything to blur.
+        {/* Bottom padding only: the top bar is in the flow.
             Sections pad their own content down by --nav-clearance instead.
-            The bottom pill is a different matter, nothing sits behind it. */}
+            The bottom is a different matter, nothing sits behind it. */}
         <main className="flex-1 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-0">
           {children}
         </main>

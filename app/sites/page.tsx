@@ -26,15 +26,15 @@ const PRECISION_NOTE: Record<string, string> = {
 
 export default function Sites() {
   return (
-    <section className="pb-24 pt-[var(--nav-clearance)]">
+    <section className="pb-24 pt-[var(--section-top)]">
       <Shell>
         <div className="max-w-[52ch]">
           <Reveal>
             <Eyebrow className="mb-7">{SITES_PAGE.eyebrow}</Eyebrow>
           </Reveal>
-          <LineReveal as="h1" lines={SITES_PAGE.headingLines} className="text-pull" />
+          <LineReveal as="h1" lines={SITES_PAGE.headingLines} className="text-h2" />
           <Reveal delay={90}>
-            <p className="mt-6 text-muted">{SITES_PAGE.sub}</p>
+            <p className="mt-6 text-neutral-700">{SITES_PAGE.sub}</p>
           </Reveal>
         </div>
 
@@ -45,7 +45,7 @@ export default function Sites() {
         {/* Section 9: a site whose coordinate is not sourced is still listed
             and still linked. It is only the map pin that is withheld, because
             a pin is a claim about where to drive. */}
-        <p className="mt-4 font-mono text-label uppercase tracking-label text-muted">
+        <p className="mt-4 font-display text-label uppercase tracking-label text-neutral-700">
           Wadi Nakhlah is listed below but not plotted. Its coordinate is not published yet.
         </p>
 
@@ -55,7 +55,7 @@ export default function Sites() {
               <div className="flex items-start justify-between gap-4">
                 <h2 className="text-2xl">{site.name}</h2>
                 {site.coordinatePrecision !== "sourced" ? (
-                  <span className="shrink-0 font-mono text-label uppercase tracking-label text-gold-deep">
+                  <span className="shrink-0 font-display text-label uppercase tracking-label text-accent-700">
                     {PRECISION_NOTE[site.coordinatePrecision]}
                   </span>
                 ) : null}
@@ -69,10 +69,10 @@ export default function Sites() {
                   "DARKSKY PARK",
                 ]}
               />
-              <p className="mt-4 text-muted">{site.description}</p>
+              <p className="mt-4 text-neutral-700">{site.description}</p>
               <Link
                 href={`/sites/${site.slug}`}
-                className="mt-5 inline-block font-mono text-label uppercase tracking-label text-gold-deep underline underline-offset-4"
+                className="mt-5 inline-block font-display text-label uppercase tracking-label text-accent-700 underline underline-offset-4"
               >
                 View site
               </Link>

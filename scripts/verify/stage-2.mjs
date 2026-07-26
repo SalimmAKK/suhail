@@ -121,10 +121,19 @@ await withServer(async (BASE) => {
 
     record("3a. bottom nav visible under md", mSmall && !dSmall, `390px: bottom nav=${mSmall}, desktop links=${dSmall}`);
     record("3b. exactly three icons", items === 3, `items=${items} [${labels.join(", ")}]`);
+    /* DESIGN_SYSTEM_REPLACEMENT.md turned the floating capsule into a
+       docked bar: full width, flush to the bottom edge, 2px top divider. */
+    const docked = await mobileNav.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { radius: s.borderRadius, border: s.borderTopWidth, blur: s.backdropFilter };
+    });
     record(
-      "3c. bottom pill is inset, not a full-width dock",
-      navBox.x > 0 && navBox.x + navBox.width < 390,
-      `x=${navBox.x}px width=${navBox.width}px in a 390px viewport`,
+      "3c. bottom nav is a docked bar, square and unblurred",
+      navBox.x === 0 &&
+        navBox.width === 390 &&
+        parseFloat(docked.radius) === 0 &&
+        docked.blur === "none",
+      `x=${navBox.x} width=${navBox.width}, radius=${docked.radius}, top border=${docked.border}, backdrop-filter=${docked.blur}`,
     );
 
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -137,7 +146,7 @@ await withServer(async (BASE) => {
     await ctx.close();
   }
 
-  /* ---- 4. the glass pill ---- */
+  /* ---- 4. the top bar ---- */
   {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await ctx.newPage();
@@ -148,63 +157,45 @@ await withServer(async (BASE) => {
     const box = await header.boundingBox();
     const css = await header.evaluate((el) => {
       const s = getComputedStyle(el);
-      return { position: s.position, radius: s.borderRadius, bg: s.backgroundColor, filter: s.backdropFilter };
+      return {
+        position: s.position,
+        radius: s.borderRadius,
+        bg: s.backgroundColor,
+        blur: s.backdropFilter,
+        borderBottom: `${s.borderBottomWidth} ${s.borderBottomStyle}`,
+      };
     });
-    const expected = await computedFor(page, ["bg-ink/50", "bg-cream/70"]);
-    const section = await page.locator("section[data-nav-tone=ink]").boundingBox();
+    const expected = await computedFor(page, ["bg-bg"]);
 
     record(
-      "4a. nav is a fixed floating pill",
-      css.position === "fixed" && parseFloat(css.radius) > 1000 && box.x > 0,
-      `position=${css.position}, radius=${css.radius}, inset x=${box.x}px y=${box.y}px, height=${box.height}px`,
+      "4a. the nav is a standard top bar, not a floating capsule",
+      css.position === "sticky" && box.x === 0 && box.width === 1280,
+      `position=${css.position}, x=${box.x}, width=${box.width}`,
     );
-    record("4b. backdrop-blur applied", /blur/.test(css.filter), `backdrop-filter=${css.filter}`);
-    record("4c. ink section runs under the pill", section.y < box.y, `section top=${section.y}px vs pill top=${box.y}px`);
     record(
-      "4d. translucent, not opaque, and toned to ink",
-      css.bg === expected["bg-ink/50"] && /0\.5\)/.test(css.bg),
-      `nav bg=${css.bg}\n      bg-ink/50=${expected["bg-ink/50"]}`,
+      "4b. square corners and no glass",
+      parseFloat(css.radius) === 0 && css.blur === "none",
+      `radius=${css.radius}, backdrop-filter=${css.blur}`,
     );
-    await page.screenshot({ path: `${ARTIFACTS}/pill-ink.png`, clip: { x: 0, y: 0, width: 1280, height: 300 } });
+    record(
+      "4c. opaque background, not a translucent one",
+      css.bg === expected["bg-bg"] && !/0\.\d\)/.test(css.bg),
+      `background=${css.bg} (bg-bg is ${expected["bg-bg"]})`,
+    );
+    record(
+      "4d. a 2px solid bottom divider, per the source stylesheet",
+      css.borderBottom === "2px solid",
+      `border-bottom: ${css.borderBottom}`,
+    );
 
-    await page.goto(`${BASE}/sites`, { waitUntil: "load" });
-    await page.waitForTimeout(1500);
-    const lightBg = await header.evaluate((el) => getComputedStyle(el).backgroundColor);
-    record(
-      "4e. cream glass over light sections",
-      lightBg === expected["bg-cream/70"] && /0\.7\)/.test(lightBg),
-      `nav bg=${lightBg}\n      bg-cream/70=${expected["bg-cream/70"]}`,
-    );
-    await page.screenshot({ path: `${ARTIFACTS}/pill-light.png`, clip: { x: 0, y: 0, width: 1280, height: 300 } });
-
-    /* dynamic: the styleguide alternates cream and ink sections */
-    await page.goto(`${BASE}/styleguide`, { waitUntil: "load" });
-    await page.waitForTimeout(1500);
-    const atTop = await header.evaluate((el) => getComputedStyle(el).backgroundColor);
-    await page
-      .locator("section[data-nav-tone=ink]")
-      .first()
-      .evaluate((el) =>
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + 40, behavior: "instant" }),
-      );
-    await page.waitForTimeout(1000);
-    const overInk = await header.evaluate((el) => getComputedStyle(el).backgroundColor);
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-    await page.waitForTimeout(1000);
-    const back = await header.evaluate((el) => getComputedStyle(el).backgroundColor);
-    record(
-      "4f. tone switches on scroll and switches back",
-      atTop === expected["bg-cream/70"] && overInk === expected["bg-ink/50"] && back === expected["bg-cream/70"],
-      `top=cream(${atTop === expected["bg-cream/70"]}) -> over ink=ink(${overInk === expected["bg-ink/50"]}) -> back=cream(${back === expected["bg-cream/70"]})`,
-    );
     await page.screenshot({
-      path: `${ARTIFACTS}/pill-over-ink.png`,
-      clip: { x: 0, y: 0, width: 1280, height: 300 },
+      path: `${ARTIFACTS}/top-bar.png`,
+      clip: { x: 0, y: 0, width: 1280, height: 220 },
     });
     await ctx.close();
   }
 
-  /* ---- 5. nothing renders under the pill on load ---- */
+  /* ---- 5. nothing renders under the bar on load ---- */
   {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await ctx.newPage();
@@ -227,7 +218,7 @@ await withServer(async (BASE) => {
       if (bad.length) overlaps.push(`${route} -> ${bad.join(" | ")}`);
     }
     record(
-      "5. no page content sits under the pill at scroll 0",
+      "5. no page content sits under the bar at scroll 0",
       overlaps.length === 0,
       overlaps.length ? overlaps.join("\n      ") : "all 7 routes clear",
     );

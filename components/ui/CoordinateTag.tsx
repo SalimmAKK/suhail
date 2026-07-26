@@ -1,8 +1,7 @@
 import { cn } from "@/lib/cn";
 
-/* CLAUDE.md section 5, the coordinate tag: a mono row of data fields with a
-   dot between them. `26.85°N · ALULA · 692M · BORTLE 2`. It sits under
-   section headings and site names. Data as ornament, but the data is real. */
+/* The coordinate strip, now in the h6 treatment rather than a mono face:
+   Archivo, 13px, tracked and uppercased. Same data, same separators. */
 
 export function CoordinateTag({
   items,
@@ -10,22 +9,21 @@ export function CoordinateTag({
   className,
 }: {
   items: string[];
-  /* light: for ink sections */
   tone?: "default" | "light";
   className?: string;
 }) {
   return (
     <p
       className={cn(
-        "flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-label uppercase tracking-label",
-        tone === "light" ? "text-moon/70" : "text-muted",
+        "flex flex-wrap items-center gap-x-2.5 gap-y-1 font-display text-label font-bold uppercase tracking-label",
+        tone === "light" ? "text-neutral-400" : "text-neutral-700",
         className,
       )}
     >
       {items.map((item, i) => (
         <span key={item} className="flex items-center gap-x-2.5">
           {i > 0 ? (
-            <span aria-hidden className={tone === "light" ? "text-gold" : "text-gold-deep"}>
+            <span aria-hidden className="text-accent-600">
               &middot;
             </span>
           ) : null}

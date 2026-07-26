@@ -33,7 +33,7 @@ export default async function ConfirmationPage({
   const experience = experiences.find((e) => e.id === booking.experience_id) ?? null;
 
   return (
-    <Shell className="pb-24 pt-[var(--nav-clearance)]">
+    <Shell className="pb-24 pt-[var(--section-top)]">
       <Confirmation booking={booking} experience={experience} />
     </Shell>
   );

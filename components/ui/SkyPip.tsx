@@ -1,18 +1,16 @@
 import { cn } from "@/lib/cn";
 
-/* CLAUDE.md section 5, the status pip: a mono label plus one dot, carrying
-   the sky-quality ramp. Applied to date cells in the night picker and to any
-   surface that has to say what kind of night this is.
-
-   The dot is the semantic part. The ramp colours are tuned for ink
-   backgrounds, so on cream the dot gets a hairline ring to stay visible. */
+/* Sky quality on the neutral ramp, per DESIGN_SYSTEM_REPLACEMENT.md: the
+   dark end is a dark sky, the light end is a moonlit one. That reads as a
+   literal light/dark metaphor, which the gold ramp could not. Gold is
+   reserved for interactive and brand elements. */
 
 export type SkyQuality = "prime" | "ok" | "bright";
 
 const QUALITY: Record<SkyQuality, { label: string; dot: string }> = {
-  prime: { label: "Prime night", dot: "bg-sky-5" },
-  ok: { label: "Ok night", dot: "bg-sky-3" },
-  bright: { label: "Bright night", dot: "bg-sky-1" },
+  prime: { label: "Prime night", dot: "bg-neutral-900" },
+  ok: { label: "Ok night", dot: "bg-neutral-500" },
+  bright: { label: "Bright night", dot: "bg-neutral-200" },
 };
 
 export function SkyPip({
@@ -22,9 +20,7 @@ export function SkyPip({
   className,
 }: {
   quality: SkyQuality;
-  /* light: for ink sections */
   tone?: "default" | "light";
-  /* the dot alone, for dense surfaces like calendar cells */
   showLabel?: boolean;
   className?: string;
 }) {
@@ -33,18 +29,14 @@ export function SkyPip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 font-mono text-label uppercase tracking-label",
-        tone === "light" ? "text-moon/80" : "text-muted",
+        "inline-flex items-center gap-2 font-display text-label font-bold uppercase tracking-label",
+        tone === "light" ? "text-neutral-300" : "text-neutral-700",
         className,
       )}
     >
       <span
         aria-hidden
-        className={cn(
-          "h-2 w-2 shrink-0 rounded-full",
-          dot,
-          tone === "default" && "ring-1 ring-inset ring-ink/15",
-        )}
+        className={cn("h-2.5 w-2.5 shrink-0 ring-1 ring-inset ring-divider", dot)}
       />
       {showLabel ? label : <span className="sr-only">{label}</span>}
     </span>

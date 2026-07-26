@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 
 export default function Contact() {
   return (
-    <section className="pb-24 pt-[var(--nav-clearance)]">
+    <section className="pb-24 pt-[var(--section-top)]">
       <Shell>
         <Eyebrow className="mb-6">Contact</Eyebrow>
-        <h1 className="text-pull">Operators, partners, and anyone curious.</h1>
-        <p className="mt-8 max-w-[52ch] text-muted">
+        <h1 className="text-h2">Operators, partners, and anyone curious.</h1>
+        <p className="mt-8 max-w-[52ch] text-neutral-700">
           A working form goes here. Until it is wired to a real endpoint it will say so plainly
           rather than accept a message it cannot deliver.
         </p>

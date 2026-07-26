@@ -80,8 +80,8 @@ export function TripsList() {
   if (state.phase === "loading") {
     return (
       <>
-        <h1 className="text-pull">Your trips</h1>
-        <p className="mt-8 text-muted">Looking up what this device has booked.</p>
+        <h1 className="text-h2">Your trips</h1>
+        <p className="mt-8 text-neutral-700">Looking up what this device has booked.</p>
       </>
     );
   }
@@ -89,13 +89,13 @@ export function TripsList() {
   if (state.phase === "empty") {
     return (
       <>
-        <h1 className="text-pull">No bookings yet.</h1>
-        <p className="mt-8 max-w-[52ch] text-muted">
+        <h1 className="text-h2">No bookings yet.</h1>
+        <p className="mt-8 max-w-[52ch] text-neutral-700">
           Nights you book are kept here on this device, so you can find your reference in the
           desert with no signal. Nothing is stored anywhere else against you: there are no
           accounts.
         </p>
-        <Button href="/tonight" variant="accent" pill className="mt-8">
+        <Button href="/tonight" variant="primary" className="mt-8">
           Pick a night
         </Button>
       </>
@@ -104,10 +104,10 @@ export function TripsList() {
 
   return (
     <>
-      <h1 className="text-pull">
+      <h1 className="text-h2">
         {state.trips.length === 1 ? "One night booked." : `${state.trips.length} nights booked.`}
       </h1>
-      <p className="mt-6 max-w-[52ch] text-muted">
+      <p className="mt-6 max-w-[52ch] text-neutral-700">
         Kept on this device. Opening Suhail in another browser will not show them.
       </p>
 
@@ -120,7 +120,7 @@ export function TripsList() {
                 <MoonPhase phase={moonPhase(date)} waxing={isWaxing(date)} size={40} />
                 <div className="min-w-0">
                   <h2 className="text-2xl">{trip.experience?.title ?? "Experience unavailable"}</h2>
-                  <p className="mt-1 text-muted">{FULL_DATE.format(date)}</p>
+                  <p className="mt-1 text-neutral-700">{FULL_DATE.format(date)}</p>
                 </div>
               </div>
               <CoordinateTag
@@ -134,7 +134,7 @@ export function TripsList() {
               />
               <Link
                 href={`/book/confirmation/${trip.reference}`}
-                className="mt-5 inline-block font-mono text-label uppercase tracking-label text-gold-deep underline underline-offset-4"
+                className="mt-5 inline-block font-display text-label uppercase tracking-label text-accent-700 underline underline-offset-4"
               >
                 View booking
               </Link>
@@ -144,10 +144,10 @@ export function TripsList() {
       </div>
 
       {state.missing.length > 0 ? (
-        <p className="mt-10 max-w-[60ch] text-[15px] text-muted">
+        <p className="mt-10 max-w-[60ch] text-[15px] text-neutral-700">
           {state.missing.length === 1 ? "One reference" : `${state.missing.length} references`} on
           this device could not be found in the database:{" "}
-          <span className="font-mono">{state.missing.join(", ")}</span>. They are shown here
+          <span className="font-display">{state.missing.join(", ")}</span>. They are shown here
           rather than hidden, because a booking that has quietly vanished is worth knowing about.
         </p>
       ) : null}

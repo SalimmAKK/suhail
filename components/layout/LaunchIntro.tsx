@@ -80,9 +80,9 @@ function Sequence() {
           aria-hidden
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-ink"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-neutral-900"
         >
-          <h1 className="font-display text-hero font-medium text-moon" aria-label={WORDMARK}>
+          <h1 className="font-display text-h1 font-extrabold text-neutral-100" aria-label={WORDMARK}>
             {WORDMARK.split("").map((letter, i) => (
               <motion.span
                 key={`${letter}-${i}`}
@@ -104,11 +104,11 @@ function Sequence() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.22, delay: COORD_DELAY }}
-            className="flex flex-col items-center gap-1.5 text-center font-mono text-label uppercase tracking-label"
+            className="flex flex-col items-center gap-1.5 text-center font-display text-label uppercase tracking-label"
           >
-            <p className="text-moon/75">
-              Canopus <span className="text-gold">&middot;</span> &alpha; Carinae{" "}
-              <span className="text-gold">&middot;</span> {SUHAIL_RA}
+            <p className="text-neutral-100/75">
+              Canopus <span className="text-accent">&middot;</span> &alpha; Carinae{" "}
+              <span className="text-accent">&middot;</span> {SUHAIL_RA}
             </p>
             <SiderealClock />
           </motion.div>
@@ -127,8 +127,8 @@ function SiderealClock() {
   }, []);
 
   return (
-    <p className="text-moon/40">
-      AlUla <span className="text-gold/60">&middot;</span> Sidereal {formatSiderealTime(now)}
+    <p className="text-neutral-100/40">
+      AlUla <span className="text-accent/60">&middot;</span> Sidereal {formatSiderealTime(now)}
     </p>
   );
 }

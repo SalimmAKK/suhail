@@ -1,114 +1,156 @@
 @import "tailwindcss";
 
-/* CLAUDE.md section 5. Tailwind v4 is CSS-first: this @theme block is the
-   whole design system. There is no tailwind.config.ts. Every token below
-   generates a utility (--color-gold gives bg-gold, text-gold, border-gold).
-
-   No colour outside this list. Section 5 is explicit about that. */
+/* DESIGN_SYSTEM_REPLACEMENT.md. One token system, not two.
+ *
+ * The role names come from the Modernist stylesheet; the values are Suhail's
+ * Desert Nocturne palette, per the revised palette section. The old
+ * --cream / --ink / --gold aliases are gone on purpose: everything now
+ * resolves through --color-*.
+ */
 @theme {
-  --color-cream: #faf8f3; /* page background. warm paper, not white */
-  --color-paper: #ffffff; /* card backgrounds */
-  --color-sand: #e8dfc9; /* tint for grouped sections */
-  --color-ink: #1a1d2e; /* text, and full dark sections (night sky) */
-  --color-ink-deep: #0f1220; /* primary hover, deepest night */
-  --color-gold: #c9a961; /* primary accent, brass. one per composition */
-  --color-gold-deep: #a8894a; /* accent hover */
-  --color-muted: #6b6b6b; /* secondary text */
-  --color-line: #e4dfd4; /* hairlines */
-  --color-moon: #f5f0e1; /* highlight on dark backgrounds. warm bone */
+  --color-bg: #faf8f3; /* cream */
+  --color-surface: #e8dfc9; /* sand */
+  --color-text: #1a1d2e; /* ink */
+  --color-accent: #c9a961; /* gold */
+  --color-accent-2: #e8a33d; /* amber, was --attention */
+  --color-divider: color-mix(in srgb, #1a1d2e 40%, transparent);
 
-  /* the sky-quality ramp. moon phase and bortle scale, always semantic,
-     never decorative. sky-1 is the worst night, sky-5 the best. */
-  --color-sky-1: #2a2e45; /* full moon / bright sky */
-  --color-sky-2: #3d416a; /* gibbous */
-  --color-sky-3: #4a5285; /* half moon */
-  --color-sky-4: #5b67a5; /* crescent */
-  --color-sky-5: #a8b5d1; /* new moon / darkest, best for stargazing */
+  /* Neutral ramp, warm and ink-tinted rather than grey. Also carries the
+     sky-quality encoding: dark end is a dark sky, light end is a moonlit
+     one. */
+  --color-neutral-100: #fbf9f5;
+  --color-neutral-200: #f3efe6;
+  --color-neutral-300: #e8dfc9;
+  --color-neutral-400: #d4c9ad;
+  --color-neutral-500: #b3a78a;
+  --color-neutral-600: #8f8468;
+  --color-neutral-700: #6b624c;
+  --color-neutral-800: #443f32;
+  --color-neutral-900: #1a1d2e;
 
-  --color-attention: #e8a33d; /* form errors, focus rings */
-  --color-danger: #c45a4a; /* destructive actions only */
+  --color-accent-100: #fbf4e4;
+  --color-accent-200: #f3e4c0;
+  --color-accent-300: #e8d19a;
+  --color-accent-400: #dbbb7c;
+  --color-accent-500: #c9a961;
+  --color-accent-600: #a8894a;
+  --color-accent-700: #8a6e38;
+  --color-accent-800: #6b542a;
+  --color-accent-900: #4a3a1d;
 
-  /* next/font supplies the raw families in app/layout.tsx. Display and body
-     changed in the hero redesign; mono did not, and carries the coordinate
-     tags and every tracked-caps label. */
-  --font-display: var(--font-newsreader), Georgia, serif;
-  --font-body: var(--font-public-sans), sans-serif;
-  --font-mono: var(--font-plex-mono), monospace;
+  --color-accent-2-100: #fdf3e2;
+  --color-accent-2-200: #fae3b8;
+  --color-accent-2-300: #f5cd87;
+  --color-accent-2-400: #edb55a;
+  --color-accent-2-500: #e8a33d;
+  --color-accent-2-600: #c4841f;
+  --color-accent-2-700: #9c6816;
+  --color-accent-2-800: #714b10;
+  --color-accent-2-900: #4a320b;
 
-  --tracking-display: -0.03em;
-  --tracking-label: 0.1em;
+  /* One family for everything. There is no mono face in this system: the
+     font-mono utility is kept pointing at Archivo so tracked-caps labels
+     render as the h6 treatment rather than silently falling back to a
+     monospace stack. */
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-body: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-archivo), system-ui, sans-serif;
 
-  /* section 5: scale with conviction. bigger than edu-hub. */
-  --text-label: 11px;
-  --text-label--line-height: 1.4;
-  --text-body: 17px;
-  --text-body--line-height: 1.6;
-  --text-hero: clamp(48px, 6vw, 84px);
-  --text-hero--line-height: 1.05;
-  --text-hero--letter-spacing: -0.03em;
-  --text-pull: clamp(38px, 4.6vw, 62px);
-  --text-pull--line-height: 1.04;
-  --text-pull--letter-spacing: -0.035em;
+  /* Fixed sizes, not fluid clamps. */
+  --text-h1: 42px;
+  --text-h1--line-height: 1.12;
+  --text-h1--letter-spacing: -0.015em;
+  --text-h2: 32px;
+  --text-h2--line-height: 1.12;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h3: 25px;
+  --text-h3--line-height: 1.14;
+  --text-h3--letter-spacing: -0.015em;
+  --text-h4: 20px;
+  --text-h4--line-height: 1.2;
+  --text-h5: 16px;
+  --text-h5--line-height: 1.3;
+  /* the h6 treatment: this is what replaces every Plex Mono label */
+  --text-label: 13px;
+  --text-label--line-height: 1.3;
+  --text-body: 15px;
+  --text-body--line-height: 1.55;
 
-  /* section 6: everything that moves uses this */
+  --tracking-label: 0.08em;
+  --tracking-display: -0.015em;
+
+  /* Sharp corners are part of this system's identity. */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
+
   --ease-move: cubic-bezier(0.22, 0.61, 0.36, 1);
-
-  --shadow-lift: 0 20px 44px -30px rgba(26, 29, 46, 0.45);
-  --shadow-deep: 0 34px 80px -42px rgba(26, 29, 46, 0.5);
 }
 
-/* The token names exactly as CLAUDE.md section 5 writes them, aliased to the
-   theme so raw CSS and inline SVG fills can use either spelling without the
-   two ever drifting apart. */
-:root {
-  --cream: var(--color-cream);
-  --paper: var(--color-paper);
-  --sand: var(--color-sand);
-  --ink: var(--color-ink);
-  --ink-deep: var(--color-ink-deep);
-  --gold: var(--color-gold);
-  --gold-deep: var(--color-gold-deep);
-  --muted: var(--color-muted);
-  --line: var(--color-line);
-  --moon: var(--color-moon);
-  --sky-1: var(--color-sky-1);
-  --sky-2: var(--color-sky-2);
-  --sky-3: var(--color-sky-3);
-  --sky-4: var(--color-sky-4);
-  --sky-5: var(--color-sky-5);
-  --attention: var(--color-attention);
-  --danger: var(--color-danger);
-  --ease: var(--ease-move);
-}
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
 
-/* The nav is a fixed floating pill, so it is out of the flow entirely. Every
-   page's first section pads its content down by this much, while its
-   background still runs to the top of the page. That is what puts something
-   behind the glass at rest. Pill inset plus pill height plus breathing room. */
-:root {
-  --nav-clearance: 6rem;
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+  }
 
-@media (width >= 48rem) {
-  :root {
-    --nav-clearance: 7rem;
+  h1 {
+    font-size: var(--text-h1);
+  }
+  h2 {
+    font-size: var(--text-h2);
+  }
+  h3 {
+    font-size: var(--text-h3);
+  }
+  h4 {
+    font-size: var(--text-h4);
+  }
+  h5 {
+    font-size: var(--text-h5);
+  }
+
+  h6 {
+    font-family: var(--font-display);
+    font-size: var(--text-label);
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-2);
+    outline-offset: 2px;
   }
 }
 
-/* The launch intro's pre-hydration backdrop. Set by the inline script in the
-   root layout and cleared by LaunchIntro once its own overlay has painted, so
-   the two never both show and never leave a gap between them. */
-html[data-intro="play"]::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 99;
-  background: var(--color-ink);
+/* The nav is a normal top bar now, so sections no longer pad around a
+   floating pill. Kept as a token because every section references it. */
+:root {
+  --section-top: 3rem;
 }
 
-/* Lenis (components/layout/SmoothScroll.tsx) needs these to own the scroll
-   position. The classes are only ever on <html> while Lenis is running, so
-   under reduced motion none of this applies. */
+/* Lenis, unchanged: smooth scroll is behaviour, not skin. */
 html.lenis,
 html.lenis body {
   height: auto;
@@ -122,29 +164,28 @@ html.lenis body {
   overflow: clip;
 }
 
-/* The star chart's draw-in, section 6 motion 2. Constellation lines draw
-   themselves, their stars fade in behind them, the whole sequence inside
-   900ms with a per-constellation stagger set inline.
+/* The launch intro's pre-hydration backdrop. */
+html[data-intro="play"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: var(--color-text);
+}
 
-   Gated on .js for the same reason Reveal is: without the script, the chart
-   renders finished rather than blank. Gated on motion for the obvious one.
-   pathLength="1" on every line makes one dasharray work for all of them
-   regardless of how long the segment actually is. */
+/* The star chart's draw-in. Presentation restyled, timing unchanged. */
 @media (prefers-reduced-motion: no-preference) {
   .js .chart-line {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: chart-draw 560ms var(--ease) forwards;
+    animation: chart-draw 560ms var(--ease-move) forwards;
   }
 
   .js .chart-star {
     opacity: 0;
-    animation: chart-fade 260ms var(--ease) forwards;
+    animation: chart-fade 260ms var(--ease-move) forwards;
   }
 
-  /* Section 6 motion 8. The whole field drifts 8px over 60 seconds and each
-     speck twinkles on its own cycle. The only continuous background motion
-     in the product. */
   .ambient-drift {
     animation: ambient-drift 60s ease-in-out infinite alternate;
   }
@@ -155,181 +196,37 @@ html.lenis body {
     animation-iteration-count: infinite;
     animation-direction: alternate;
   }
-}
 
-/* The site map's markers and popovers, section 8.3.
-
-   Mapbox renders markers and popups as its own DOM outside React, so these
-   are plain classes rather than utilities. Kept to the palette: gold pins,
-   ink popovers, hairline borders.
-
-   Section 9: a pin whose coordinate is not sourced is drawn as a dashed ring
-   and labelled, never as a solid pin a traveller would trust to drive to. */
-.suhail-marker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  background: none;
-  border: 0;
-  padding: 0;
-}
-
-.suhail-marker-pin {
-  width: 14px;
-  height: 14px;
-  border-radius: 9999px;
-  background: var(--color-gold);
-  box-shadow: 0 0 0 3px rgba(250, 248, 243, 0.75);
-  transition: transform 200ms var(--ease);
-}
-
-.suhail-marker:hover .suhail-marker-pin,
-.suhail-marker:focus-visible .suhail-marker-pin {
-  transform: scale(1.25);
-}
-
-.suhail-marker-pin.is-approximate {
-  background: transparent;
-  border: 1.5px dashed var(--color-gold-deep);
-  box-shadow: 0 0 0 3px rgba(250, 248, 243, 0.6);
-}
-
-.suhail-marker-label {
-  font-family: var(--font-plex-mono), monospace;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-ink);
-  white-space: nowrap;
-  text-shadow:
-    0 0 3px var(--color-cream),
-    0 0 6px var(--color-cream);
-}
-
-.suhail-marker-note {
-  font-family: var(--font-plex-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-gold-deep);
-  white-space: nowrap;
-}
-
-.suhail-town-dot {
-  display: block;
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  background: var(--color-muted);
-  margin: 0 auto;
-}
-
-.suhail-town-label {
-  font-family: var(--font-plex-mono), monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-
-.suhail-popup .mapboxgl-popup-content {
-  background: var(--color-ink);
-  border-radius: 8px;
-  padding: 14px 16px;
-  box-shadow: var(--shadow-lift);
-}
-
-.suhail-popup .mapboxgl-popup-tip {
-  border-top-color: var(--color-ink);
-  border-bottom-color: var(--color-ink);
-}
-
-.suhail-popup-name {
-  color: var(--color-moon);
-  font-family: var(--font-display);
-  font-size: 17px;
-}
-
-.suhail-popup-coords,
-.suhail-popup-note {
-  font-family: var(--font-plex-mono), monospace;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-top: 4px;
-}
-
-.suhail-popup-coords {
-  color: rgba(245, 240, 225, 0.6);
-}
-
-.suhail-popup-note {
-  color: var(--color-gold);
-}
-
-.suhail-popup-link {
-  display: inline-block;
-  margin-top: 10px;
-  font-family: var(--font-plex-mono), monospace;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-gold);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* The booking reference on the confirmation screen, section 11's one
-   considered touch for that surface. Characters arrive in sequence rather
-   than cycling through decoys: section 6 bans text scrambles, and the whole
-   reference is in the DOM from the first frame regardless. */
-@media (prefers-reduced-motion: no-preference) {
-  .js .reference-char {
-    opacity: 0;
-    animation: reference-in 260ms var(--ease) forwards;
-  }
-}
-
-@keyframes reference-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.12em);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* The night picker, section 6 motion 3. Each date cell fills its sky-quality
-   colour from the bottom, staggered by row. Gated on .js so the grid is
-   already filled and readable if the script never runs. */
-@media (prefers-reduced-motion: no-preference) {
   .js .cell-fill {
     transform: scaleY(0);
-    animation: cell-fill 350ms var(--ease) forwards;
+    animation: cell-fill 350ms var(--ease-move) forwards;
   }
 
-  /* The detail panel on a state change: fade and an 8px rise, 200ms. Keyed
-     on the selection, so it plays once per change rather than per render. */
   .js .panel-enter {
-    animation: panel-enter 200ms var(--ease);
+    animation: panel-enter 200ms var(--ease-move);
   }
-}
 
-@keyframes cell-fill {
-  to {
-    transform: scaleY(1);
-  }
-}
-
-@keyframes panel-enter {
-  from {
+  .js .reference-char {
     opacity: 0;
-    transform: translateY(8px);
+    animation: reference-in 260ms var(--ease-move) forwards;
   }
+
+  .js .reveal-hidden {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .js .lr-hidden {
+    transform: translateY(100%);
+  }
+}
+
+.chart-star {
+  opacity: var(--star-opacity, 1);
+}
+
+.ambient-star {
+  opacity: var(--twinkle-low, 0.3);
 }
 
 @keyframes chart-draw {
@@ -338,26 +235,10 @@ html.lenis body {
   }
 }
 
-/* Resting opacity for the chart's stars and labels. A CSS animation ending
-   at a literal 1 beats an opacity presentation attribute, so anything the
-   component wants to hold back, a dimmed constellation on a site page or a
-   figure name meant to sit quietly under its stars, has to travel through
-   this variable or it is silently forced to full. */
-.chart-star {
-  opacity: var(--star-opacity, 1);
-}
-
 @keyframes chart-fade {
   to {
     opacity: var(--star-opacity, 1);
   }
-}
-
-/* The resting state, outside the motion query: under reduced motion, or
-   before the animation applies, a speck sits at its low opacity rather than
-   fully opaque. */
-.ambient-star {
-  opacity: var(--twinkle-low, 0.3);
 }
 
 @keyframes ambient-drift {
@@ -378,46 +259,138 @@ html.lenis body {
   }
 }
 
-/* Reveal's pre-animation state. Scoped to .js (set by an inline script in the
-   root layout) and to motion being allowed, so content is only ever hidden
-   when the script that reveals it is running. Kept outside @layer so it is
-   never purged. */
-@media (prefers-reduced-motion: no-preference) {
-  .js .reveal-hidden {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-
-  /* LineReveal's pre-animation state: the line waits below its clip mask.
-     Same .js gating, so headings are visible without JavaScript. */
-  .js .lr-hidden {
-    transform: translateY(100%);
+@keyframes cell-fill {
+  to {
+    transform: scaleY(1);
   }
 }
 
-@layer base {
-  body {
-    @apply bg-cream font-body text-ink antialiased;
-    font-size: var(--text-body);
-    line-height: 1.6;
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
+}
 
-  h1,
-  h2,
-  h3 {
-    @apply font-display font-medium tracking-display;
-    line-height: 1.05;
-    font-optical-sizing: auto;
+@keyframes reference-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.12em);
   }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
-  /* Newsreader's optical size axis tops out at 72. Pushing the display sizes
-     to it keeps the large headings from wearing body-copy hairlines. */
-  h1 {
-    font-variation-settings: "opsz" 72;
-  }
+/* Mapbox renders its markers and popups outside React. Restyled to the new
+   tokens: square, flat, divider-bordered. */
+.suhail-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
 
-  :focus-visible {
-    outline: 2px solid var(--color-attention);
-    outline-offset: 3px;
-  }
+.suhail-marker-pin {
+  width: 12px;
+  height: 12px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-bg);
+  transition: transform 200ms var(--ease-move);
+}
+
+.suhail-marker:hover .suhail-marker-pin,
+.suhail-marker:focus-visible .suhail-marker-pin {
+  transform: scale(1.25);
+}
+
+.suhail-marker-pin.is-approximate {
+  background: transparent;
+  border: 1.5px dashed var(--color-accent-600);
+  box-shadow: 0 0 0 3px var(--color-bg);
+}
+
+.suhail-marker-label,
+.suhail-marker-note,
+.suhail-town-label,
+.suhail-popup-coords,
+.suhail-popup-note,
+.suhail-popup-link {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.suhail-marker-label {
+  color: var(--color-text);
+  white-space: nowrap;
+  text-shadow:
+    0 0 3px var(--color-bg),
+    0 0 6px var(--color-bg);
+}
+
+.suhail-marker-note {
+  font-size: 11px;
+  color: var(--color-accent-700);
+  white-space: nowrap;
+}
+
+.suhail-town-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  background: var(--color-neutral-600);
+  margin: 0 auto;
+}
+
+.suhail-town-label {
+  font-size: 11px;
+  color: var(--color-neutral-700);
+}
+
+.suhail-popup .mapboxgl-popup-content {
+  background: var(--color-text);
+  border-radius: 0;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-md);
+}
+
+.suhail-popup .mapboxgl-popup-tip {
+  border-top-color: var(--color-text);
+  border-bottom-color: var(--color-text);
+}
+
+.suhail-popup-name {
+  color: var(--color-bg);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.suhail-popup-coords {
+  color: var(--color-neutral-400);
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.suhail-popup-note {
+  color: var(--color-accent-300);
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.suhail-popup-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 11px;
 }

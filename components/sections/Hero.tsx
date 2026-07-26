@@ -29,7 +29,7 @@ export function Hero({ content, date }: { content: HeroContent; date: Date }) {
   const percent = Math.round(phase * 100);
 
   return (
-    <section className="relative overflow-hidden pb-16 pt-[var(--nav-clearance)]">
+    <section className="relative overflow-hidden pb-16 pt-[var(--section-top)]">
       <AmbientStars tone="cream" className="bottom-[46%] lg:bottom-0 lg:right-[46%]" />
 
       <Shell className="relative">
@@ -43,19 +43,21 @@ export function Hero({ content, date }: { content: HeroContent; date: Date }) {
               <Eyebrow className="mb-7">{content.eyebrow}</Eyebrow>
             </Reveal>
 
-            <LineReveal as="h1" lines={content.headingLines} className="text-hero" />
+            <LineReveal as="h1" lines={content.headingLines} className="text-h1" />
 
             <Reveal delay={90}>
-              <p className="mt-7 max-w-[42ch] text-muted">{content.sub}</p>
+              <p className="mt-7 max-w-[42ch] text-neutral-700">{content.sub}</p>
             </Reveal>
 
             <Reveal delay={180}>
               <div className="mt-9 flex flex-wrap items-center gap-3">
-                {/* section 5: the pill marks the one hero-level action */}
-                <Button href={content.primary.href} variant="accent" pill>
+                {/* section 5: the marks the one hero-level action */}
+                <Button href={content.primary.href} variant="primary">
                   {content.primary.label}
                 </Button>
-                <Button href={content.secondary.href}>{content.secondary.label}</Button>
+                <Button href={content.secondary.href} variant="secondary">
+                  {content.secondary.label}
+                </Button>
               </div>
             </Reveal>
           </div>
@@ -65,7 +67,7 @@ export function Hero({ content, date }: { content: HeroContent; date: Date }) {
             <figure className="relative">
               {/* A fixed aspect ratio in both layouts, so the image reserves
                   its space before it loads and the hero cannot shift. */}
-              <div className="relative aspect-[3/2] w-full overflow-hidden rounded-lg border border-line bg-sand/40 lg:aspect-[4/5]">
+              <div className="relative aspect-[3/2] w-full overflow-hidden bg-surface lg:aspect-[4/5]">
                 <Image
                   src={content.image.src}
                   alt={content.image.alt}
@@ -82,7 +84,7 @@ export function Hero({ content, date }: { content: HeroContent; date: Date }) {
               {/* Rule 12 in the small: stock is labelled as stock, on the
                   image, rather than left to read as a photograph of a place
                   Suhail actually sends people to. */}
-              <figcaption className="absolute bottom-3 left-3 rounded-full bg-ink/70 px-3 py-1.5 font-mono text-label uppercase tracking-label text-moon/90 backdrop-blur-sm">
+              <figcaption className="absolute bottom-0 left-0 bg-text px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-label text-bg">
                 {content.image.caption}
               </figcaption>
             </figure>
@@ -92,7 +94,7 @@ export function Hero({ content, date }: { content: HeroContent; date: Date }) {
 
       <Shell className="relative mt-12">
         <Reveal delay={240}>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-line pt-6">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-divider pt-6">
             <MoonPhase phase={phase} waxing={isWaxing(date)} size={28} />
             <CoordinateTag
               items={[

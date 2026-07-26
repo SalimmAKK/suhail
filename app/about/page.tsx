@@ -12,11 +12,11 @@ export const metadata: Metadata = {
 
 export default function About() {
   return (
-    <section className="pb-24 pt-[var(--nav-clearance)]">
+    <section className="pb-24 pt-[var(--section-top)]">
       <Shell>
         <Eyebrow className="mb-6">About</Eyebrow>
-        <h1 className="text-pull">Named for a star you can only see from here.</h1>
-        <p className="mt-8 max-w-[52ch] text-muted">
+        <h1 className="text-h2">Named for a star you can only see from here.</h1>
+        <p className="mt-8 max-w-[52ch] text-neutral-700">
           Suhail, Canopus, clears AlUla&rsquo;s southern horizon by about ten degrees and never
           rises at all across most of Europe. Arab navigators steered by it. The full note is
           being written.

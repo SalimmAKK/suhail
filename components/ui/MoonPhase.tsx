@@ -70,16 +70,15 @@ export function MoonPhase({
       aria-label={label}
       className={cn("shrink-0", className)}
     >
-      {/* the unlit disc. sky-1 is the ramp's brightest-sky, darkest-surface
-          end, which is exactly what an unlit moon face is. */}
+      {/* the unlit disc, on the dark end of the neutral ramp */}
       <circle
         cx={C}
         cy={C}
         r={R}
-        className={tone === "light" ? "fill-sky-1" : "fill-ink"}
+        className={tone === "light" ? "fill-neutral-800" : "fill-text"}
       />
       <g transform={waxing ? undefined : `translate(${2 * C},0) scale(-1,1)`}>
-        <path d={litPath(clamped)} className="fill-moon" />
+        <path d={litPath(clamped)} className="fill-neutral-100" />
       </g>
       <circle
         cx={C}
@@ -87,7 +86,7 @@ export function MoonPhase({
         r={R - 0.5}
         fill="none"
         strokeWidth={1}
-        className={tone === "light" ? "stroke-moon/25" : "stroke-ink/20"}
+        className={tone === "light" ? "stroke-neutral-100/25" : "stroke-text/20"}
       />
     </svg>
   );

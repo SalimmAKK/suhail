@@ -306,7 +306,10 @@ await withServer(async (BASE) => {
       return {
         chartInHero: !!chart && hero.contains(chart),
         chartOnPage: !!chart,
-        chartInInkSection: !!chart && !!chart.closest('[data-nav-tone="ink"]'),
+        /* the tone system went with the glass nav: what matters now is that
+           the chart sits in the section after the hero, not in the hero */
+        chartInSecondSection:
+          !!chart && chart.closest("section") === document.querySelectorAll("main section")[1],
         hasImage: !!img,
         imageLoaded: img?.complete && img.naturalWidth > 0,
         imageWidth: box ? Math.round(box.width) : 0,
@@ -323,8 +326,8 @@ await withServer(async (BASE) => {
     );
     record(
       "6d. the chart still opens the night picker section",
-      composition.chartOnPage && composition.chartInInkSection,
-      `chart on the landing page=${composition.chartOnPage}, inside the ink section=${composition.chartInInkSection}`,
+      composition.chartOnPage && composition.chartInSecondSection,
+      `chart on the landing page=${composition.chartOnPage}, in the section below the hero=${composition.chartInSecondSection}`,
     );
     record(
       "6e. the hero image actually loads",
@@ -344,35 +347,34 @@ await withServer(async (BASE) => {
       /* the coordinate tags are paragraphs too, and they are meant to be
          mono: pick a paragraph that is not one */
       const prose = [...document.querySelectorAll("main p")].find(
-        (el) => !el.className.includes("font-mono"),
+        (el) => !el.className.includes("uppercase"),
       );
       return {
         families: [...new Set(loaded)],
         heading: styles(document.querySelector("main h1")),
         body: styles(prose),
-        mono: styles(document.querySelector("main .font-mono")),
+        mono: styles(document.querySelector("main .font-display")),
       };
     });
     record(
-      "6g. Newsreader and Public Sans are really loaded, not fallbacks",
-      fonts.families.some((f) => /Newsreader/i.test(f)) &&
-        fonts.families.some((f) => /Public Sans/i.test(f)),
+      "6g. Archivo is really loaded, not a fallback",
+      fonts.families.some((f) => /Archivo/i.test(f)),
       `loaded: ${fonts.families.join(", ")}`,
     );
     record(
-      "6h. headings use the serif, body uses the sans, mono is untouched",
-      /Newsreader/i.test(fonts.heading) &&
-        /Public Sans/i.test(fonts.body) &&
-        /Plex Mono/i.test(fonts.mono),
+      "6h. one family for everything, including the former mono labels",
+      /Archivo/i.test(fonts.heading) &&
+        /Archivo/i.test(fonts.body) &&
+        /Archivo/i.test(fonts.mono),
       `h1=${fonts.heading.split(",")[0]}, p=${fonts.body.split(",")[0]}, mono=${fonts.mono.split(",")[0]}`,
     );
 
     const cta = page.getByRole("link", { name: "Pick a night" }).first();
     record(
-      "6b. the hero CTA is a pill and reaches the night picker",
-      (await cta.evaluate((el) => parseFloat(getComputedStyle(el).borderRadius))) > 1000 &&
+      "6b. the hero CTA is square and reaches the night picker",
+      (await cta.evaluate((el) => parseFloat(getComputedStyle(el).borderRadius))) === 0 &&
         (await cta.getAttribute("href")) === "/tonight",
-      `href=${await cta.getAttribute("href")}, radius rounded-full`,
+      `href=${await cta.getAttribute("href")}, border-radius 0`,
     );
 
     await page.screenshot({ path: `${ARTIFACTS}/hero-desktop.png` });

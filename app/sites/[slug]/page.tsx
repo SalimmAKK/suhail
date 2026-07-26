@@ -52,7 +52,7 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
 
   return (
     <>
-      <section className="relative overflow-hidden bg-ink pb-20 pt-[var(--nav-clearance)]" data-nav-tone="ink">
+      <section className="relative overflow-hidden bg-neutral-900 pb-20 pt-[var(--section-top)]">
         <AmbientStars tone="ink" className="lg:right-[46%]" />
         <Shell className="relative">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -62,7 +62,7 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
                   Dark-sky site
                 </Eyebrow>
               </Reveal>
-              <LineReveal as="h1" lines={[site.name]} className="text-pull text-moon" />
+              <LineReveal as="h1" lines={[site.name]} className="text-h2 text-neutral-100" />
               <Reveal delay={90}>
                 <CoordinateTag
                   tone="light"
@@ -76,10 +76,10 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
                 />
               </Reveal>
               <Reveal delay={150}>
-                <p className="mt-7 max-w-[46ch] text-moon/70">{site.description}</p>
+                <p className="mt-7 max-w-[46ch] text-neutral-100/70">{site.description}</p>
               </Reveal>
               <Reveal delay={210}>
-                <p className="mt-6 font-mono text-label uppercase tracking-label text-gold">
+                <p className="mt-6 font-display text-label uppercase tracking-label text-accent">
                   Best for {site.bestFor.join(" · ").replace(/-/g, " ")}
                 </p>
               </Reveal>
@@ -87,7 +87,7 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
 
             <div className="relative">
               <StarChart date={new Date()} tone="ink" highlight={site.bestFor} />
-              <p className="mt-3 text-center font-mono text-label uppercase tracking-label text-moon/45">
+              <p className="mt-3 text-center font-display text-label uppercase tracking-label text-neutral-100/45">
                 Tonight at 21:00, with this site&rsquo;s targets picked out
               </p>
             </div>
@@ -99,13 +99,13 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
         <Shell>
           {/* Rule 12: what this project could not source stays on the page. */}
           {site.verify.length > 0 ? (
-            <div className="border-l-2 border-attention pl-5">
-              <p className="font-mono text-label uppercase tracking-label text-muted">
+            <div className="border-l-2 border-accent-2 pl-5">
+              <p className="font-display text-label uppercase tracking-label text-neutral-700">
                 Not yet verified
               </p>
               <ul className="mt-3 space-y-2">
                 {site.verify.map((note) => (
-                  <li key={note} className="max-w-[64ch] text-[15px] text-muted">
+                  <li key={note} className="max-w-[64ch] text-[15px] text-neutral-700">
                     {note}
                   </li>
                 ))}
@@ -118,14 +118,14 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
           </h2>
 
           {error ? (
-            <p className="mt-4 max-w-[52ch] text-muted">
+            <p className="mt-4 max-w-[52ch] text-neutral-700">
               The catalogue could not be loaded, so we cannot say what runs here.
-              <span className="mt-2 block font-mono text-label uppercase tracking-label text-attention">
+              <span className="mt-2 block font-display text-label uppercase tracking-label text-accent-2">
                 {error}
               </span>
             </p>
           ) : here.length === 0 ? (
-            <p className="mt-4 max-w-[52ch] text-muted">
+            <p className="mt-4 max-w-[52ch] text-neutral-700">
               No operator currently lists a dark-sky experience at {site.name}. When one does, it
               will appear here rather than being invented to fill the space.
             </p>
@@ -135,7 +135,7 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
                 <Card key={experience.id} lift>
                   <div className="flex items-baseline justify-between gap-4">
                     <h3 className="text-2xl">{experience.title}</h3>
-                    <p className="shrink-0 font-mono text-label uppercase tracking-label text-muted">
+                    <p className="shrink-0 font-display text-label uppercase tracking-label text-neutral-700">
                       SAR {experience.priceSar}
                     </p>
                   </div>
@@ -150,9 +150,9 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
                     ]}
                   />
                   {experience.description ? (
-                    <p className="mt-4 text-muted">{experience.description}</p>
+                    <p className="mt-4 text-neutral-700">{experience.description}</p>
                   ) : null}
-                  <Button href="/tonight" size="sm" className="mt-5">
+                  <Button href="/tonight" variant="secondary" size="sm" className="mt-5">
                     Pick a night for this
                   </Button>
                 </Card>
@@ -162,7 +162,7 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
 
           <Link
             href="/sites"
-            className="mt-14 inline-block font-mono text-label uppercase tracking-label text-gold-deep underline underline-offset-4"
+            className="mt-14 inline-block font-display text-label uppercase tracking-label text-accent-700 underline underline-offset-4"
           >
             All four sites
           </Link>

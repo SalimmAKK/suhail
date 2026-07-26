@@ -21,14 +21,14 @@ type FieldProps = {
   onValueChange?: (value: string) => void;
 };
 
-const LABEL = "block text-[13px] font-medium text-ink";
+const LABEL = "block font-display text-label font-bold uppercase tracking-label text-text";
 
 function controlClass(error?: string) {
   return cn(
-    "mt-2 w-full rounded-md border bg-paper px-3.5 py-2.5 text-[15px] text-ink",
-    "placeholder:text-muted",
+    "mt-2 w-full border-2 bg-bg px-3.5 py-2.5 text-[15px] text-text",
+    "placeholder:text-neutral-600",
     focusRing,
-    error ? "border-attention" : "border-line",
+    error ? "border-accent-2-600" : "border-divider",
   );
 }
 
@@ -49,7 +49,7 @@ export function Field({
   onValueChange,
 }: FieldProps) {
   const optionalMark = required ? null : (
-    <span className="font-normal text-muted"> (optional)</span>
+    <span className="font-normal text-neutral-700"> (optional)</span>
   );
   const errorId = `${name}-error`;
   const describedBy = error ? errorId : undefined;
@@ -68,12 +68,12 @@ export function Field({
           on paper it cannot carry the message text. The colour marks the
           field (border, dot), the text stays ink so it is readable. */}
       {error ? (
-        <p id={errorId} className="mt-2 flex items-center gap-2 text-sm font-medium text-ink">
-          <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-attention" />
+        <p id={errorId} className="mt-2 flex items-center gap-2 text-[13px] font-semibold text-text">
+          <span aria-hidden className="h-1.5 w-1.5 shrink-0 bg-accent-2" />
           {error}
         </p>
       ) : null}
-      {hint ? <p className="mt-2 text-sm text-muted">{hint}</p> : null}
+      {hint ? <p className="mt-2 text-sm text-neutral-700">{hint}</p> : null}
     </>
   );
 
@@ -86,12 +86,12 @@ export function Field({
         </legend>
         <div className="mt-2 flex flex-col gap-2.5">
           {options.map((o) => (
-            <label key={o.value} className="flex items-center gap-2.5 text-[15px] text-ink">
+            <label key={o.value} className="flex items-center gap-2.5 text-[15px] text-text">
               <input
                 type="checkbox"
                 name={name}
                 value={o.value}
-                className={cn("h-4 w-4 accent-gold", focusRing)}
+                className={cn("h-4 w-4 accent-accent", focusRing)}
               />
               {o.label}
             </label>

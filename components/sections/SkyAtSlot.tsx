@@ -49,15 +49,15 @@ export function SkyAtSlot({
   return (
     <div
       className={cn(
-        "rounded-lg border p-5",
-        onInk ? "border-moon/15 bg-ink-deep/40" : "border-line bg-cream",
+        "border-2 p-5",
+        onInk ? "border-neutral-700 bg-neutral-900" : "border-divider bg-surface",
         className,
       )}
     >
       <p
         className={cn(
-          "font-mono text-label uppercase tracking-label",
-          onInk ? "text-gold" : "text-gold-deep",
+          "font-display text-label uppercase tracking-label",
+          onInk ? "text-accent" : "text-accent-700",
         )}
       >
         The sky on this night
@@ -66,7 +66,7 @@ export function SkyAtSlot({
       <div className="mt-4 flex items-center gap-4">
         <MoonPhase phase={phase} waxing={isWaxing(date)} size={44} tone={tone} />
         <div>
-          <p className={cn("first-letter:uppercase", onInk ? "text-moon" : "text-ink")}>
+          <p className={cn("first-letter:uppercase", onInk ? "text-neutral-100" : "text-text")}>
             {moonPhaseLabel(phase)} moon, {Math.round(phase * 100)}% lit
           </p>
           <SkyPip quality={quality} tone={tone} className="mt-1.5" />
@@ -74,7 +74,7 @@ export function SkyAtSlot({
       </div>
 
       {milkyWay.length > 0 ? (
-        <p className={cn("mt-4 text-[15px]", onInk ? "text-moon/70" : "text-muted")}>
+        <p className={cn("mt-4 text-[15px]", onInk ? "text-neutral-100/70" : "text-neutral-700")}>
           The Milky Way core is up, through {list(milkyWay.map((c) => c.name))}.
           {quality === "bright"
             ? " The moon will wash out most of it."

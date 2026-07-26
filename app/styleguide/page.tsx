@@ -20,26 +20,24 @@ export const metadata: Metadata = {
 };
 
 const RAMP = [
-  { token: "sky-1", swatch: "bg-sky-1", note: "full moon, worst" },
-  { token: "sky-2", swatch: "bg-sky-2", note: "gibbous" },
-  { token: "sky-3", swatch: "bg-sky-3", note: "half moon" },
-  { token: "sky-4", swatch: "bg-sky-4", note: "crescent" },
-  { token: "sky-5", swatch: "bg-sky-5", note: "new moon, best" },
+  { token: "neutral-200", swatch: "bg-neutral-200", note: "bright night" },
+  { token: "neutral-500", swatch: "bg-neutral-500", note: "ok night" },
+  { token: "neutral-900", swatch: "bg-neutral-900", note: "prime night" },
 ];
 
 const CORE = [
-  { token: "cream", swatch: "bg-cream", note: "page" },
-  { token: "paper", swatch: "bg-paper", note: "cards" },
-  { token: "sand", swatch: "bg-sand", note: "grouped sections" },
-  { token: "ink", swatch: "bg-ink", note: "text, dark sections" },
-  { token: "ink-deep", swatch: "bg-ink-deep", note: "primary hover" },
-  { token: "gold", swatch: "bg-gold", note: "accent" },
-  { token: "gold-deep", swatch: "bg-gold-deep", note: "accent hover" },
+  { token: "cream", swatch: "bg-bg", note: "page" },
+  { token: "paper", swatch: "bg-neutral-100", note: "cards" },
+  { token: "sand", swatch: "bg-surface", note: "grouped sections" },
+  { token: "ink", swatch: "bg-neutral-900", note: "text, dark sections" },
+  { token: "ink-deep", swatch: "bg-neutral-900", note: "primary hover" },
+  { token: "gold", swatch: "bg-accent", note: "accent" },
+  { token: "gold-deep", swatch: "bg-accent-600", note: "accent hover" },
   { token: "muted", swatch: "bg-muted", note: "secondary text" },
   { token: "line", swatch: "bg-line", note: "hairlines" },
-  { token: "moon", swatch: "bg-moon", note: "highlight on dark" },
-  { token: "attention", swatch: "bg-attention", note: "errors, focus" },
-  { token: "danger", swatch: "bg-danger", note: "destructive only" },
+  { token: "moon", swatch: "bg-neutral-100", note: "highlight on dark" },
+  { token: "attention", swatch: "bg-accent-2", note: "errors, focus" },
+  { token: "danger", swatch: "bg-accent-2-700", note: "destructive only" },
 ];
 
 const PHASES = [0, 0.25, 0.5, 0.75, 1];
@@ -58,7 +56,7 @@ function Section({
       /* full-ink sections declare themselves so the glass nav re-tones over
          them, per lib/useNavTone.ts */
       data-nav-tone={tone === "light" ? "ink" : undefined}
-      className={tone === "light" ? "bg-ink py-16" : "border-t border-line py-16"}
+      className={tone === "light" ? "bg-neutral-900 py-16" : "border-t border-divider py-16"}
     >
       <Shell>
         <Eyebrow tone={tone} className="mb-8">
@@ -73,9 +71,9 @@ function Section({
 function Swatch({ token, swatch, note }: { token: string; swatch: string; note: string }) {
   return (
     <div>
-      <div className={`h-16 rounded-md border border-line ${swatch}`} />
-      <p className="mt-2 font-mono text-label uppercase tracking-label text-ink">{token}</p>
-      <p className="font-mono text-label tracking-label text-muted">{note}</p>
+      <div className={`h-16 border border-divider ${swatch}`} />
+      <p className="mt-2 font-display text-label uppercase tracking-label text-text">{token}</p>
+      <p className="font-display text-label tracking-label text-neutral-700">{note}</p>
     </div>
   );
 }
@@ -83,10 +81,10 @@ function Swatch({ token, swatch, note }: { token: string; swatch: string; note: 
 export default function Styleguide() {
   return (
     <>
-      <div className="border-b border-line pb-16 pt-[var(--nav-clearance)]">
+      <div className="border-b border-divider pb-16 pt-[var(--section-top)]">
         <Shell>
           <Eyebrow className="mb-6">Styleguide</Eyebrow>
-          <LineReveal as="h1" lines={["Every primitive,", "in isolation."]} className="text-pull" />
+          <LineReveal as="h1" lines={["Every primitive,", "in isolation."]} className="text-h2" />
           <CoordinateTag
             className="mt-6"
             items={["SUHAIL", "STAGE 1", "NOT LINKED FROM NAV"]}
@@ -108,7 +106,7 @@ export default function Styleguide() {
             <Swatch key={c.token} {...c} />
           ))}
         </div>
-        <p className="mt-6 max-w-[52ch] text-muted">
+        <p className="mt-6 max-w-[52ch] text-neutral-700">
           Semantic only. The ramp says how dark a given night will be, never that a surface
           needed some colour.
         </p>
@@ -117,20 +115,20 @@ export default function Styleguide() {
       <Section title="Type">
         <div className="space-y-8">
           <div>
-            <p className="mb-2 font-mono text-label uppercase tracking-label text-muted">
-              text-hero / Bricolage Grotesque
+            <p className="mb-2 font-display text-label uppercase tracking-label text-neutral-700">
+              text-h1 / Bricolage Grotesque
             </p>
-            <p className="font-display text-hero font-medium">Look up. Then book.</p>
+            <p className="font-display text-h1 font-extrabold">Look up. Then book.</p>
           </div>
           <div>
-            <p className="mb-2 font-mono text-label uppercase tracking-label text-muted">
-              text-pull / Bricolage Grotesque
+            <p className="mb-2 font-display text-label uppercase tracking-label text-neutral-700">
+              text-h2 / Bricolage Grotesque
             </p>
-            <p className="font-display text-pull font-medium">The sky over AlUla, by the night.</p>
+            <p className="font-display text-h2 font-extrabold">The sky over AlUla, by the night.</p>
           </div>
           <div>
-            <p className="mb-2 font-mono text-label uppercase tracking-label text-muted">
-              body 17px / IBM Plex Sans
+            <p className="mb-2 font-display text-label uppercase tracking-label text-neutral-700">
+              body 15px / Archivo
             </p>
             <p className="max-w-[62ch]">
               Suhail surfaces what the sky is offering on a specific night over AlUla and its
@@ -138,8 +136,8 @@ export default function Styleguide() {
             </p>
           </div>
           <div>
-            <p className="mb-2 font-mono text-label uppercase tracking-label text-muted">
-              label 11px / IBM Plex Mono
+            <p className="mb-2 font-display text-label uppercase tracking-label text-neutral-700">
+              h6 label 13px / Archivo tracked caps
             </p>
             <CoordinateTag items={["27.19°N", "ALULA MANARA", "1209M", "BORTLE 2"]} />
           </div>
@@ -149,40 +147,43 @@ export default function Styleguide() {
       <Section title="Buttons">
         <div className="flex flex-wrap items-center gap-4">
           <Button href="/styleguide">Primary</Button>
-          <Button href="/styleguide" variant="accent">
-            Book this night
+          <Button href="/styleguide" variant="secondary">
+            Secondary
           </Button>
-          <Button href="/styleguide" size="sm">
-            Primary, small
+          <Button href="/styleguide" variant="ghost">
+            Ghost
+          </Button>
+          <Button variant="icon" aria-label="Icon">
+            +
           </Button>
           <Button disabled>Disabled</Button>
         </div>
-        <p className="mt-6 max-w-[52ch] text-muted">
-          Ink on gold, not white on gold. Roughly 7:1 at rest and 5:1 against gold-deep on
-          hover. Primary keeps white on ink.
+        <p className="mt-6 max-w-[52ch] text-neutral-700">
+          Primary carries ink on accent, not bg on accent. Cream on gold is about 2:1 and
+          fails AA on the button that carries every conversion in the product.
         </p>
       </Section>
 
       <Section title="Shape carries rank">
         <div className="flex flex-wrap items-center gap-4">
-          <Button href="/tonight" variant="accent" pill>
+          <Button href="/tonight" variant="primary">
             Pick a night
           </Button>
           <Button href="/styleguide">Add a guest</Button>
         </div>
-        <p className="mt-6 max-w-[52ch] text-muted">
+        <p className="mt-6 max-w-[52ch] text-neutral-700">
           The capsule marks the single most important action on a surface: the nav CTA, the
           hero CTA, the one that starts a booking. At most one per screen. Everything else
-          stays rounded-md.
+          stays.
         </p>
       </Section>
 
       <Section title="Buttons on ink" tone="light">
         <div className="flex flex-wrap items-center gap-4">
-          <Button href="/styleguide" variant="light">
+          <Button href="/styleguide" variant="primary">
             Pick a night
           </Button>
-          <Button href="/styleguide" variant="light" size="sm">
+          <Button href="/styleguide" variant="primary" size="sm">
             Light, small
           </Button>
         </div>
@@ -193,14 +194,14 @@ export default function Styleguide() {
           <Card lift>
             <Eyebrow className="mb-4">Hover me</Eyebrow>
             <h3 className="text-2xl">The gold rule sweeps in</h3>
-            <p className="mt-3 text-muted">
+            <p className="mt-3 text-neutral-700">
               Lift cards rise 4px and draw a 3px rule across the top over 380ms.
             </p>
           </Card>
           <Card>
             <Eyebrow className="mb-4">Static</Eyebrow>
             <h3 className="text-2xl">No rule, no lift</h3>
-            <p className="mt-3 text-muted">
+            <p className="mt-3 text-neutral-700">
               For content that is not a link to somewhere else.
             </p>
           </Card>
@@ -235,14 +236,14 @@ export default function Styleguide() {
           {PHASES.map((p) => (
             <div key={p} className="text-center">
               <MoonPhase phase={p} size={64} />
-              <p className="mt-3 font-mono text-label uppercase tracking-label text-muted">
+              <p className="mt-3 font-display text-label uppercase tracking-label text-neutral-700">
                 {Math.round(p * 100)}% waxing
               </p>
             </div>
           ))}
           <div className="text-center">
             <MoonPhase phase={0.25} size={64} waxing={false} />
-            <p className="mt-3 font-mono text-label uppercase tracking-label text-muted">
+            <p className="mt-3 font-display text-label uppercase tracking-label text-neutral-700">
               25% waning
             </p>
           </div>
@@ -254,7 +255,7 @@ export default function Styleguide() {
           {PHASES.map((p) => (
             <div key={p} className="text-center">
               <MoonPhase phase={p} size={64} tone="light" />
-              <p className="mt-3 font-mono text-label uppercase tracking-label text-moon/70">
+              <p className="mt-3 font-display text-label uppercase tracking-label text-neutral-100/70">
                 {Math.round(p * 100)}%
               </p>
             </div>
@@ -332,7 +333,7 @@ export default function Styleguide() {
           {[0, 1, 2].map((i) => (
             <Reveal key={i} delay={i * 90}>
               <Card>
-                <p className="font-mono text-label uppercase tracking-label text-muted">
+                <p className="font-display text-label uppercase tracking-label text-neutral-700">
                   Delay {i * 90}ms
                 </p>
                 <p className="mt-3">Scroll away and back to replay from a fresh load.</p>

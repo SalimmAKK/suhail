@@ -93,12 +93,12 @@ export function StarChart({
   /* Gold at 40 percent is section 8.1's figure and it reads correctly on ink.
      On cream the same value disappears, so the light variant uses gold-deep
      at a higher alpha to hold the same visual weight. */
-  const lineColor = onInk ? "var(--color-gold)" : "var(--color-gold-deep)";
+  const lineColor = onInk ? "var(--color-accent)" : "var(--color-accent-700)";
   const lineOpacity = onInk ? 0.4 : 0.7;
   const lineWidth = onInk ? 1 : 1.3;
-  const starColor = onInk ? "var(--color-moon)" : "var(--color-ink)";
-  const rimColor = onInk ? "var(--color-moon)" : "var(--color-line)";
-  const labelColor = onInk ? "var(--color-moon)" : "var(--color-gold-deep)";
+  const starColor = onInk ? "var(--color-neutral-100)" : "var(--color-text)";
+  const rimColor = onInk ? "var(--color-neutral-100)" : "var(--color-neutral-400)";
+  const labelColor = onInk ? "var(--color-neutral-100)" : "var(--color-accent-700)";
 
   return (
     <svg
@@ -135,7 +135,7 @@ export function StarChart({
             y={C - rr * Math.cos(rad)}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="font-mono"
+            className="font-display"
             fontSize={11}
             letterSpacing="0.1em"
             fill={labelColor}
@@ -226,7 +226,7 @@ export function StarChart({
                 x={(Math.min(...up.map((p) => p.x)) + Math.max(...up.map((p) => p.x))) / 2}
                 y={Math.max(...up.map((p) => p.y)) + 16}
                 textAnchor="middle"
-                className="chart-star chart-figure font-mono hidden sm:inline"
+                className="chart-star chart-figure font-display hidden sm:inline"
                 fontSize={9}
                 letterSpacing="0.16em"
                 fill={labelColor}
@@ -249,7 +249,7 @@ export function StarChart({
                   /* Hidden under sm: the chart scales with its viewBox, so at
                      phone width a 10px label renders at about 5px. A name
                      nobody can read is not a name. */
-                  className="chart-star font-mono hidden sm:inline"
+                  className="chart-star font-display hidden sm:inline"
                   fontSize={10}
                   letterSpacing="0.08em"
                   fill={labelColor}

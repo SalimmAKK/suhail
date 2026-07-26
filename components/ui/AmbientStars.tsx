@@ -96,7 +96,7 @@ export function AmbientStars({
             strokeWidth={s.r}
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
-            stroke={onInk ? "var(--color-moon)" : "var(--color-ink)"}
+            stroke={onInk ? "var(--color-neutral-100)" : "var(--color-text)"}
             className="ambient-star"
             style={{
               /* the resting opacity, and the ceiling the twinkle reaches */

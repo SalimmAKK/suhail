@@ -33,13 +33,13 @@ export default async function BookExperience({
 
   if (error) {
     return (
-      <Shell className="pb-24 pt-[var(--nav-clearance)]">
+      <Shell className="pb-24 pt-[var(--section-top)]">
         <Eyebrow className="mb-7">Booking</Eyebrow>
-        <h1 className="text-pull">The catalogue is unavailable.</h1>
-        <p className="mt-8 max-w-[52ch] text-muted">
+        <h1 className="text-h2">The catalogue is unavailable.</h1>
+        <p className="mt-8 max-w-[52ch] text-neutral-700">
           This experience could not be loaded, so there is nothing here to book yet. This is a
           real error rather than an empty page.
-          <span className="mt-3 block font-mono text-label uppercase tracking-label text-attention">
+          <span className="mt-3 block font-display text-label uppercase tracking-label text-accent-2">
             {error}
           </span>
         </p>
@@ -50,10 +50,10 @@ export default async function BookExperience({
   if (!experience) notFound();
 
   return (
-    <Shell className="pb-24 pt-[var(--nav-clearance)]">
+    <Shell className="pb-24 pt-[var(--section-top)]">
       <div className="max-w-[46ch]">
         <Eyebrow className="mb-7">Reserve a night</Eyebrow>
-        <h1 className="text-pull">{experience.title}</h1>
+        <h1 className="text-h2">{experience.title}</h1>
       </div>
       <div className="mt-14">
         <BookingFlow

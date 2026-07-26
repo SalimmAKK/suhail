@@ -166,8 +166,8 @@ export function SiteMap({ sites, className }: { sites: Site[]; className?: strin
          element and Mapbox's own DOM, which it does not know about, survives
          inside the fallback */
       <div key="fallback" className={className} data-map-state={state}>
-        <div className="flex h-full min-h-[320px] items-center justify-center rounded-lg border border-line bg-sand/40 p-8">
-          <p className="max-w-[46ch] text-center text-muted">
+        <div className="flex h-full min-h-[320px] items-center justify-center border border-divider bg-surface/40 p-8">
+          <p className="max-w-[46ch] text-center text-neutral-700">
             {state === "no-token"
               ? "The map is not configured on this deployment, so it is not being shown. The four sites and their coordinates are listed below."
               : state === "unsupported"
@@ -187,7 +187,7 @@ export function SiteMap({ sites, className }: { sites: Site[]; className?: strin
         ref={container}
         role="application"
         aria-label="Map of the dark-sky sites around AlUla"
-        className="h-full min-h-[320px] w-full overflow-hidden rounded-lg border border-line bg-sand/40"
+        className="h-full min-h-[320px] w-full overflow-hidden border border-divider bg-surface/40"
       />
     </div>
   );

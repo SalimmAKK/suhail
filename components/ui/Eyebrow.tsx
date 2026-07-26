@@ -1,8 +1,8 @@
 import { cn } from "@/lib/cn";
 
-/* Ported from edu-hub, where the inline mark was a BandChip. Suhail has no
-   rubric bands, so the mark is the short gold rule the section eyebrows in
-   CLAUDE.md section 5 are written with ("— TONIGHT OVER ALULA"). */
+/* The card-kicker from DESIGN_SYSTEM_REPLACEMENT.md replaces the old gold
+   rule and mono treatment: tracked uppercase, accent coloured, no ornament.
+   Kept under the Eyebrow name because every section already composes it. */
 
 export function Eyebrow({
   children,
@@ -10,19 +10,18 @@ export function Eyebrow({
   className,
 }: {
   children: React.ReactNode;
-  /* light: for ink sections. text-muted on ink fails contrast at 3:1. */
+  /* light: for sections laid on the dark neutral end */
   tone?: "default" | "light";
   className?: string;
 }) {
   return (
     <p
       className={cn(
-        "flex items-center gap-2.5 font-mono text-label font-medium uppercase tracking-label",
-        tone === "light" ? "text-moon/75" : "text-muted",
+        "font-display text-[10px] font-bold uppercase tracking-[0.14em]",
+        tone === "light" ? "text-accent-300" : "text-accent-700",
         className,
       )}
     >
-      <span aria-hidden className="h-px w-5 shrink-0 bg-gold" />
       {children}
     </p>
   );

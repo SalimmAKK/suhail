@@ -1,24 +1,23 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { Shell } from "@/components/layout/Shell";
 import { cn, focusRing } from "@/lib/cn";
-import { useNavTone } from "@/lib/useNavTone";
 
-/* CLAUDE.md section 5, the glass nav, as a floating pill rather than a bar.
+/* DESIGN_SYSTEM_REPLACEMENT.md: a standard top bar with a 2px bottom
+   divider. Not fixed, not floating, not a glass capsule. It is sticky, which
+   the document leaves to the implementer, because a booking product wants
+   its one CTA reachable without scrolling back up.
 
-   It is fixed, not sticky. Sticky reserves its own space in the flow, which
-   means nothing ever passes underneath it and backdrop-blur has nothing to
-   blur: the glass reads as flat cream and the ink sections never reach the
-   band the tone observer watches. Fixed puts the page behind it, which is the
-   whole point of the surface.
+   Because it is a normal bar with a solid background, the tone-switching
+   glass logic and the clearance token both go: nothing passes behind it, so
+   there is nothing to re-tone against.
 
-   Because it is fixed, the first section of every page owes it clearance.
-   Sections pad their content down (--nav-clearance in globals.css) and run
-   their background to the top of the page, so the ink is behind the glass at
-   rest rather than starting below it. */
+   Operators is deliberately absent. CLAUDE.md section 2.4 rule 17 keeps that
+   route out of public navigation, and that is a scope decision about access
+   to booking data rather than a style one. */
 
 const LINKS = [
   { href: "/tonight", label: "Tonight" },
@@ -29,32 +28,21 @@ const LINKS = [
 
 export function Nav() {
   const pathname = usePathname();
-  const ref = useRef<HTMLElement>(null);
-  const tone = useNavTone(ref);
-  const onInk = tone === "ink";
 
   return (
-    <header
-      ref={ref}
-      className={cn(
-        "fixed inset-x-4 top-4 z-50 rounded-full border shadow-lift backdrop-blur-md md:inset-x-6 md:top-6",
-        "transition-colors duration-300 ease-move",
-        onInk ? "border-moon/15 bg-ink/50" : "border-line bg-cream/70",
-      )}
-    >
-      <div className="flex h-14 items-center justify-between gap-4 pl-6 pr-2 md:h-16 md:grid md:grid-cols-[1fr_auto_1fr] md:pl-8 md:pr-3">
+    <header className="sticky top-0 z-50 border-b-2 border-text bg-bg">
+      <Shell className="flex h-16 items-center justify-between gap-6">
         <Link
           href="/"
           className={cn(
-            "rounded-full font-display text-xl font-medium tracking-display transition-colors duration-200 ease-move md:justify-self-start",
+            "font-display text-xl font-extrabold tracking-display text-text",
             focusRing,
-            onInk ? "text-moon" : "text-ink",
           )}
         >
           Suhail
         </Link>
 
-        <nav aria-label="Primary" className="hidden items-center gap-7 md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-8 md:flex">
           {LINKS.map((link) => {
             const active = pathname === link.href;
             return (
@@ -63,15 +51,9 @@ export function Nav() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-full font-mono text-label uppercase tracking-label transition-colors duration-200 ease-move",
+                  "font-display text-label font-bold uppercase tracking-label transition-colors duration-150 ease-move",
                   focusRing,
-                  active
-                    ? onInk
-                      ? "text-gold"
-                      : "text-gold-deep"
-                    : onInk
-                      ? "text-moon/75 hover:text-moon"
-                      : "text-muted hover:text-ink",
+                  active ? "text-accent-700" : "text-neutral-700 hover:text-text",
                 )}
               >
                 {link.label}
@@ -80,12 +62,10 @@ export function Nav() {
           })}
         </nav>
 
-        {/* The only route into booking in v1 is choosing a night first, so the
-            CTA and the Tonight link share a destination. */}
-        <Button href="/tonight" variant="accent" size="sm" pill className="md:justify-self-end">
+        <Button href="/tonight" size="sm">
           Book a night
         </Button>
-      </div>
+      </Shell>
     </header>
   );
 }

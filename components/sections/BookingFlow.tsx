@@ -118,7 +118,7 @@ export function BookingFlow({
       <form onSubmit={onSubmit} noValidate>
         <Group step="01" title="Which night">
           {experience.dates.length === 0 ? (
-            <p className="text-muted">
+            <p className="text-neutral-700">
               This experience has no nights open in the next sixty days.
             </p>
           ) : (
@@ -191,11 +191,11 @@ export function BookingFlow({
           {/* CLAUDE.md rule 15: the payment step is labelled demo mode and
               takes nothing. No card fields, because a form that looks like it
               takes a card is a lie whatever the label above it says. */}
-          <div className="rounded-lg border border-attention/50 bg-sand/30 p-5">
-            <p className="font-mono text-label uppercase tracking-label text-gold-deep">
+          <div className="border border-accent-2/50 bg-surface/30 p-5">
+            <p className="font-display text-label uppercase tracking-label text-accent-700">
               Demo mode
             </p>
-            <p className="mt-3 max-w-[52ch] text-muted">
+            <p className="mt-3 max-w-[52ch] text-neutral-700">
               No payment is taken and no card details are collected. Reserving writes a real
               booking to the database with a real reference, which is what the confirmation
               screen reads back. Mada and card payment are out of scope for this build.
@@ -206,9 +206,9 @@ export function BookingFlow({
         {formError ? (
           <p
             role="alert"
-            className="mt-8 flex items-start gap-2.5 rounded-md border border-danger/40 bg-paper p-4 text-[15px] text-ink"
+            className="mt-8 flex items-start gap-2.5 border border-accent-2-700/40 bg-neutral-100 p-4 text-[15px] text-text"
           >
-            <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-danger" />
+            <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 bg-accent-2-700" />
             <span>
               The booking was not saved. {formError}
             </span>
@@ -216,17 +216,17 @@ export function BookingFlow({
         ) : null}
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
-          <Button type="submit" variant="accent" pill disabled={submitting || !date}>
+          <Button type="submit" variant="primary" disabled={submitting || !date}>
             {submitting ? "Reserving..." : "Reserve this night"}
           </Button>
-          <p className="font-mono text-label uppercase tracking-label text-muted">
+          <p className="font-display text-label uppercase tracking-label text-neutral-700">
             No payment taken
           </p>
         </div>
       </form>
 
-      <aside className="lg:sticky lg:top-[var(--nav-clearance)] lg:self-start">
-        <div className="rounded-lg border border-line bg-paper p-6">
+      <aside className="lg:sticky lg:top-[var(--section-top)] lg:self-start">
+        <div className="border border-divider bg-neutral-100 p-6">
           <h2 className="text-2xl">{experience.title}</h2>
           <CoordinateTag
             className="mt-3"
@@ -239,7 +239,7 @@ export function BookingFlow({
             ]}
           />
 
-          <dl className="mt-6 space-y-2 border-t border-line pt-5 text-[15px]">
+          <dl className="mt-6 space-y-2 border-t border-divider pt-5 text-[15px]">
             <Row label="Per guest" value={`SAR ${experience.priceSar}`} />
             <Row label="Guests" value={String(guests)} />
             <Row label="Total" value={`SAR ${total}`} strong />
@@ -248,14 +248,14 @@ export function BookingFlow({
           {/* Brief item 4. True of this build and checkable: the seeded price
               is the operator's own published price, and nothing is added on
               top of it. Stated as the fact it is rather than as a slogan. */}
-          <p className="mt-4 border-t border-line pt-4 font-mono text-label uppercase leading-relaxed tracking-label text-gold-deep">
+          <p className="mt-4 border-t border-divider pt-4 font-display text-label uppercase leading-relaxed tracking-label text-accent-700">
             Operator&rsquo;s published price. No booking fee added.
           </p>
 
           {date ? <SkyAtSlot dateKey={date} className="mt-6" /> : null}
 
           {experience.requiresDark && nightQuality === "bright" ? (
-            <p className="mt-4 text-[15px] text-muted">
+            <p className="mt-4 text-[15px] text-neutral-700">
               This one is built around a dark sky, and the night you have chosen has a bright
               moon. It still runs.
             </p>
@@ -276,9 +276,9 @@ function Group({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border-t border-line py-8 first:border-t-0 first:pt-0">
+    <section className="border-t border-divider py-8 first:border-t-0 first:pt-0">
       <div className="mb-5 flex items-baseline gap-3">
-        <span className="font-mono text-label tracking-label text-gold-deep">{step}</span>
+        <span className="font-display text-label tracking-label text-accent-700">{step}</span>
         <h2 className="text-2xl">{title}</h2>
       </div>
       {children}
@@ -289,8 +289,8 @@ function Group({
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <dt className="text-muted">{label}</dt>
-      <dd className={cn(strong ? "text-lg text-ink" : "text-ink")}>{value}</dd>
+      <dt className="text-neutral-700">{label}</dt>
+      <dd className={cn(strong ? "text-lg text-text" : "text-text")}>{value}</dd>
     </div>
   );
 }

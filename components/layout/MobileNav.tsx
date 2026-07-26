@@ -6,13 +6,10 @@ import { Map, Star, Ticket } from "lucide-react";
 import { cn, focusRing } from "@/lib/cn";
 
 /* CLAUDE.md section 4: exactly three icons, each a distinct destination.
-   Sky is the star chart and the night picker, Sites is the map, Trips is
-   what you have booked. Section 2.2 rule 7 is satisfied because removing any
-   one of these loses a destination, not decoration.
+   That requirement is about routes, not styling, so it survives the re-skin.
 
-   Same floating pill as the desktop nav, inset from the bottom and the sides
-   rather than docked full width. It clears the home indicator on iOS by
-   adding the safe area inset to its own offset. */
+   Restyled to the new system: a solid bar flush to the bottom edge with a
+   2px top divider, square, no glass and no float. */
 
 const ITEMS = [
   { href: "/tonight", label: "Sky", Icon: Star },
@@ -26,7 +23,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 rounded-full border border-line bg-cream/70 shadow-lift backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t-2 border-text bg-bg pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="flex items-stretch">
         {ITEMS.map(({ href, label, Icon }) => {
@@ -37,13 +34,15 @@ export function MobileNav() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-full py-2.5 transition-colors duration-200 ease-move",
+                  "flex flex-col items-center gap-1 py-3 transition-colors duration-150 ease-move",
                   focusRing,
-                  active ? "text-gold-deep" : "text-muted",
+                  active ? "text-accent-700" : "text-neutral-700",
                 )}
               >
-                <Icon aria-hidden size={20} strokeWidth={1.5} />
-                <span className="font-mono text-label uppercase tracking-label">{label}</span>
+                <Icon aria-hidden size={20} strokeWidth={2} />
+                <span className="font-display text-[11px] font-bold uppercase tracking-label">
+                  {label}
+                </span>
               </Link>
             </li>
           );

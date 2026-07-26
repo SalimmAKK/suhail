@@ -167,6 +167,17 @@ Rule 2.2/7 applies — each is a distinct destination, not decoration.
 
 ## 5. Design language
 
+> **Superseded by `DESIGN_SYSTEM_REPLACEMENT.md`.** The palette, typography,
+> shape and component structure below describe the system built through
+> stage 7 and the hero revision. They were replaced wholesale by the
+> Modernist re-skin: Desert Nocturne colour values mapped onto `--color-*`
+> role names, Archivo for every typeface including the former mono labels,
+> a fixed pixel type scale, zero border radius, and a solid top bar in place
+> of the glass pill. Read that document, not this section, before styling
+> anything. What survives here: §2's anti-slop rules, §4's routes, §8's
+> signature elements, §9's data model, and the accessibility decision that
+> the gold button carries ink rather than cream.
+
 ### The idea
 **The sky is the design language.** This product exists because the sky over
 AlUla is exceptional and no one is treating it as bookable inventory. Colour,
@@ -273,6 +284,11 @@ tappable.
 ---
 
 ## 6. Motion
+
+> Partially superseded by `DESIGN_SYSTEM_REPLACEMENT.md`. The timings and the
+> reduced-motion contract below still hold and are still verified. The card
+> hover rule sweep is gone, replaced by an elevation change, and the ambient
+> starfield now sits only on the dark sections that remain.
 
 Clean, with a little flare, more than edu-hub allowed. This is a product
 about the sky at night — the site should have some of that atmosphere.

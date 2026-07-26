@@ -1,5 +1,4 @@
 import { Shell } from "@/components/layout/Shell";
-import { AmbientStars } from "@/components/ui/AmbientStars";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LineReveal } from "@/components/ui/LineReveal";
 import { Reveal } from "@/components/ui/Reveal";
@@ -36,8 +35,7 @@ export async function NightPickerSection({
 
   return (
     <section
-      data-nav-tone="ink"
-      className="relative overflow-hidden bg-ink pb-24 pt-[var(--nav-clearance)]"
+      className="relative overflow-hidden border-t-2 border-text bg-surface pb-24 pt-[var(--section-top)]"
     >
       <Shell className="relative">
         {/* The star chart opens this section rather than the hero. It was
@@ -52,21 +50,21 @@ export async function NightPickerSection({
               bound on the section would have to guess at where the chart
               lands once the layout stacks. */}
           <div className="relative max-w-[46ch]">
-            <AmbientStars tone="ink" className="-inset-8" />
+            
             <Reveal>
-              <Eyebrow tone="light" className="mb-7">
+              <Eyebrow className="mb-7">
                 {intro.eyebrow}
               </Eyebrow>
             </Reveal>
-            <LineReveal as={headingAs} lines={intro.headingLines} className="text-pull text-moon" />
+            <LineReveal as={headingAs} lines={intro.headingLines} className="text-h2" />
             <Reveal delay={90}>
-              <p className="mt-6 text-moon/70">{intro.sub}</p>
+              <p className="mt-6 text-neutral-700">{intro.sub}</p>
             </Reveal>
           </div>
 
           <Reveal delay={120}>
-            <StarChart date={new Date()} tone="ink" />
-            <p className="mt-3 text-center font-mono text-label uppercase tracking-label text-moon/45">
+            <StarChart date={new Date()} tone="cream" />
+            <p className="mt-3 text-center font-display text-label font-bold uppercase tracking-label text-neutral-600">
               Tonight at 21:00 over AlUla
             </p>
           </Reveal>

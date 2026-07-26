@@ -38,16 +38,18 @@ const COLUMNS = 6;
 
 /* the ramp, per section 5. sky-5 is the darkest night and the best one. */
 const FILL: Record<SkyQuality, string> = {
-  prime: "bg-sky-5",
-  ok: "bg-sky-3",
-  bright: "bg-sky-1",
+  prime: "bg-neutral-900",
+  ok: "bg-neutral-500",
+  bright: "bg-neutral-200",
 };
 
 /* sky-5 is pale enough that ink is the only readable ink on it */
 const CELL_TEXT: Record<SkyQuality, string> = {
-  prime: "text-ink",
-  ok: "text-moon",
-  bright: "text-moon/85",
+  /* follows the fill: a prime night is the dark end of the ramp and needs
+     light type on it, the other two are light enough to take ink */
+  prime: "text-neutral-100",
+  ok: "text-text",
+  bright: "text-text",
 };
 
 const MONTH = new Intl.DateTimeFormat("en-GB", { month: "short" });
@@ -159,11 +161,11 @@ export function NightPicker({
                 onFocus={() => setFocusIndex(i)}
                 onClick={() => select(key)}
                 className={cn(
-                  "relative aspect-square overflow-hidden rounded-md border transition-colors duration-200 ease-move",
+                  "relative aspect-square overflow-hidden border transition-colors duration-200 ease-move",
                   focusRing,
                   isSelected
-                    ? "border-gold ring-2 ring-gold"
-                    : "border-moon/10 hover:border-moon/40",
+                    ? "border-accent-700 ring-2 ring-accent-700"
+                    : "border-divider hover:border-text",
                 )}
               >
                 {/* Motion 3: the quality colour fills from the bottom,
@@ -176,7 +178,7 @@ export function NightPicker({
                 />
                 <span
                   className={cn(
-                    "relative flex h-full w-full flex-col items-center justify-center gap-0.5 font-mono text-[13px] leading-none",
+                    "relative flex h-full w-full flex-col items-center justify-center gap-0.5 font-display text-[13px] leading-none",
                     CELL_TEXT[quality],
                   )}
                 >
@@ -193,9 +195,9 @@ export function NightPicker({
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-          <SkyPip quality="prime" tone="light" />
-          <SkyPip quality="ok" tone="light" />
-          <SkyPip quality="bright" tone="light" />
+          <SkyPip quality="prime" />
+          <SkyPip quality="ok" />
+          <SkyPip quality="bright" />
         </div>
       </div>
 
@@ -208,7 +210,7 @@ export function NightPicker({
           so a static panel scrolls away from the cells that drive it. */}
       <div
         ref={panelRef}
-        className="scroll-mt-[var(--nav-clearance)] lg:sticky lg:top-[var(--nav-clearance)] lg:self-start"
+        className="scroll-mt-[var(--section-top)] lg:sticky lg:top-[var(--section-top)] lg:self-start"
       >
         <div key={selected ?? "empty"} className={interacted ? "panel-enter" : undefined}>
           {selected ? (
@@ -232,8 +234,8 @@ export function NightPicker({
 function EmptyPanel() {
   return (
     <div className="flex h-full flex-col justify-center border-t border-moon/15 pt-8 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-0">
-      <h3 className="text-3xl text-moon">No nights to show.</h3>
-      <p className="mt-4 max-w-[40ch] text-moon/70">
+      <h3 className="text-3xl text-text">No nights to show.</h3>
+      <p className="mt-4 max-w-[40ch] text-neutral-700">
         The calendar window came back empty, which is a fault rather than a quiet night.
       </p>
     </div>
@@ -284,11 +286,10 @@ function NightDetail({
   return (
     <div className="border-t border-moon/15 pt-8 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-0">
       <div className="flex items-start gap-5">
-        <MoonPhase phase={phase} waxing={isWaxing(date)} size={52} tone="light" />
+        <MoonPhase phase={phase} waxing={isWaxing(date)} size={52} />
         <div>
-          <h3 className="text-3xl text-moon">{FULL_DATE.format(date)}</h3>
+          <h3 className="text-3xl text-text">{FULL_DATE.format(date)}</h3>
           <CoordinateTag
-            tone="light"
             className="mt-3"
             items={[
               `${moonPhaseLabel(phase).toUpperCase()} MOON`,
@@ -299,15 +300,15 @@ function NightDetail({
       </div>
 
       <div className="mt-6">
-        <SkyPip quality={quality} tone="light" />
+        <SkyPip quality={quality} />
       </div>
 
       <Group title="Overhead at 21:00">
-        <p className="font-mono text-label uppercase leading-relaxed tracking-label text-moon/70">
+        <p className="font-display text-label uppercase leading-relaxed tracking-label text-neutral-700">
           {constellations.map((c) => c.name).join("  ·  ")}
         </p>
         {constellations.find((c) => c.note) ? (
-          <p className="mt-3 max-w-[44ch] text-moon/70">
+          <p className="mt-3 max-w-[44ch] text-neutral-700">
             {constellations.find((c) => c.note)!.note}
           </p>
         ) : null}
@@ -318,8 +319,8 @@ function NightDetail({
           <ul className="space-y-2">
             {suited.map(({ site, matches }) => (
               <li key={site.slug} className="flex flex-wrap items-baseline gap-x-3">
-                <span className="text-moon">{site.name}</span>
-                <span className="font-mono text-label uppercase tracking-label text-moon/55">
+                <span className="text-text">{site.name}</span>
+                <span className="font-display text-label uppercase tracking-label text-neutral-600">
                   {matches.join(" · ").replace(/-/g, " ")}
                 </span>
               </li>
@@ -330,15 +331,15 @@ function NightDetail({
 
       <Group title={running.length > 0 ? "Running that night" : "Availability"}>
         {error ? (
-          <p className="max-w-[44ch] text-moon/70">
+          <p className="max-w-[44ch] text-neutral-700">
             The catalogue could not be loaded, so we cannot say what is running. This is a
             real error, not an empty night.
-            <span className="mt-2 block font-mono text-label uppercase tracking-label text-attention">
+            <span className="mt-2 block font-display text-label uppercase tracking-label text-accent-2">
               {error}
             </span>
           </p>
         ) : running.length === 0 ? (
-          <p className="max-w-[44ch] text-moon/70">
+          <p className="max-w-[44ch] text-neutral-700">
             Nothing is scheduled on this night yet.
           </p>
         ) : (
@@ -361,7 +362,7 @@ function NightDetail({
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-8 border-t border-moon/12 pt-6">
-      <h4 className="mb-3 font-mono text-label uppercase tracking-label text-gold">{title}</h4>
+      <h4 className="mb-3 font-display text-label uppercase tracking-label text-accent-700">{title}</h4>
       {children}
     </section>
   );
@@ -384,24 +385,24 @@ function ExperienceRow({
   return (
     <li>
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <p className="text-moon">{experience.title}</p>
-        <p className="font-mono text-label uppercase tracking-label text-moon/70">
+        <p className="text-text">{experience.title}</p>
+        <p className="font-display text-label uppercase tracking-label text-neutral-700">
           SAR {experience.priceSar}
         </p>
       </div>
-      <p className="mt-1 font-mono text-label uppercase tracking-label text-moon/50">
+      <p className="mt-1 font-display text-label uppercase tracking-label text-neutral-600">
         {experience.operatorName} · {experience.site.name}
         {experience.durationMin ? ` · ${Math.round(experience.durationMin / 60)}H` : ""}
       </p>
       {compromised ? (
-        <p className="mt-2 max-w-[42ch] text-[15px] text-moon/70">
+        <p className="mt-2 max-w-[42ch] text-[15px] text-neutral-700">
           Built for a dark sky. The moon will be up on this night, so the faint objects will
           be washed out.
         </p>
       ) : null}
       <Button
         href={`/book/${experience.id}?date=${dateKey}`}
-        variant="light"
+        variant="secondary"
         size="sm"
         className="mt-3"
       >
