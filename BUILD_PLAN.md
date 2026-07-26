@@ -140,7 +140,7 @@ Supabase schema, seed data, typed data helpers. No UI yet.
 3. `data/sites.ts` — the four dark-sky sites, hardcoded, with real lat/long
    for Manara, AlGharameel, Sharaan, Wadi Nakhlah.
 4. `data/stars.ts` — curated dataset. 8 to 12 constellations visible from
-   AlUla (~26.61°N) across the four seasons. For each: name, English name,
+   AlUla (~26.85°N) across the four seasons. For each: name, English name,
    season(s), bounding box in RA/Dec, and array of star points
    (`{ra, dec, mag, name?}`) and connection lines.
 5. `data/experiences.ts` — 6 seed experiences across the four sites and
@@ -198,8 +198,8 @@ component visually, so it happens early to leave room for iteration.
    secondary CTA (`See the sites`). Right column: `StarChart` for tonight's
    date at AlUla lat, bleeding past the right grid edge on `lg+`, softly
    cropped by the viewport.
-4. Below hero, a `CoordinateTag` strip: `26.61°N · ALULA, KSA · BORTLE 2 ·
-   TONIGHT'S MOON: 34%` (dynamic).
+4. Below hero, a `CoordinateTag` strip: `26.85°N · ALULA, KSA · ELEVATION
+   692M · BORTLE 2 · TONIGHT'S MOON: 34%` (dynamic).
 5. Wire into `app/page.tsx` (server component).
 
 **Verify:**
@@ -226,7 +226,7 @@ Suhail's interactive centrepiece. Do not compress this.
    bottom via `scaleY` transform, staggered by row (motion 3, 350ms).
 3. On cell click, populate detail panel:
    - Selected date, moon phase graphic, phase label
-   - `visibleConstellations(date, 26.61)` as a mono list
+   - `visibleConstellations(date, 26.85)` as a mono list
    - Sites best suited (filter `sites.best_for` against tonight's targets)
    - Every experience active on that date, sorted by price, each with a
      `Book this night` link to `/book/[experienceId]?date=YYYY-MM-DD`

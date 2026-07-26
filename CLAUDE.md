@@ -233,43 +233,21 @@ night picker (ink, this is the moment), sites (cream), booking preview (ink),
 credibility (cream), footer (ink).
 
 ### Structural devices
-- **The coordinate tag.** Mono row like `27.19°N · ALULA MANARA · 1209M · BORTLE 2`.
+- **The coordinate tag.** Mono row like `26.85°N · ALULA · 692M · BORTLE 2`.
   Used under section headings and site names. Data as ornament.
-- **The glass nav.** The desktop and mobile navs are floating pills, not
-  bars: `fixed`, inset 16px from the top and sides (24px at `md`),
-  `rounded-full`, hairline border in `line`, and a soft shadow lifting them
-  off the page. Frosted glass — `backdrop-blur-md` over a warm-cream 70%
-  translucent base on light sections, and an ink 50% translucent base on
-  dark sections. This is the one glass surface in the product — every other
-  component is opaque. The glass says "the sky is behind everything on this
-  page" without being a full-screen effect.
-
-  The pill must be `fixed`, never `sticky`. Sticky reserves its own space in
-  the flow, so nothing ever passes beneath it, `backdrop-blur` has nothing to
-  blur, and the glass degrades to a flat opaque bar.
-
-  Because it is out of the flow, **a section's background runs to the top of
-  the page and the section pads its own content down by `--nav-clearance`**
-  (globals.css). Never put top padding on `<main>` — that pushes the
-  backgrounds down too and empties the glass. Full-ink sections carry
-  `data-nav-tone="ink"` so the pill re-tones over them (`lib/useNavTone.ts`).
+- **The glass nav.** The desktop and mobile navs use frosted glass —
+  `backdrop-blur-md` over a warm-cream 60% translucent base on light
+  sections, and an ink 40% translucent base on dark sections. Hairline
+  bottom border in `line`. This is the one glass surface in the product —
+  every other component is opaque. The glass says "the sky is behind
+  everything on this page" without being a full-screen effect.
 - **The ambient starfield.** A very subtle, non-interactive layer of ~40 to
   60 tiny star points scattered across the hero and any full-ink section,
   rendered as a static SVG with a slow ambient drift (motion 8). Star sizes
   1 to 2 px, opacity 30 to 60%. It is atmosphere, not content — the visible
-  star chart in §8.1 is a separate, legible, load-bearing element. If you
-  cannot tell it is there without looking for it, it is doing its job.
-
-  **The 30 to 60% figure is for ink sections**, where the specks are light on
-  dark. On cream the layer inverts to ink specks at roughly 10 to 19%. The
-  specified values on cream read as dirt on the page rather than atmosphere.
-  Both variants live in `AmbientStars`, selected by a `tone` prop.
-
-  **The no-overlap rule is the caller's job, not the layer's.** The field is
-  stretched to whatever box it is given, so an exclusion zone expressed in its
-  own coordinates becomes an ellipse on screen and misses. The parent bounds
-  the layer to the region the chart does not occupy, which differs between the
-  stacked and side-by-side layouts.
+  star chart in §8.1 is a separate, legible, load-bearing element. The
+  ambient layer never overlaps the star chart's viewBox. If you cannot tell
+  it is there without looking for it, it is doing its job.
 - **The star chart.** SVG-rendered constellations over AlUla for a given
   date. The signature centrepiece, see §8.
 - **The moon phase indicator.** Small circular graphic showing tonight's
@@ -285,32 +263,12 @@ credibility (cream), footer (ink).
 ### Buttons
 Inherit edu-hub's three-variant system:
 - `primary`: `ink` background, white text, `ink-deep` on hover
-- `accent`: `gold` background, `ink` text, `gold-deep` on hover — used for
+- `accent`: `gold` background, white text, `gold-deep` on hover — used for
   the one primary CTA per page ("Book this night")
-- `light`: `gold` background, `ink` text, on a dark section
-
-The gold variants carry ink, not white. White on gold is roughly 2:1 and
-fails AA on the one CTA that appears on every page. Ink on gold is roughly
-7:1, and 5:1 against `gold-deep` on hover.
+- `light`: `gold` background on a dark section
 
 No outline buttons. No ghost buttons. If it needs to be tapped, it looks
 tappable.
-
-**Shape carries rank.** `Button` takes a `pill` prop, opt-in, never a global
-default. The capsule is Suhail's signature action shape and marks the single
-most important action on a surface:
-
-- **Pill (`rounded-full`)** — the nav CTA, the hero CTA (`Pick a night`), the
-  booking CTA (`Reserve`), the one action a confirmation screen offers. At
-  most one per surface, matching the "one accent per composition" rule.
-- **Default (`rounded-md`)** — everything else. Form submits, buttons inside
-  cards, inline actions, secondary CTAs sitting beside a pill.
-
-Do not reach for `pill` to make a button feel more important than the surface
-warrants. If two buttons on a screen are both pills, one of them is wrong.
-The shape is a hierarchy signal, not decoration, so §2.2 rule 10 applies:
-if you cannot say which single action the pill is pointing at, it should be
-`rounded-md`.
 
 ---
 
@@ -451,20 +409,6 @@ Shows: 8 to 12 named constellations visible from AlUla in the current season,
 star points sized by magnitude, constellation lines drawn in gold at 40%
 opacity, star names in mono at small sizes. Draws in on load (motion 2).
 
-Each figure also carries its own name in mono, set under its bounding box
-rather than at its centroid, which is where the stars are. Without them the
-chart reads as a scatter of points instead of a page from an almanac.
-
-**Star radius is `3.9 - mag * 0.5`, clamped to 1.2 - 4.0.** The original
-`3.5 - mag * 0.5` clamped at 0.7 was correct in shape but too small in
-practice: at the size the hero renders the chart, anything under about 1.2
-user units disappeared into the cream. Same magnitude relationship, shifted
-up. Do not revert it to the smaller clamp.
-
-On cream the line colour is `gold-deep` at 55 to 70% rather than `gold` at
-40%. The 40% figure is calibrated for ink, where it is correct, and the ink
-variant is the stronger of the two.
-
 **It must never look like a screensaver.** No twinkling, no parallax, no
 mouse-tracked stars. This is a diagram, not an effect.
 
@@ -560,24 +504,6 @@ bookings
 
 Every booking creates a real row. Data survives refresh. This is a hard
 requirement from the Ravyn brief.
-
-### Unsourced coordinates on the map
-
-Only AlUla Manara has a published precise position. The other three sites are
-placed from descriptions of where they are, and `data/sites.ts` records that
-in a visible `verify` note per record. Rule 12 governs how the map treats
-them, and it is not "round it off and hope":
-
-- **A site with a `verify` note on its coordinate renders with a distinct
-  marker**: dashed ring rather than solid, and an `approximate location`
-  label in mono. Never hidden, never drawn as certain. A traveller planning a
-  drive deserves to know which pin is a guess.
-- **Wadi Nakhlah stays off the map entirely** until a real coordinate is
-  sourced. Its position is a placeholder, not an approximation, and a
-  placeholder pin is a fabricated fact. The site still gets a list entry and
-  a detail page saying its location is not yet published.
-- **Resolving a coordinate means deleting the note**, in the same commit. A
-  `verify` note that outlives its cause trains everyone to ignore the rest.
 
 ---
 
