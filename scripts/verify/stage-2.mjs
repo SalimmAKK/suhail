@@ -42,10 +42,14 @@ await withServer(async (BASE) => {
       overlay.n > 0,
       `overlay on screen ${overlay.from}ms..${overlay.to}ms (${overlay.n} samples)`,
     );
+    /* The two layers overlap rather than hand over. Handing over assumed the
+       overlay paints in the same frame the backdrop is released, which stopped
+       being true once the landing page got heavier. Both are the same ink, so
+       the backdrop simply stays until the intro is done. */
     record(
-      "1b. pre-paint backdrop covers until the overlay exists, with no gap",
-      backdrop.n > 0 && backdrop.to < overlay.from && overlay.from - backdrop.to < 40,
-      `backdrop ${backdrop.from}ms..${backdrop.to}ms, overlay takes over at ${overlay.from}ms`,
+      "1b. the backdrop covers from before first paint until the overlay is up",
+      backdrop.n > 0 && backdrop.from < overlay.from && backdrop.to >= overlay.from,
+      `backdrop ${backdrop.from}ms..${backdrop.to}ms, overlay ${overlay.from}ms..${overlay.to}ms: covered throughout`,
     );
     record(
       "1c. sequence stays close to the 1400ms budget",

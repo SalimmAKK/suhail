@@ -53,7 +53,7 @@ export default async function SiteDetail({ params }: { params: Promise<{ slug: s
   return (
     <>
       <section className="relative overflow-hidden bg-neutral-900 pb-20 pt-[var(--section-top)]">
-        <AmbientStars tone="ink" className="lg:right-[46%]" />
+        <AmbientStars tone="ink" className="lg:right-[52%]" />
         <Shell className="relative">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <div>

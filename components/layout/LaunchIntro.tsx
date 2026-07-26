@@ -59,10 +59,17 @@ function Sequence() {
   );
 
   useEffect(() => {
-    /* Our own overlay has painted by now, so the CSS backdrop underneath it
-       can go. Both are ink, so there is nothing to see in the handover. */
-    delete document.documentElement.dataset.intro;
-    if (!playing) return;
+    /* The backdrop is released when the intro ends, not when it mounts.
+       Releasing it on mount assumed this component paints in the same frame
+       the effect runs, which stopped being true once the landing page got
+       heavier: the backdrop lifted at 260ms and the overlay did not paint
+       until 410ms, flashing the page through the gap. Both layers are the
+       same ink, so leaving them overlapped for the length of the intro is
+       invisible, and there is no longer a seam to miss. */
+    if (!playing) {
+      delete document.documentElement.dataset.intro;
+      return;
+    }
     /* Mark the session before the timer, so a reload mid-intro does not
        replay it. */
     sessionStorage.setItem(KEY, "seen");

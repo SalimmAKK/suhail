@@ -42,11 +42,13 @@ export type CatalogExperience = {
 
 export type Catalog = {
   experiences: CatalogExperience[];
+  /** how many sites the catalogue actually holds, for the live stats line */
+  siteCount: number;
   /** null when everything loaded. a real message when it did not. */
   error: string | null;
 };
 
-const EMPTY: Catalog = { experiences: [], error: null };
+const EMPTY: Catalog = { experiences: [], siteCount: 0, error: null };
 
 /**
  * The catalogue for a window of nights.
@@ -119,5 +121,5 @@ export async function getCatalog(from: string, to: string): Promise<Catalog> {
   /* cheapest first, as the night picker panel presents them */
   list.sort((a, b) => (a.priceSar ?? Infinity) - (b.priceSar ?? Infinity));
 
-  return { experiences: list, error: null };
+  return { experiences: list, siteCount: siteById.size, error: null };
 }

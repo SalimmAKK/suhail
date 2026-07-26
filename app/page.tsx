@@ -1,24 +1,45 @@
-import { Hero } from "@/components/sections/Hero";
-import { NightPickerSection } from "@/components/sections/NightPickerSection";
-import { HERO, NIGHT_PICKER } from "@/data/home";
+import Link from "next/link";
+import { Shell } from "@/components/layout/Shell";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { ExperienceBoard } from "@/components/sections/ExperienceBoard";
+import { HOME_HEADER } from "@/data/home";
+import { getCatalog } from "@/lib/catalog";
+import { dateKey, upcomingNights } from "@/lib/astro";
 
-/* Stage 4 and 5: the hero, then the night picker. The sites and the
-   credibility strip follow in stages 6 and 9.
-
-   Server components throughout. The chart is derived from the date and the
-   catalogue from Supabase, so both are settled before any JavaScript runs,
-   which is what keeps layout shift at zero.
-
-   force-dynamic because the chart, the moon and the sixty nights are all
-   relative to today. A statically prerendered page would freeze whichever
-   night the build happened to run on and quietly show the wrong sky. */
+/* PAGE_COMPOSITION_BRIEF: the homepage opens on live inventory.
+ *
+ * A compact header line, a working filter row, the real bookable experiences
+ * as cards, and the map. No hero section, no introduction, and no second
+ * copy of the night picker: the star chart and the sixty-night picker are
+ * the whole of /tonight already, so they are linked rather than duplicated.
+ *
+ * Counts come from the catalogue at render time. There are three seeded
+ * experiences and the page says three.
+ */
 export const dynamic = "force-dynamic";
 
-export default function Home() {
+export default async function Home() {
+  const nights = upcomingNights(60).map(dateKey);
+  const { experiences, error } = await getCatalog(nights[0], nights[nights.length - 1]);
+
   return (
-    <>
-      <Hero content={HERO} date={new Date()} />
-      <NightPickerSection intro={NIGHT_PICKER} />
-    </>
+    <Shell className="pb-24 pt-10">
+      <div className="max-w-[62ch]">
+        <Eyebrow className="mb-4">{HOME_HEADER.eyebrow}</Eyebrow>
+        <h1 className="text-h1">{HOME_HEADER.headline}</h1>
+        <p className="mt-4 text-neutral-700">
+          {HOME_HEADER.sub}{" "}
+          <Link
+            href="/tonight"
+            className="text-accent-700 underline underline-offset-4 hover:text-text"
+          >
+            See the sky for any of the next sixty nights
+          </Link>
+          .
+        </p>
+      </div>
+
+      <ExperienceBoard experiences={experiences} error={error} />
+    </Shell>
   );
 }
