@@ -5,6 +5,11 @@ import { ARTIFACTS, reporter, resetArtifacts, withServer } from "./lib/harness.m
  *
  *   npm run verify:stage-4
  *
+ * Revised by HERO_REDESIGN_BRIEF: the hero is now a photo split and the chart
+ * opens the night picker section instead. The chart checks are unchanged, the
+ * hero checks now cover the image, and both fonts are checked for actually
+ * loading rather than silently falling back.
+ *
  * The chart is the signature centrepiece and the highest visual risk in the
  * plan, so this checks the things that would quietly ruin it: stars landing
  * outside the horizon disc, NaN coordinates collapsing the figure, the chart
@@ -291,6 +296,77 @@ await withServer(async (BASE) => {
       errors.length ? errors.slice(0, 3).join(" | ") : "clean",
     );
 
+    /* the hero is a photo split now: the chart must not be in it */
+    const composition = await page.evaluate(() => {
+      const hero = document.querySelector("main section");
+      const chart = document.querySelector('svg[aria-label^="Star chart"]');
+      const figure = hero.querySelector("figure");
+      const img = figure?.querySelector("img");
+      const box = img?.getBoundingClientRect();
+      return {
+        chartInHero: !!chart && hero.contains(chart),
+        chartOnPage: !!chart,
+        chartInInkSection: !!chart && !!chart.closest('[data-nav-tone="ink"]'),
+        hasImage: !!img,
+        imageLoaded: img?.complete && img.naturalWidth > 0,
+        imageWidth: box ? Math.round(box.width) : 0,
+        imageHeight: box ? Math.round(box.height) : 0,
+        caption: figure?.querySelector("figcaption")?.textContent?.trim() ?? null,
+        alt: img?.getAttribute("alt") ?? null,
+      };
+    });
+
+    record(
+      "6c. the hero is a photo split, with the chart moved out of it",
+      composition.hasImage && !composition.chartInHero,
+      `hero image present=${composition.hasImage}, chart inside hero=${composition.chartInHero}`,
+    );
+    record(
+      "6d. the chart still opens the night picker section",
+      composition.chartOnPage && composition.chartInInkSection,
+      `chart on the landing page=${composition.chartOnPage}, inside the ink section=${composition.chartInInkSection}`,
+    );
+    record(
+      "6e. the hero image actually loads",
+      composition.imageLoaded && composition.imageWidth > 200,
+      `${composition.imageWidth}x${composition.imageHeight}, loaded=${composition.imageLoaded}`,
+    );
+    record(
+      "6f. the placeholder is labelled as one, on the image and in its alt",
+      /placeholder/i.test(composition.caption ?? "") && /not alula/i.test(composition.alt ?? ""),
+      `caption "${composition.caption}", alt "${composition.alt}"`,
+    );
+
+    const fonts = await page.evaluate(async () => {
+      await document.fonts.ready;
+      const loaded = [...document.fonts].map((f) => f.family);
+      const styles = (el) => getComputedStyle(el).fontFamily;
+      /* the coordinate tags are paragraphs too, and they are meant to be
+         mono: pick a paragraph that is not one */
+      const prose = [...document.querySelectorAll("main p")].find(
+        (el) => !el.className.includes("font-mono"),
+      );
+      return {
+        families: [...new Set(loaded)],
+        heading: styles(document.querySelector("main h1")),
+        body: styles(prose),
+        mono: styles(document.querySelector("main .font-mono")),
+      };
+    });
+    record(
+      "6g. Newsreader and Public Sans are really loaded, not fallbacks",
+      fonts.families.some((f) => /Newsreader/i.test(f)) &&
+        fonts.families.some((f) => /Public Sans/i.test(f)),
+      `loaded: ${fonts.families.join(", ")}`,
+    );
+    record(
+      "6h. headings use the serif, body uses the sans, mono is untouched",
+      /Newsreader/i.test(fonts.heading) &&
+        /Public Sans/i.test(fonts.body) &&
+        /Plex Mono/i.test(fonts.mono),
+      `h1=${fonts.heading.split(",")[0]}, p=${fonts.body.split(",")[0]}, mono=${fonts.mono.split(",")[0]}`,
+    );
+
     const cta = page.getByRole("link", { name: "Pick a night" }).first();
     record(
       "6b. the hero CTA is a pill and reaches the night picker",
@@ -321,10 +397,20 @@ await withServer(async (BASE) => {
     );
 
     await page.goto(BASE, { waitUntil: "load" });
+    /* a photo split has real responsive risk the old hero did not */
+    for (const [name, width, height] of [
+      ["mobile", 390, 844],
+      ["tablet", 834, 1112],
+    ]) {
+      await page.setViewportSize({ width, height });
+      await page.reload({ waitUntil: "load" });
+      await page.waitForTimeout(2200);
+      await page.screenshot({ path: `${ARTIFACTS}/hero-${name}.png` });
+    }
+
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload({ waitUntil: "load" });
     await page.waitForTimeout(2000);
-    await page.screenshot({ path: `${ARTIFACTS}/hero-mobile.png` });
 
     const mobileChart = await page
       .locator('svg[aria-label^="Star chart"]')

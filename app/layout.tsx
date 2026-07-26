@@ -1,21 +1,28 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Newsreader, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import { LaunchIntro } from "@/components/layout/LaunchIntro";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Nav } from "@/components/layout/Nav";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({
+/* HERO_REDESIGN_BRIEF: Newsreader for display, Public Sans for body. Mono is
+   untouched, and so is the type scale: only the families changed.
+
+   Newsreader is loaded as a variable font with its optical-size axis, which
+   the base styles drive through font-optical-sizing. A serif needs that far
+   more than a grotesk did: without it the hero at 84px renders with the same
+   hairlines as body copy and goes thin against cream. */
+const display = Newsreader({
   subsets: ["latin"],
   axes: ["opsz"],
-  variable: "--font-bricolage",
+  variable: "--font-newsreader",
 });
 
-const body = IBM_Plex_Sans({
+const body = Public_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  variable: "--font-plex-sans",
+  variable: "--font-public-sans",
 });
 
 const mono = IBM_Plex_Mono({
@@ -36,8 +43,21 @@ export default function RootLayout({
   return (
     /* suppressHydrationWarning covers only this element's attributes: the
        inline script below adds .js to <html> before React hydrates. */
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${display.variable} ${body.variable} ${mono.variable} flex min-h-screen flex-col`}>
+    /* The font variables belong on <html>, not <body>.
+
+       Tailwind emits the theme on :root, so --font-display holds
+       `var(--font-newsreader), ...`. A custom property containing var() is
+       substituted where it is defined: on :root. With the next/font classes
+       on <body>, --font-newsreader was undefined at that point, --font-display
+       computed to guaranteed-invalid, and every font-family fell through to
+       Preflight's system stack. The webfonts downloaded and were never used.
+       That was true from stage 1 until this commit. */
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-screen flex-col">
         {/* Runs before any content parses. Two jobs.
 
             Reveal's pre-animation hidden state only applies under .js

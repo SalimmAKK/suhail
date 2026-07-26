@@ -28,9 +28,11 @@
   --color-attention: #e8a33d; /* form errors, focus rings */
   --color-danger: #c45a4a; /* destructive actions only */
 
-  /* next/font supplies the raw families in app/layout.tsx */
-  --font-display: var(--font-bricolage), sans-serif;
-  --font-body: var(--font-plex-sans), sans-serif;
+  /* next/font supplies the raw families in app/layout.tsx. Display and body
+     changed in the hero redesign; mono did not, and carries the coordinate
+     tags and every tracked-caps label. */
+  --font-display: var(--font-newsreader), Georgia, serif;
+  --font-body: var(--font-public-sans), sans-serif;
   --font-mono: var(--font-plex-mono), monospace;
 
   --tracking-display: -0.03em;
@@ -246,7 +248,7 @@ html.lenis body {
 
 .suhail-popup-name {
   color: var(--color-moon);
-  font-family: var(--font-bricolage), sans-serif;
+  font-family: var(--font-display);
   font-size: 17px;
 }
 
@@ -408,8 +410,10 @@ html.lenis body {
     font-optical-sizing: auto;
   }
 
+  /* Newsreader's optical size axis tops out at 72. Pushing the display sizes
+     to it keeps the large headings from wearing body-copy hairlines. */
   h1 {
-    font-variation-settings: "opsz" 96;
+    font-variation-settings: "opsz" 72;
   }
 
   :focus-visible {

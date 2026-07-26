@@ -13,6 +13,7 @@ export type PageIntro = {
 
 export const TONIGHT: PageIntro = {
   eyebrow: "The next sixty nights",
-  headingLines: ["What is the sky", "doing on your dates?"],
+  /* see the note in data/home.ts: short lines, the chart shares this row */
+  headingLines: ["What is the sky", "doing?"],
   sub: "Moon phase decides how much you will see, and it changes more over a fortnight than most travellers expect. Pick the night you are in AlUla and see what is overhead, which site suits it, and what is running.",
 };
