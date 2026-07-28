@@ -2,7 +2,9 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BrandMark } from "@/components/layout/BrandMark";
 import { LandingAccountLink } from "@/components/landing/LandingAccountLink";
+import { LineReveal } from "@/components/ui/LineReveal";
 import { MoonPhase } from "@/components/ui/MoonPhase";
+import { Reveal } from "@/components/ui/Reveal";
 import { SkyBackdrop } from "@/components/landing/SkyBackdrop";
 import { cn, focusRing } from "@/lib/cn";
 
@@ -29,6 +31,14 @@ import { cn, focusRing } from "@/lib/cn";
  *   Gold surfaces   The design puts cream text on the accent. At Desert
  *                   Nocturne's gold that is about 2:1. Ink instead, as
  *                   everywhere else in the product.
+ *
+ * Motion: this page had none while every platform route underneath it used
+ * Reveal and LineReveal (CLAUDE.md section 6). Landing on it after clicking
+ * through from the platform read as a hard cut into a static page. It now
+ * carries the same primitives: LineReveal on the hero headline and the
+ * closer's three-line pitch (motion 4's "one or two headlines that deserve
+ * emphasis" — these are the two), Reveal with the same 60-90ms stagger
+ * everywhere else already uses it.
  */
 
 export type LandingStats = {
@@ -148,7 +158,7 @@ export function Landing({
           </div>
 
           {/* kicker */}
-          <div className="relative z-[4] flex flex-wrap items-center gap-3.5 px-10 pt-8">
+          <Reveal className="relative z-[4] flex flex-wrap items-center gap-3.5 px-10 pt-8">
             <span className="tnum font-display text-[12px] font-extrabold tracking-[0.16em] text-accent">
               N° 001
             </span>
@@ -161,7 +171,7 @@ export function Landing({
               {sky.dateLabel}
               {sky.nextNewMoon ? ` · ${sky.nextNewMoon}` : ""}
             </span>
-          </div>
+          </Reveal>
           <span
             aria-hidden
             className="absolute left-10 right-[380px] top-[148px] hidden h-px bg-[var(--sky-text)]/35 xl:block"
@@ -169,18 +179,27 @@ export function Landing({
 
           <div className="relative z-[4] grid gap-12 px-10 pt-12 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-16">
             <div>
-              <h1 className="font-display text-[64px] font-extrabold leading-[0.92] tracking-[-0.035em] text-[var(--sky-text)] sm:text-[84px] xl:text-[104px]">
-                The night sky,
-                <br />
-                booked <span className="text-accent">by the night.</span>
-              </h1>
-              <p className="mt-6 max-w-[46ch] font-display text-[15px] font-medium uppercase leading-[1.55] tracking-[0.06em] text-[var(--sky-text)]/75">
-                Saudi Arabia&rsquo;s dark-sky reserves, surfaced with the sky&rsquo;s actual
-                conditions and made bookable in one flow.
-              </p>
+              <LineReveal
+                as="h1"
+                lines={[
+                  "The night sky,",
+                  <>
+                    booked <span className="text-accent">by the night.</span>
+                  </>,
+                ]}
+                className="font-display text-[64px] font-extrabold leading-[0.92] tracking-[-0.035em] text-[var(--sky-text)] sm:text-[84px] xl:text-[104px]"
+              />
+              <Reveal delay={150}>
+                <p className="mt-6 max-w-[46ch] font-display text-[15px] font-medium uppercase leading-[1.55] tracking-[0.06em] text-[var(--sky-text)]/75">
+                  Saudi Arabia&rsquo;s dark-sky reserves, surfaced with the sky&rsquo;s actual
+                  conditions and made bookable in one flow.
+                </p>
+              </Reveal>
             </div>
 
-            <TonightCard sky={sky} />
+            <Reveal delay={100}>
+              <TonightCard sky={sky} />
+            </Reveal>
           </div>
 
           {/* The design's two editorial marks: a rotated stamp down the left
@@ -203,7 +222,7 @@ export function Landing({
 
           {/* lower band */}
           <div className="relative z-[4] grid grid-cols-1 items-end gap-10 px-10 pb-12 pt-20 lg:grid-cols-2 xl:grid-cols-[1.8fr_1fr_1fr_1fr]">
-            <div className="flex flex-col gap-3.5">
+            <Reveal delay={200} className="flex flex-col gap-3.5">
               <span className="font-display text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--sky-text)]/55">
                 Find a night
               </span>
@@ -224,97 +243,111 @@ export function Landing({
                   <ArrowRight aria-hidden size={14} strokeWidth={2.5} />
                 </Link>
               </div>
-            </div>
+            </Reveal>
 
-            <Stat
-              k="Dark Sky Parks"
-              v={String(stats.siteCount).padStart(2, "0")}
-              unit="certified"
-              s="DarkSky International, certified 2024 onward."
-            />
-            <Stat
-              k="Operators"
-              v={String(stats.operatorCount).padStart(2, "0")}
-              unit="listed"
-              s="Booked direct through Suhail."
-            />
-            <Stat
-              k="Tonight"
-              v={String(stats.bookableTonight).padStart(2, "0")}
-              unit="bookable"
-              s={
-                stats.cheapestSar !== null
-                  ? `Ranked by sky quality, from SAR ${stats.cheapestSar}.`
-                  : "Ranked by sky quality."
-              }
-            />
+            <Reveal delay={260}>
+              <Stat
+                k="Dark Sky Parks"
+                v={String(stats.siteCount).padStart(2, "0")}
+                unit="certified"
+                s="DarkSky International, certified 2024 onward."
+              />
+            </Reveal>
+            <Reveal delay={320}>
+              <Stat
+                k="Operators"
+                v={String(stats.operatorCount).padStart(2, "0")}
+                unit="listed"
+                s="Booked direct through Suhail."
+              />
+            </Reveal>
+            <Reveal delay={380}>
+              <Stat
+                k="Tonight"
+                v={String(stats.bookableTonight).padStart(2, "0")}
+                unit="bookable"
+                s={
+                  stats.cheapestSar !== null
+                    ? `Ranked by sky quality, from SAR ${stats.cheapestSar}.`
+                    : "Ranked by sky quality."
+                }
+              />
+            </Reveal>
           </div>
         </header>
 
         {/* ----------------------------------------------------------- sites */}
         <section className="relative z-[2] px-10 pb-20 pt-24">
-          <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4 border-b-2 border-[var(--sky-text)]/35 pb-6">
-            <h2 className="font-display text-[40px] font-extrabold leading-[0.95] tracking-[-0.02em] text-[var(--sky-text)] sm:text-[60px]">
-              The four sites,
-              <br />
-              <span className="text-accent">tonight.</span>
-            </h2>
-            <p className="font-display text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--sky-text)]/55">
-              Index · N° 002 – 005
-            </p>
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b-2 border-[var(--sky-text)]/35 pb-6">
+            <LineReveal
+              as="h2"
+              lines={[
+                "The four sites,",
+                <span key="tonight" className="text-accent">
+                  tonight.
+                </span>,
+              ]}
+              className="font-display text-[40px] font-extrabold leading-[0.95] tracking-[-0.02em] text-[var(--sky-text)] sm:text-[60px]"
+            />
+            <Reveal delay={80}>
+              <p className="font-display text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--sky-text)]/55">
+                Index · N° 002 – 005
+              </p>
+            </Reveal>
           </div>
 
           <div className="grid grid-cols-1 border-t border-[var(--sky-text)]/20 sm:grid-cols-2 xl:grid-cols-4">
             {sites.map((site, i) => (
-              <article
-                key={site.slug}
-                /* flex column so the three stat rows sit on the cell floor and
-                   line up across all four, whatever the title wraps to */
-                className={cn(
-                  "flex flex-col border-b border-[var(--sky-text)]/20 py-8 xl:border-r xl:last:border-r-0",
-                  i === 0 ? "xl:pr-6" : "xl:px-6",
-                  i === sites.length - 1 ? "xl:pr-0" : "",
-                )}
-              >
-                <p className="tnum mb-5 font-display text-[12px] font-extrabold tracking-[0.08em] text-accent">
-                  N° {String(i + 2).padStart(3, "0")}
-                </p>
-                <h3 className="font-display text-[24px] font-extrabold leading-[1.1] tracking-[-0.01em] text-[var(--sky-text)]">
-                  <Link href={`/sites/${site.slug}`} className={cn("hover:text-accent", focusRing)}>
-                    {site.name}
-                  </Link>
-                </h3>
-                <p className="mb-4 mt-2 font-display text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--sky-text)]/55">
-                  {site.meta}
-                </p>
-                <p className="mb-6 max-w-[32ch] flex-1 text-[13px] leading-[1.6] text-[var(--sky-text)]/75">
-                  {site.description}
-                </p>
-                <SiteRow k="Bortle" v={site.bortle !== null ? String(site.bortle) : "—"} accent />
-                <SiteRow
-                  k="Tonight"
-                  v={site.bookableTonight > 0 ? `${site.bookableTonight} bookable` : "None running"}
-                />
-                <SiteRow k="From" v={site.fromSar !== null ? `SAR ${site.fromSar}` : "—"} />
-              </article>
+              <Reveal key={site.slug} delay={Math.min(i, 6) * 70}>
+                <article
+                  /* flex column so the three stat rows sit on the cell floor and
+                     line up across all four, whatever the title wraps to */
+                  className={cn(
+                    "flex flex-col border-b border-[var(--sky-text)]/20 py-8 xl:border-r xl:last:border-r-0",
+                    i === 0 ? "xl:pr-6" : "xl:px-6",
+                    i === sites.length - 1 ? "xl:pr-0" : "",
+                  )}
+                >
+                  <p className="tnum mb-5 font-display text-[12px] font-extrabold tracking-[0.08em] text-accent">
+                    N° {String(i + 2).padStart(3, "0")}
+                  </p>
+                  <h3 className="font-display text-[24px] font-extrabold leading-[1.1] tracking-[-0.01em] text-[var(--sky-text)]">
+                    <Link href={`/sites/${site.slug}`} className={cn("hover:text-accent", focusRing)}>
+                      {site.name}
+                    </Link>
+                  </h3>
+                  <p className="mb-4 mt-2 font-display text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--sky-text)]/55">
+                    {site.meta}
+                  </p>
+                  <p className="mb-6 max-w-[32ch] flex-1 text-[13px] leading-[1.6] text-[var(--sky-text)]/75">
+                    {site.description}
+                  </p>
+                  <SiteRow k="Bortle" v={site.bortle !== null ? String(site.bortle) : "—"} accent />
+                  <SiteRow
+                    k="Tonight"
+                    v={site.bookableTonight > 0 ? `${site.bookableTonight} bookable` : "None running"}
+                  />
+                  <SiteRow k="From" v={site.fromSar !== null ? `SAR ${site.fromSar}` : "—"} />
+                </article>
+              </Reveal>
             ))}
           </div>
         </section>
 
         {/* ---------------------------------------------------------- closer */}
         <section className="relative z-[2] bg-accent px-10 py-24 text-text">
-          <p className="mb-6 flex items-center gap-3.5 font-display text-[11px] font-extrabold uppercase tracking-[0.24em]">
-            <span aria-hidden className="h-px w-10 bg-text/70" />
-            One flow · from sky to seat
-          </p>
-          <h2 className="mb-10 max-w-[20ch] font-display text-[56px] font-extrabold leading-[0.9] tracking-[-0.04em] sm:text-[80px] xl:text-[120px]">
-            Pick a night.
-            <br />
-            Read the sky.
-            <br />
-            Book it, done.
-          </h2>
-          <div className="flex flex-wrap items-center gap-5 border-t-2 border-text/60 pt-8">
+          <Reveal>
+            <p className="mb-6 flex items-center gap-3.5 font-display text-[11px] font-extrabold uppercase tracking-[0.24em]">
+              <span aria-hidden className="h-px w-10 bg-text/70" />
+              One flow · from sky to seat
+            </p>
+          </Reveal>
+          <LineReveal
+            as="h2"
+            lines={["Pick a night.", "Read the sky.", "Book it, done."]}
+            className="mb-10 max-w-[20ch] font-display text-[56px] font-extrabold leading-[0.9] tracking-[-0.04em] sm:text-[80px] xl:text-[120px]"
+          />
+          <Reveal delay={120} className="flex flex-wrap items-center gap-5 border-t-2 border-text/60 pt-8">
             <Link
               href="/discover"
               className={cn(
@@ -347,7 +380,7 @@ export function Landing({
                 </p>
               </div>
             ) : null}
-          </div>
+          </Reveal>
         </section>
 
         <footer className="relative z-[2] flex flex-wrap items-center justify-between gap-4 border-t border-[var(--sky-text)]/20 bg-[#0a0908]/90 px-10 py-6 font-display text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--sky-text)]/55">

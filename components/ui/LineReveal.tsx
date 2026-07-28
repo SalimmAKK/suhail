@@ -17,8 +17,10 @@ export function LineReveal({
   className,
 }: {
   as?: "h1" | "h2";
-  /* one string per visual line. a single-line heading passes one. */
-  lines: string[];
+  /* one entry per visual line. Plain strings cover most headings; a line
+     needing inline styling (the hero's gold-accented half-line) can pass a
+     fragment instead — ReactNode covers both. */
+  lines: React.ReactNode[];
   className?: string;
 }) {
   const ref = useRef<HTMLHeadingElement>(null);
@@ -48,7 +50,7 @@ export function LineReveal({
     <Tag ref={ref} className={className}>
       {lines.map((line, i) => (
         /* the mask. padding keeps descenders unclipped at rest. */
-        <span key={line} className="-mb-[0.12em] block overflow-hidden pb-[0.12em]">
+        <span key={i} className="-mb-[0.12em] block overflow-hidden pb-[0.12em]">
           <span
             style={i ? { transitionDelay: `${i * 90}ms` } : undefined}
             className={cn(

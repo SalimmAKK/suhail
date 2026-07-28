@@ -3,15 +3,23 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Ticket } from "lucide-react";
+import { ArrowLeft, Ticket } from "lucide-react";
 import { BrandMark } from "@/components/layout/BrandMark";
 import { onSessionChange } from "@/lib/auth";
 import { cn, focusRing } from "@/lib/cn";
 
 /* The single top bar every view shares. 56px, 2px bottom divider, three
-   groups: brand, tabs, status cells.
+   groups: back, brand, tabs, status cells.
 
-   Two departures from the handoff's bar, both deliberate.
+   Three departures from the handoff's bar, all deliberate.
+
+   The back arrow, leftmost, has no handoff equivalent. The brand mark
+   already linked to "/", but a wordmark doubling as the only way back to the
+   landing page reads as a logo click, not a navigation control — easy to
+   miss when what a traveller actually wants is "take me out of the platform."
+   A dedicated cell says so plainly, the same way the Ticket cell exists
+   instead of asking a traveller to intuit that "My trips" lives under an
+   icon that could mean anything.
 
    The handoff's fifth tab is Operators. CLAUDE.md section 2.4 rule 17 keeps
    that route out of public navigation, and that is a decision about access to
@@ -64,6 +72,17 @@ export function TopBar({ nightLabel }: { nightLabel: string }) {
        from primary nav on mobile — the same gap the original desktop-only Nav
        had before Search existed as a route. */
     <header className="sticky top-0 z-50 flex h-[var(--topbar-h)] shrink-0 items-stretch border-b-2 border-divider bg-bg">
+      <Link
+        href="/"
+        aria-label="Back to landing"
+        className={cn(
+          "flex shrink-0 items-center justify-center border-r-2 border-divider px-3.5 text-text/70",
+          "transition-colors duration-150 ease-move hover:bg-text/4 hover:text-text",
+          focusRing,
+        )}
+      >
+        <ArrowLeft aria-hidden size={17} strokeWidth={2.2} />
+      </Link>
       <Link
         href="/"
         className={cn(
