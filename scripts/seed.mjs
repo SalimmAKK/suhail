@@ -31,7 +31,16 @@ const NIGHTS = 90;
  * fourteen seats.
  *
  * Deterministic on slug plus date, so reseeding does not reshuffle inventory
- * under a booking someone already made against it. */
+ * under a booking someone already made against it. One thing this
+ * determinism does not protect against, and is worth knowing before running
+ * this against a project with real bookings on it: migrations/
+ * 005_consume_slot_on_booking.sql and 004_restore_slots_on_cancel.sql make
+ * slots_remaining live, decremented and restored by actual bookings. This
+ * upsert always rewrites it back to the deterministic baseline below,
+ * which is correct for a fresh seed but effectively "restocks" every
+ * experience if run again later, undoing whatever real bookings had
+ * consumed. Fine for the demo's own workflow — reseed, then book — not
+ * fine to run casually against a project you also want live counts on. */
 function slotsFor(slug, date, groupMax) {
   let h = 2166136261;
   for (const ch of `${slug}:${date}`) {
