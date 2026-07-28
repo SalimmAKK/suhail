@@ -112,9 +112,16 @@ Non-negotiable. Check output against this list before reporting any task complet
 - **Mapbox GL JS** for the site picker map. Not Google Maps. Mapbox's free
   tier covers demo traffic and the styling is more design-controllable.
   Use a custom `light-v11`-derived style tuned to the palette.
-- **PWA:** `next-pwa` for service worker generation, plus a custom offline
-  cache for the last-viewed experience/booking. Full offline mode is a hard
-  requirement (traveller may lose signal in the desert on their trip).
+- **PWA:** hand-written service worker (`public/sw.js`), not `next-pwa` or
+  `@serwist/next`. Both are webpack plugins under the hood, and this project
+  builds with Turbopack, which does not execute webpack plugins — installing
+  either would silently produce no service worker. A static file in
+  `public/` needs no bundler cooperation, which is what makes it the reliable
+  choice here. It precaches the app shell and runtime-caches the last-viewed
+  experience/booking. Full offline mode is a hard requirement (traveller may
+  lose signal in the desert on their trip). Verified end to end with the
+  network killed: a previously-viewed experience page and `/trips` both
+  still render; an unvisited page falls back to `/offline`.
 - **Deployment:** Vercel. Not Cloudflare Pages this time — Vercel's Next.js
   runtime supports the API routes and image handling Suhail needs.
 - **Fonts:** same three as edu-hub, `Bricolage Grotesque` / `IBM Plex Sans` /
@@ -135,9 +142,11 @@ Non-negotiable. Check output against this list before reporting any task complet
   referrer URL restrictions in the Mapbox dashboard.
 - Supabase RLS: enable row-level security from the first table. It is easier
   to write policies as you go than to retrofit.
-- Next PWA + App Router: `next-pwa` needs the App Router configuration path.
-  The service worker registers via a `'use client'` component in the layout,
-  not via `next.config.js` alone.
+- PWA + Turbopack: `next-pwa` and `@serwist/next` are both webpack plugins
+  and do nothing under Turbopack. The service worker registers via a
+  `'use client'` component in the layout (`ServiceWorkerRegister`), not via
+  `next.config.ts` alone — that part of the original guidance still holds,
+  it's bundler-agnostic.
 - Framer Motion + SSR: any component using `motion.*` needs `'use client'`.
 
 ---
