@@ -70,8 +70,18 @@ const { error: badRef } = await anon.from("bookings").insert({
 });
 check("anon cannot write a malformed reference", !!badRef, `rejected: ${badRef?.message ?? "NOT REJECTED"}`);
 
+/* Not a frozen count: this checks the RLS read policy still lets anon read
+   every seeded row, not that the catalogue is frozen at whatever size it was
+   when this check was written. It was hardcoded to 3, from before the
+   catalogue grew to nineteen seeded experiences, and failed permanently the
+   moment that changed even though the policy itself was working correctly. */
 const { data: cat } = await anon.from("experiences").select("slug");
-check("anon can still read the catalogue", cat && cat.length === 3, `${cat?.length} experiences readable`);
+const { data: allExp } = await admin.from("experiences").select("slug");
+check(
+  "anon can still read the catalogue",
+  cat && allExp && cat.length === allExp.length && cat.length > 0,
+  `${cat?.length} of ${allExp?.length} seeded experiences readable by anon`,
+);
 
 // 4. clean up so the dashboard stays honest
 const { error: delErr } = await admin.from("bookings").delete().eq("reference", ref);

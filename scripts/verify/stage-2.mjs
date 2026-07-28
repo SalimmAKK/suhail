@@ -204,7 +204,10 @@ await withServer(async (BASE) => {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await ctx.newPage();
     const overlaps = [];
-    for (const route of ["/", "/tonight", "/sites", "/about", "/contact", "/trips", "/styleguide"]) {
+    /* /styleguide was a build reference, deleted once the re-skin it was
+       checking against was in place; /operators and /discover are new
+       routes, worth the same coverage as everything else under the bar. */
+    for (const route of ["/", "/discover", "/tonight", "/sites", "/about", "/contact", "/trips", "/operators"]) {
       await page.goto(BASE + route, { waitUntil: "load" });
       await page.waitForTimeout(1400);
       const bad = await page.evaluate(() => {
@@ -224,7 +227,7 @@ await withServer(async (BASE) => {
     record(
       "5. no page content sits under the bar at scroll 0",
       overlaps.length === 0,
-      overlaps.length ? overlaps.join("\n      ") : "all 7 routes clear",
+      overlaps.length ? overlaps.join("\n      ") : "all 8 routes clear",
     );
 
     await page.setViewportSize({ width: 390, height: 844 });

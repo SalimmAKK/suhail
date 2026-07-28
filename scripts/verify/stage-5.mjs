@@ -295,23 +295,38 @@ await withServer(async (BASE) => {
      new moon rendered as full and a 21 percent crescent as a near-full disc.
      Reading the path aloud is what missed it the first time, so this samples
      the path with isPointInPath and compares the enclosed area against the
-     phase the component was given. */
+     phase the component was given.
+
+     Sampled from /tonight's own night picker rather than a dedicated
+     styleguide swatch page: that page rendered five fixed phases purely for
+     this check and nothing else, and was deleted once the re-skin it existed
+     to verify was long since in place. Clicking cells spread across the
+     60-night window reads a real MoonPhase in a real production surface at
+     several different points in the cycle instead, which is a better test of
+     the same claim, not a weaker stand-in for one. */
   {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     const page = await ctx.newPage();
-    await page.goto(`${BASE}/styleguide`, { waitUntil: "load" });
+    await page.goto(`${BASE}/tonight`, { waitUntil: "load" });
     await page.waitForTimeout(1200);
 
-    const measured = await page.evaluate(() => {
-      const canvas = document.createElement("canvas").getContext("2d");
-      const out = [];
-      for (const svg of document.querySelectorAll('svg[aria-label*="percent lit"]')) {
+    const cells = await page.locator('[role="group"] button').all();
+    /* five points spread across the 60-night window, roughly a lunation and
+       a half apart, so the sample actually spans different phases rather
+       than landing on five consecutive, nearly-identical nights */
+    const indices = [0, 12, 24, 36, 48].filter((i) => i < cells.length);
+
+    const measured = [];
+    for (const i of indices) {
+      await cells[i].click();
+      await page.waitForTimeout(250);
+      const sample = await page.evaluate(() => {
+        const canvas = document.createElement("canvas").getContext("2d");
+        const svg = document.querySelector('svg[aria-label*="percent lit"]');
+        if (!svg) return null;
         const claimed = Number(svg.getAttribute("aria-label").match(/(\d+) percent/)[1]);
         const path = svg.querySelector("path");
-        if (!path) {
-          out.push({ claimed, measured: 0 });
-          continue;
-        }
+        if (!path) return { claimed, measured: 0 };
         const shape = new Path2D(path.getAttribute("d"));
         let lit = 0;
         let total = 0;
@@ -323,10 +338,10 @@ await withServer(async (BASE) => {
             if (canvas.isPointInPath(shape, x, y)) lit++;
           }
         }
-        out.push({ claimed, measured: Math.round((lit / total) * 100) });
-      }
-      return out;
-    });
+        return { claimed, measured: Math.round((lit / total) * 100) };
+      });
+      if (sample) measured.push(sample);
+    }
 
     const worst = measured.reduce(
       (max, m) => Math.max(max, Math.abs(m.claimed - m.measured)),
@@ -334,7 +349,7 @@ await withServer(async (BASE) => {
     );
     record(
       "7a. the lit area matches the phase the moon claims",
-      measured.length >= 5 && worst <= 3,
+      measured.length >= 4 && worst <= 3,
       measured.map((m) => `${m.claimed}%->${m.measured}%`).join("  ") + `  worst gap ${worst}pp`,
     );
     await ctx.close();

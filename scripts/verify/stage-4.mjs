@@ -5,11 +5,12 @@ import { ARTIFACTS, reporter, resetArtifacts, withServer } from "./lib/harness.m
  *
  *   npm run verify:stage-4
  *
- * Revised twice. HERO_REDESIGN_BRIEF moved the chart out of the hero, and
- * PAGE_COMPOSITION_BRIEF then replaced the hero itself with live inventory.
- * The chart now lives on /tonight, so that is where it is checked. The
- * landing checks cover the inventory board instead: real counts, real cards,
- * working controls.
+ * Revised three times. HERO_REDESIGN_BRIEF moved the chart out of the hero,
+ * PAGE_COMPOSITION_BRIEF then replaced the hero itself with live inventory,
+ * and the Modernist handoff put a real landing page back at / and moved that
+ * inventory board to /discover. The chart lives on /tonight, checked there.
+ * Section 6 below checks /discover instead: real counts, real cards, working
+ * controls.
  *
  * The chart is the signature centrepiece and the highest visual risk in the
  * plan, so this checks the things that would quietly ruin it: stars landing
@@ -294,7 +295,20 @@ await withServer(async (BASE) => {
     await ctx.close();
   }
 
-  /* ---- 6. the landing page is live inventory ---- */
+  /* ---- 6. /discover is live inventory ----
+   *
+   * Revised a third time. The Modernist handoff put a real landing page back
+   * at /, so the inventory board that PAGE_COMPOSITION_BRIEF put there moved
+   * to /discover — same job, different URL, and a different DOM: cards are
+   * <article>, not <li>; price sits in a <span>, not a <p>; the card links
+   * straight to /experiences/[slug] rather than to a /book/[id] URL, since
+   * booking is now a step reached from the detail page, not the card itself;
+   * map pins carry MapPanel's .suhail-pin class, not SiteMap's
+   * .suhail-marker; and there is no live sort control any more — the
+   * catalogue is already sorted by price server-side, so what were "sort"
+   * checks below are rewritten as filter checks against the type chips that
+   * do exist.
+   */
   {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
     const page = await ctx.newPage();
@@ -306,64 +320,71 @@ await withServer(async (BASE) => {
       if (m.type() === "error" && !/Mapbox|403/.test(t)) errors.push(t);
     });
 
-    await page.goto(BASE, { waitUntil: "load" });
+    await page.goto(`${BASE}/discover`, { waitUntil: "load" });
     await page.waitForTimeout(3000);
 
     const board = await page.evaluate(() => {
-      const cards = [...document.querySelectorAll("main li")].filter((li) => li.querySelector("h3"));
-      const stats = [...document.querySelectorAll("main p")].find((p) =>
+      const cards = [...document.querySelectorAll("main article")].filter((el) => el.querySelector("h3"));
+      const stats = [...document.querySelectorAll("main p, main span")].find((p) =>
         /\d+\s+experiences?\b/i.test(p.innerText),
       )?.innerText;
       return {
         stats: stats?.replace(/\s+/g, " ").trim(),
         cards: cards.map((c) => ({
           title: c.querySelector("h3").innerText,
-          price: [...c.querySelectorAll("p")].map((p) => p.innerText).find((t) => /^SAR/.test(t)),
-          labelled: /placeholder image, not/i.test(c.innerText),
-          book: c.querySelector("a")?.getAttribute("href") ?? "",
+          price: [...c.querySelectorAll("span")].map((s) => s.innerText).find((t) => /^SAR/.test(t)),
+          /* the "not <site>" sentence lives in the img alt text and the
+             corner tag's title attribute now, not in visible card text —
+             the visible tag is a plain "STOCK" label */
+          labelled: /stock photography, not/i.test(c.querySelector("img")?.getAttribute("alt") ?? ""),
+          detail: c.querySelector('a[href^="/experiences/"]')?.getAttribute("href") ?? "",
         })),
         heroChart: !!document.querySelector('main svg[aria-label^="Star chart"]'),
-        markers: document.querySelectorAll(".suhail-marker").length,
+        markers: document.querySelectorAll(".suhail-pin").length,
       };
     });
 
+    /* Whatever the catalogue holds right now, not a number frozen at
+       nineteen: this test should still pass after the next seed row is
+       added, and should still fail if the board renders nothing at all. */
     record(
-      "6a. the landing page opens on inventory, not a hero",
-      board.cards.length === 3 && !board.heroChart,
-      `${board.cards.length} experience cards, star chart in the landing page=${board.heroChart}`,
+      "6a. /discover opens on inventory, not a hero, and has cards",
+      board.cards.length > 0 && !board.heroChart,
+      `${board.cards.length} experience cards, star chart on the page=${board.heroChart}`,
     );
     record(
-      "6b. the stats line reports the real count, not the mockup's",
-      /\b3 experiences\b/i.test(board.stats ?? "") && !/23/.test(board.stats ?? ""),
-      `"${board.stats}"`,
+      "6b. the stats line reports the real count, not the mockup's twenty-three",
+      new RegExp(`\\b${board.cards.length}\\s+experiences?\\b`, "i").test(board.stats ?? "") &&
+        !/\b23\b/.test(board.stats ?? ""),
+      `${board.cards.length} cards rendered, stats line reads "${board.stats}"`,
     );
     record(
-      "6c. every card carries real seeded data and a working booking link",
-      board.cards.every((c) => /^SAR \d+$/.test(c.price ?? "")) &&
-        board.cards.every((c) => /^\/book\/[0-9a-f-]{36}\?date=/.test(c.book)),
-      board.cards.map((c) => `${c.title} ${c.price}`).join(" | "),
+      "6c. every card carries real seeded data and a working link to its detail page",
+      board.cards.every((c) => /^SAR \d+/.test(c.price ?? "")) &&
+        board.cards.every((c) => /^\/experiences\/[a-z0-9-]+$/.test(c.detail)),
+      board.cards.map((c) => `${c.title} ${c.price} -> ${c.detail}`).slice(0, 3).join(" | "),
     );
     record(
-      "6d. every placeholder photograph says it is one",
+      "6d. every placeholder photograph says so in its alt text",
       board.cards.every((c) => c.labelled),
       `${board.cards.filter((c) => c.labelled).length} of ${board.cards.length} labelled`,
     );
     record(
       "6e. the map keeps the three-plotted, one-withheld convention",
       board.markers === 3,
-      `${board.markers} site markers, Wadi Nakhlah withheld`,
+      `${board.markers} site pins, Wadi Nakhlah withheld`,
     );
 
-    /* the controls have to be real, not decorative */
-    const order = async () => (await page.locator("main li h3").allInnerTexts()).join("|");
-    const bySky = await order();
+    /* the type chips have to actually filter, not just decorate the row */
+    const cardCount = async () => (await page.locator("main article h3").count());
+    const before = await cardCount();
     await page.getByRole("button", { name: "Duration" }).click();
     await page.waitForTimeout(400);
-    const byDuration = await order();
+    const after = await cardCount();
     record(
-      "6f. the sort controls actually reorder the grid",
-      bySky !== byDuration,
-      `sky: ${bySky}  ->  duration: ${byDuration}`,
+      "6f. the Duration filter chip actually narrows the grid",
+      after < before,
+      `${before} cards -> ${after} cards after filtering to under three hours`,
     );
 
     const fonts = await page.evaluate(async () => {
@@ -374,7 +395,7 @@ await withServer(async (BASE) => {
       return {
         families: [...new Set([...document.fonts].map((f) => f.family))],
         heading: getComputedStyle(document.querySelector("main h1")).fontFamily,
-        body: getComputedStyle(prose).fontFamily,
+        body: prose ? getComputedStyle(prose).fontFamily : "",
       };
     });
     record(
@@ -386,11 +407,11 @@ await withServer(async (BASE) => {
     );
     record("6h. no console or page errors", errors.length === 0, errors.slice(0, 2).join(" | ") || "clean");
 
-    await page.screenshot({ path: `${ARTIFACTS}/home-desktop.png` });
+    await page.screenshot({ path: `${ARTIFACTS}/discover-desktop.png` });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload({ waitUntil: "load" });
     await page.waitForTimeout(2800);
-    await page.screenshot({ path: `${ARTIFACTS}/home-mobile.png`, fullPage: true });
+    await page.screenshot({ path: `${ARTIFACTS}/discover-mobile.png`, fullPage: true });
     await ctx.close();
   }
 
