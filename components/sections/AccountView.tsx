@@ -36,11 +36,16 @@ export function AccountView() {
   const [state, setState] = useState<State>({ phase: "checking-session" });
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  /* A deliberate sign-out also flips `session` to null, which would otherwise
+     race this component's own "no session, go sign in" redirect below and
+     send someone who just chose to leave straight back to a login screen.
+     This flag lets the sign-out button's own navigation win instead. */
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => onSessionChange(setSession), []);
 
   useEffect(() => {
-    if (session === undefined) return;
+    if (session === undefined || signingOut) return;
     if (session === null) {
       router.replace("/login?redirect=/account");
       return;
@@ -55,7 +60,7 @@ export function AccountView() {
     return () => {
       cancelled = true;
     };
-  }, [session, router]);
+  }, [session, router, signingOut]);
 
   async function onCancel(id: string) {
     setCancelling(id);
@@ -97,6 +102,7 @@ export function AccountView() {
           variant="secondary"
           size="sm"
           onClick={async () => {
+            setSigningOut(true);
             await signOut();
             router.push("/");
           }}
