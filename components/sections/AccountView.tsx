@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { CoordinateTag } from "@/components/ui/CoordinateTag";
 import { Reveal } from "@/components/ui/Reveal";
 import { onSessionChange, signOut } from "@/lib/auth";
-import { cancelMyBooking, getMyBookings, type MyBooking } from "@/lib/account";
+import { cancelMyBooking, claimGuestBookings, getMyBookings, type MyBooking } from "@/lib/account";
 import { parseDateKey } from "@/lib/astro";
 
 /* Bookings for the signed-in traveller, with the one write this account is
@@ -36,6 +36,8 @@ export function AccountView() {
   const [state, setState] = useState<State>({ phase: "checking-session" });
   const [cancelling, setCancelling] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [claiming, setClaiming] = useState(false);
+  const [claimMessage, setClaimMessage] = useState<string | null>(null);
   /* A deliberate sign-out also flips `session` to null, which would otherwise
      race this component's own "no session, go sign in" redirect below and
      send someone who just chose to leave straight back to a login screen.
@@ -79,6 +81,28 @@ export function AccountView() {
     }
   }
 
+  async function onClaim() {
+    setClaiming(true);
+    setClaimMessage(null);
+    const result = await claimGuestBookings();
+    setClaiming(false);
+    if (!result.ok) {
+      setClaimMessage(result.error);
+      return;
+    }
+    if (result.claimed === 0) {
+      setClaimMessage("Nothing new found under this email.");
+      return;
+    }
+    setClaimMessage(
+      result.claimed === 1
+        ? "Linked one booking to your account."
+        : `Linked ${result.claimed} bookings to your account.`,
+    );
+    const refreshed = await getMyBookings();
+    if (!refreshed.error) setState({ phase: "ready", bookings: refreshed.bookings });
+  }
+
   if (session === undefined || state.phase === "checking-session" || state.phase === "loading") {
     return <p className="text-neutral-700">Loading your bookings.</p>;
   }
@@ -111,9 +135,17 @@ export function AccountView() {
         </Button>
       </div>
 
+      <div className="mt-6 flex flex-wrap items-center gap-4">
+        <Button type="button" variant="ghost" size="sm" disabled={claiming} onClick={onClaim}>
+          {claiming ? "Checking..." : "Check for guest bookings under this email"}
+        </Button>
+        {claimMessage ? <p className="text-[14px] text-neutral-700">{claimMessage}</p> : null}
+      </div>
+
       {state.bookings.length === 0 ? (
         <p className="mt-8 max-w-[52ch] text-neutral-700">
-          No bookings on this account yet. Book a night while signed in and it will show up here.
+          No bookings on this account yet. Book a night while signed in, or use &ldquo;check for
+          guest bookings&rdquo; above if you booked with this email before signing in.
         </p>
       ) : (
         <div className="mt-8 grid gap-6 md:grid-cols-2">

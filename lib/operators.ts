@@ -9,13 +9,15 @@ import { SITES } from "@/data/sites";
  * because it is a decision about access to booking data, not a style one —
  * the route itself is meant to exist and work.
  *
- * There is no login in v1 (section 12: "email confirmation, no login"), so
- * there is no auth boundary this page could actually enforce. What it does
- * instead is the same restraint the rest of the product uses for booking
- * data: a traveller's name and how many seats they took, not their email or
- * phone number. An operator fulfilling a booking needs the name and the
- * headcount; the contact details exist for Suhail to reach a guest, not for
- * this page to republish them.
+ * migrations/003_accounts.sql added real accounts for travellers, but this
+ * route still has no operator-facing login of its own (section 2.4/17: no
+ * operator self-service portal), so there is no auth boundary this page
+ * could actually enforce beyond staying unlinked from public nav. What it
+ * does instead is the same restraint the rest of the product uses for
+ * booking data: a traveller's name and how many seats they took, not their
+ * email or phone number. An operator fulfilling a booking needs the name and
+ * the headcount; the contact details exist for Suhail to reach a guest, not
+ * for this page to republish them.
  *
  * The three separate queries joined in JS, rather than one nested
  * PostgREST select, are the same shape lib/catalog.ts already uses and for
@@ -24,6 +26,7 @@ import { SITES } from "@/data/sites";
  */
 
 export type OperatorBooking = {
+  id: string;
   reference: string;
   date: string;
   guestCount: number;
@@ -110,6 +113,7 @@ export async function getOperatorsOverview(): Promise<OperatorsPage> {
   for (const row of bookings.data ?? []) {
     const list = bookingsByExperience.get(row.experience_id) ?? [];
     list.push({
+      id: row.id,
       reference: row.reference,
       date: row.date,
       guestCount: row.guest_count,

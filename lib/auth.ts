@@ -56,6 +56,35 @@ export async function signOut(): Promise<void> {
   await supabaseBrowser().auth.signOut();
 }
 
+/**
+ * Sends a password reset email. Always returns ok on a well-formed address,
+ * even if no account uses it — Supabase itself does not distinguish "sent"
+ * from "no such user" for this call, and echoing that distinction back would
+ * let a form become a way to check which emails have accounts.
+ */
+export async function requestPasswordReset(email: string): Promise<AuthResult> {
+  if (!EMAIL.test(email)) return { ok: false, error: "That email address does not look right." };
+
+  const { error } = await supabaseBrowser().auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/**
+ * Sets a new password. Only works with the temporary session Supabase
+ * establishes from a valid reset-password link — see app/(platform)/
+ * reset-password/page.tsx, which is the only place this is called from.
+ */
+export async function updatePassword(password: string): Promise<AuthResult> {
+  if (password.length < 8) return { ok: false, error: "Use at least 8 characters." };
+
+  const { error } = await supabaseBrowser().auth.updateUser({ password });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 export async function getSession(): Promise<Session | null> {
   const { data } = await supabaseBrowser().auth.getSession();
   return data.session;

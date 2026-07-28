@@ -99,3 +99,27 @@ export async function cancelMyBooking(id: string): Promise<CancelResult> {
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
+
+export type ClaimResult = { ok: true; claimed: number } | { ok: false; error: string };
+
+/**
+ * Links any guest booking made under this account's email to the account
+ * itself, via /api/account/claim. Needs the server route rather than a
+ * direct client update: matching "every booking with this email, whoever
+ * booked it" reaches past what the signed-in account owns yet, which the
+ * client-side RLS policies do not allow, deliberately.
+ */
+export async function claimGuestBookings(): Promise<ClaimResult> {
+  const { data } = await supabaseBrowser().auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) return { ok: false, error: "Not signed in." };
+
+  const response = await fetch("/api/account/claim", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const body = await response.json();
+  if (!response.ok) return { ok: false, error: body.error ?? "Could not check for bookings." };
+  return { ok: true, claimed: body.claimed };
+}

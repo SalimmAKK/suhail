@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Shell } from "@/components/layout/Shell";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { getOperatorsOverview } from "@/lib/operators";
+import { cancelBooking, confirmBooking } from "@/app/(platform)/operators/actions";
 
 /* CLAUDE.md section 4: "/operators Admin route. Seeded operators + bookings
  * received. Not linked from public nav." Section 2.4/17 restates the second
@@ -106,25 +107,56 @@ export default async function Operators() {
                                 <th className="py-1.5 pr-4 font-display text-[10px] font-bold uppercase tracking-label text-neutral-600">
                                   Party
                                 </th>
-                                <th className="py-1.5 font-display text-[10px] font-bold uppercase tracking-label text-neutral-600">
+                                <th className="py-1.5 pr-4 font-display text-[10px] font-bold uppercase tracking-label text-neutral-600">
                                   Status
+                                </th>
+                                <th className="py-1.5 font-display text-[10px] font-bold uppercase tracking-label text-neutral-600">
+                                  Action
                                 </th>
                               </tr>
                             </thead>
                             <tbody>
-                              {exp.bookings.map((b) => (
-                                <tr key={b.reference} className="border-b border-divider">
-                                  <td className="py-1.5 pr-4 font-display font-bold tracking-[0.02em] text-text">
-                                    {b.reference}
-                                  </td>
-                                  <td className="py-1.5 pr-4 text-neutral-700">
-                                    {DATE.format(new Date(`${b.date}T00:00:00`))}
-                                  </td>
-                                  <td className="py-1.5 pr-4 text-neutral-700">{b.contactName}</td>
-                                  <td className="py-1.5 pr-4 text-neutral-700">{b.guestCount}</td>
-                                  <td className="py-1.5 uppercase text-accent-700">{b.status}</td>
-                                </tr>
-                              ))}
+                              {exp.bookings.map((b) => {
+                                const confirmThis = confirmBooking.bind(null, b.id);
+                                const cancelThis = cancelBooking.bind(null, b.id);
+                                return (
+                                  <tr key={b.reference} className="border-b border-divider">
+                                    <td className="py-1.5 pr-4 font-display font-bold tracking-[0.02em] text-text">
+                                      {b.reference}
+                                    </td>
+                                    <td className="py-1.5 pr-4 text-neutral-700">
+                                      {DATE.format(new Date(`${b.date}T00:00:00`))}
+                                    </td>
+                                    <td className="py-1.5 pr-4 text-neutral-700">{b.contactName}</td>
+                                    <td className="py-1.5 pr-4 text-neutral-700">{b.guestCount}</td>
+                                    <td className="py-1.5 pr-4 uppercase text-accent-700">{b.status}</td>
+                                    <td className="py-1.5">
+                                      <div className="flex gap-3">
+                                        {b.status === "pending" ? (
+                                          <form action={confirmThis}>
+                                            <button
+                                              type="submit"
+                                              className="font-display text-[11px] font-bold uppercase tracking-label text-accent-700 underline underline-offset-4 hover:text-text"
+                                            >
+                                              Confirm
+                                            </button>
+                                          </form>
+                                        ) : null}
+                                        {b.status !== "cancelled" ? (
+                                          <form action={cancelThis}>
+                                            <button
+                                              type="submit"
+                                              className="font-display text-[11px] font-bold uppercase tracking-label text-neutral-600 underline underline-offset-4 hover:text-text"
+                                            >
+                                              Cancel
+                                            </button>
+                                          </form>
+                                        ) : null}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         )}

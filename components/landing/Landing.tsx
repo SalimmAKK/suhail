@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BrandMark } from "@/components/layout/BrandMark";
+import { LandingAccountLink } from "@/components/landing/LandingAccountLink";
 import { MoonPhase } from "@/components/ui/MoonPhase";
 import { SkyBackdrop } from "@/components/landing/SkyBackdrop";
 import { cn, focusRing } from "@/lib/cn";
@@ -13,9 +14,10 @@ import { cn, focusRing } from "@/lib/cn";
  * Where this departs from the design file, and why:
  *
  *   Backdrop        AI-generated in the design, licensed stock here. Rule 13.
- *   "Sign in"       There is no account in this product. A link to a sign-in
- *                   that does not exist is the placeholder link rule 2.2/8
- *                   rules out, so the cell is gone.
+ *   "Sign in"       Superseded: migrations/003_accounts.sql added real
+ *                   accounts, so LandingAccountLink renders "Sign in" or
+ *                   "Account" depending on session, the same session-aware
+ *                   cell TopBar carries on every platform route.
  *   Nav "Operators" Rule 2.4/17 keeps that route out of public navigation.
  *   Nav "Journal"   No such route exists.
  *   Every figure    The design hard-codes 17 operators, 23 bookable, per-site
@@ -128,6 +130,7 @@ export function Landing({
                   {link.label}
                 </Link>
               ))}
+              <LandingAccountLink />
             </nav>
 
             <Link

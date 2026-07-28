@@ -21,7 +21,8 @@ export default function Account() {
           <Link href="/trips" className="underline underline-offset-4">
             trips
           </Link>{" "}
-          for that.
+          for that, or use &ldquo;check for guest bookings&rdquo; below to link one made with this
+          account&rsquo;s email before you signed in.
         </p>
         <div className="mt-10">
           <AccountView />
