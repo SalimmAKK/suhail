@@ -148,6 +148,90 @@
    floating pill. Kept as a token because every section references it. */
 :root {
   --section-top: 3rem;
+
+  /* The Modernist spacing scale, from the handoff's _ds stylesheet. Tailwind
+     utilities cover most of the layout; these exist for the hand-written
+     blocks below, where a raw CSS value would otherwise drift from the
+     system. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* The split views are fixed-chrome: the top bar is 56px and the columns
+     fill exactly what is left, each scrolling on its own. */
+  --topbar-h: 56px;
+}
+
+/* Content photographs are duotoned into the palette rather than left flat
+   grey.
+ *
+ * The handoff specifies grayscale, and a straight grayscale(1) is what was
+ * built first. On a catalogue that is almost entirely night photography it
+ * read as dead weight: nineteen near-black rectangles with no colour anywhere
+ * on the page. This keeps the discipline the rule is actually protecting —
+ * photographs are treated, never raw camera colour, so they cannot fight the
+ * accent — while putting Desert Nocturne into them.
+ *
+ * The ramp is defined in layout.tsx as an SVG filter: luminance first, then a
+ * per-channel table mapping shadows to ink #1a1d2e, midtones through a warm
+ * brown to gold #c9a961, and highlights to cream #faf8f3. Stars and lit sand
+ * come out gold, sky comes out ink.
+ *
+ * Contrast is applied before the duotone so it acts on luminance rather than
+ * on the mapped colour. */
+.photo-duotone,
+.photo-duotone-hero {
+  /* Both of these promote the image to its own compositor layer, and they are
+     not decoration — they are what makes the filter affordable.
+
+     A filtered element is re-rastered every time it repaints, and scrolling
+     repaints. With nineteen filtered thumbnails on /discover that measured as
+     527ms of RasterTask across a thirty-step scroll, which is the scroll lag.
+     Promoted, the filtered output is cached in a texture and scrolling only
+     moves it: the same scroll measured 62ms, an eighty-percent cut.
+
+     Swapping the SVG filter for accelerated CSS filter primitives was measured
+     too and changed nothing — the cost is repainting a filter at all, not this
+     particular filter. Do not remove these without re-measuring. */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.photo-duotone {
+  filter: contrast(1.05) url(#nocturne-duotone);
+}
+
+.photo-duotone-hero {
+  filter: contrast(1.08) url(#nocturne-duotone);
+}
+
+/* Figures that sit in a column of prose or in a row of cells have to line up
+   digit for digit. Applied to prices, times, coordinates and Bortle numbers. */
+.tnum {
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The one place the palette bends, and it bends only inside this class.
+   Scoped deliberately: /sky opts in, nothing else can inherit it. The values
+   are the handoff's near-blacks rather than Suhail's ink, which reads navy at
+   full bleed and fights the night-sky subject.
+
+   Gold on #0a0908 measures about 9:1, so the accent gets stronger here than
+   it is on cream, not weaker. */
+.sky-dark {
+  --sky-bg: #0a0908;
+  --sky-rail: #050403;
+  --sky-line: #2a2724;
+  --sky-text: #f3f2f2;
+  --sky-muted: color-mix(in srgb, #f3f2f2 60%, transparent);
+  --sky-faint: color-mix(in srgb, #f3f2f2 55%, transparent);
+
+  background: var(--sky-bg);
+  color: var(--sky-text);
 }
 
 /* Lenis, unchanged: smooth scroll is behaviour, not skin. */
@@ -393,4 +477,145 @@ html[data-intro="play"]::after {
   text-decoration: underline;
   text-underline-offset: 3px;
   font-size: 11px;
+}
+
+/* ------------------------------------------------------- handoff map pins
+
+   The split views' pins, which are a different object from the /sites map's
+   markers above: a bordered label box sitting on a pointer over a small dot,
+   rather than a pin with text beside it. Both live in plain CSS because
+   Mapbox builds its markers outside React. */
+
+.suhail-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.suhail-pin-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 7px;
+  padding: 4px 8px;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-text);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* the downward pointer, drawn as a bordered triangle so its edge continues
+   the label's own 1.5px rule */
+.suhail-pin-label::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--color-text);
+}
+
+.suhail-pin-mark {
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent);
+}
+
+.suhail-pin-price {
+  color: var(--color-accent-700);
+  font-feature-settings: "tnum" 1;
+}
+
+.suhail-pin-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg);
+  transition: transform 200ms var(--ease-move);
+}
+
+.suhail-pin:hover .suhail-pin-dot,
+.suhail-pin:focus-visible .suhail-pin-dot {
+  transform: scale(1.2);
+}
+
+/* An approximate coordinate is drawn hollow and says so, the same contract
+   the /sites map already keeps. */
+.suhail-pin-dot.is-approximate {
+  background: var(--color-bg);
+  border-color: var(--color-accent-600);
+  border-style: dashed;
+}
+
+/* Search view: everything that is not the focused result drops to ink, so the
+   one match the list is showing reads first. */
+.suhail-pin[data-muted="true"] .suhail-pin-dot {
+  background: var(--color-text);
+}
+
+.suhail-pin[data-muted="true"] .suhail-pin-label {
+  display: none;
+}
+
+.suhail-pin-ring {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .suhail-pin[data-focused="true"] .suhail-pin-ring {
+    animation: pin-pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pin-pulse {
+  0%,
+  100% {
+    transform: scale(0.55);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* The landing's scroll cue: an accent segment travelling along a hairline.
+   Motion 8's rule applies — ambient, slow, and gone under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-cue::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -30%;
+    width: 30%;
+    height: 100%;
+    background: var(--color-accent);
+    animation: scroll-cue 2.4s linear infinite;
+  }
+}
+
+@keyframes scroll-cue {
+  to {
+    left: 100%;
+  }
 }

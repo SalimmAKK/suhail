@@ -13,6 +13,12 @@ import { cn, focusRing } from "@/lib/cn";
 type Variant = "primary" | "secondary" | "ghost" | "icon";
 type Size = "sm" | "md";
 
+/* Modernist keeps a wide CTA's label flush left with its icon flush right,
+   which the handoff calls out as a rule rather than a preference. A
+   content-width button still centres, because there is nothing to centre it
+   against. */
+type Align = "center" | "between";
+
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-accent text-text hover:bg-accent-600",
   secondary: "border-2 border-text bg-transparent text-text hover:bg-text hover:text-bg",
@@ -28,6 +34,9 @@ const SIZES: Record<Size, string> = {
 type CommonProps = {
   variant?: Variant;
   size?: Size;
+  align?: Align;
+  /** full width, for the one primary CTA in a panel */
+  block?: boolean;
   className?: string;
   children: React.ReactNode;
 };
@@ -42,9 +51,18 @@ type NativeProps = CommonProps & {
 };
 
 export function Button(props: AnchorProps | NativeProps) {
-  const { variant = "primary", size = "md", className, children } = props;
+  const {
+    variant = "primary",
+    size = "md",
+    align = "center",
+    block = false,
+    className,
+    children,
+  } = props;
   const classes = cn(
-    "inline-flex items-center justify-center gap-2 font-semibold uppercase tracking-[0.06em] transition-colors duration-150 ease-move",
+    "items-center gap-2 font-semibold uppercase tracking-[0.06em] transition-colors duration-150 ease-move",
+    block ? "flex w-full" : "inline-flex",
+    align === "between" ? "justify-between text-left" : "justify-center",
     focusRing,
     "disabled:cursor-not-allowed disabled:opacity-40",
     variant === "icon" ? "h-9 w-9 p-0" : SIZES[size],

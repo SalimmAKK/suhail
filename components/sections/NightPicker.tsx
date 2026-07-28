@@ -4,11 +4,10 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { CoordinateTag } from "@/components/ui/CoordinateTag";
 import { MoonPhase } from "@/components/ui/MoonPhase";
+import { NightGrid } from "@/components/ui/NightGrid";
 import { SkyPip } from "@/components/ui/SkyPip";
-import { cn, focusRing } from "@/lib/cn";
 import {
   ALULA_LAT,
-  SKY_QUALITY_LABEL,
   isWaxing,
   moonPhase,
   moonPhaseLabel,
@@ -34,25 +33,10 @@ import type { Site, SkyTarget } from "@/data/sites";
    stays reserved for the launch intro, where the letter-by-letter sequence
    genuinely has no CSS equivalent worth writing. */
 
-const COLUMNS = 6;
+/* The grid itself now lives in components/ui/NightGrid, so the discovery
+   view's "Pick a date" chip opens the same sixty cells this page shows. What
+   stays here is the panel that reads a selection. */
 
-/* the ramp, per section 5. sky-5 is the darkest night and the best one. */
-const FILL: Record<SkyQuality, string> = {
-  prime: "bg-neutral-900",
-  ok: "bg-neutral-500",
-  bright: "bg-neutral-200",
-};
-
-/* sky-5 is pale enough that ink is the only readable ink on it */
-const CELL_TEXT: Record<SkyQuality, string> = {
-  /* follows the fill: a prime night is the dark end of the ramp and needs
-     light type on it, the other two are light enough to take ink */
-  prime: "text-neutral-100",
-  ok: "text-text",
-  bright: "text-text",
-};
-
-const MONTH = new Intl.DateTimeFormat("en-GB", { month: "short" });
 const FULL_DATE = new Intl.DateTimeFormat("en-GB", {
   weekday: "long",
   day: "numeric",
@@ -77,9 +61,6 @@ export function NightPicker({
   const [selected, setSelected] = useState<string | null>(nights[0] ?? null);
   /* The panel animates on a change, not on the mount that preselects. */
   const [interacted, setInteracted] = useState(false);
-  /* roving tabindex: sixty buttons in the tab order would be a wall */
-  const [focusIndex, setFocusIndex] = useState(0);
-  const cellRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const panelRef = useRef<HTMLDivElement>(null);
 
   /* Stacked, the panel sits under ten rows of grid, so picking a night sends
@@ -99,107 +80,9 @@ export function NightPicker({
     );
   }, []);
 
-  const move = useCallback(
-    (from: number, delta: number) => {
-      const next = Math.min(nights.length - 1, Math.max(0, from + delta));
-      setFocusIndex(next);
-      cellRefs.current[next]?.focus();
-    },
-    [nights.length],
-  );
-
-  const onKeyDown = useCallback(
-    (event: React.KeyboardEvent, index: number) => {
-      const moves: Record<string, number> = {
-        ArrowRight: 1,
-        ArrowLeft: -1,
-        ArrowDown: COLUMNS,
-        ArrowUp: -COLUMNS,
-      };
-      if (event.key in moves) {
-        event.preventDefault();
-        move(index, moves[event.key]);
-        return;
-      }
-      if (event.key === "Home") {
-        event.preventDefault();
-        move(index, -index);
-      }
-      if (event.key === "End") {
-        event.preventDefault();
-        move(index, nights.length - 1 - index);
-      }
-    },
-    [move, nights.length],
-  );
-
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-14">
-      <div>
-        <div
-          role="group"
-          aria-label={`The next ${nights.length} nights over AlUla`}
-          className="grid grid-cols-6 gap-1.5 sm:gap-2"
-        >
-          {nights.map((key, i) => {
-            const date = parseDateKey(key);
-            const quality = skyQuality(date);
-            const isSelected = selected === key;
-            const day = date.getDate();
-
-            return (
-              <button
-                key={key}
-                ref={(el) => {
-                  cellRefs.current[i] = el;
-                }}
-                type="button"
-                tabIndex={i === focusIndex ? 0 : -1}
-                aria-pressed={isSelected}
-                aria-label={`${FULL_DATE.format(date)}. ${SKY_QUALITY_LABEL[quality]}.`}
-                onKeyDown={(e) => onKeyDown(e, i)}
-                onFocus={() => setFocusIndex(i)}
-                onClick={() => select(key)}
-                className={cn(
-                  "relative aspect-square overflow-hidden border transition-colors duration-200 ease-move",
-                  focusRing,
-                  isSelected
-                    ? "border-accent-700 ring-2 ring-accent-700"
-                    : "border-divider hover:border-text",
-                )}
-              >
-                {/* Motion 3: the quality colour fills from the bottom,
-                    staggered by row. Gated on .js so the grid is already
-                    filled and readable before hydration. */}
-                <span
-                  aria-hidden
-                  className={cn("cell-fill absolute inset-0 origin-bottom", FILL[quality])}
-                  style={{ animationDelay: `${Math.floor(i / COLUMNS) * 40}ms` }}
-                />
-                <span
-                  className={cn(
-                    "relative flex h-full w-full flex-col items-center justify-center gap-0.5 font-display text-[13px] leading-none",
-                    CELL_TEXT[quality],
-                  )}
-                >
-                  {day}
-                  {day === 1 ? (
-                    <span className="text-[9px] uppercase tracking-label opacity-80">
-                      {MONTH.format(date)}
-                    </span>
-                  ) : null}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-          <SkyPip quality="prime" />
-          <SkyPip quality="ok" />
-          <SkyPip quality="bright" />
-        </div>
-      </div>
+      <NightGrid nights={nights} selected={selected} onSelect={select} />
 
       {/* Panel change animation, motion: fade and 8px rise, 200ms. Keyed on
           the selection so React remounts it and the CSS runs once per change
@@ -233,7 +116,7 @@ export function NightPicker({
    window is misconfigured. Says so rather than rendering a blank column. */
 function EmptyPanel() {
   return (
-    <div className="flex h-full flex-col justify-center border-t border-moon/15 pt-8 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-0">
+    <div className="flex h-full flex-col justify-center border-t border-divider pt-8 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-0">
       <h3 className="text-3xl text-text">No nights to show.</h3>
       <p className="mt-4 max-w-[40ch] text-neutral-700">
         The calendar window came back empty, which is a fault rather than a quiet night.
@@ -284,7 +167,7 @@ function NightDetail({
   const running = experiences.filter((e) => e.dates.includes(dateKey));
 
   return (
-    <div className="border-t border-moon/15 pt-8 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-0">
+    <div className="border-t border-divider pt-8 lg:border-l lg:border-t-0 lg:pl-14 lg:pt-0">
       <div className="flex items-start gap-5">
         <MoonPhase phase={phase} waxing={isWaxing(date)} size={52} />
         <div>
@@ -361,7 +244,7 @@ function NightDetail({
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-8 border-t border-moon/12 pt-6">
+    <section className="mt-8 border-t border-divider pt-6">
       <h4 className="mb-3 font-display text-label uppercase tracking-label text-accent-700">{title}</h4>
       {children}
     </section>

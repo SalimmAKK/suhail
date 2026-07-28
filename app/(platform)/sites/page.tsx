@@ -53,7 +53,11 @@ export default function Sites() {
           {SITES.map((site) => (
             <Card key={site.slug} lift>
               <div className="flex items-start justify-between gap-4">
-                <h2 className="text-2xl">{site.name}</h2>
+                {/* min-w-0: a flex child's default min-width is its content
+                    width, so without this the longest site name (AlGharameel
+                    Nature Reserve) refused to shrink below that and pushed the
+                    shrink-0 badge past the viewport edge on a phone. */}
+                <h2 className="min-w-0 text-2xl">{site.name}</h2>
                 {site.coordinatePrecision !== "sourced" ? (
                   <span className="shrink-0 font-display text-label uppercase tracking-label text-accent-700">
                     {PRECISION_NOTE[site.coordinatePrecision]}

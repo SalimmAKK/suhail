@@ -38,6 +38,8 @@ export type CatalogExperience = {
   operatorName: string;
   /** date keys, `2026-08-14`, on which this experience still has slots */
   dates: string[];
+  /** how many seats are left on each of those dates, keyed by date key */
+  slotsByDate: Record<string, number>;
 };
 
 export type Catalog = {
@@ -49,6 +51,48 @@ export type Catalog = {
 };
 
 const EMPTY: Catalog = { experiences: [], siteCount: 0, error: null };
+
+/** One page below PostgREST's default ceiling, so a full page is unambiguous. */
+const PAGE = 1000;
+
+type AvailabilityRow = { experience_id: string; date: string; slots_remaining: number };
+
+/**
+ * Every availability row in the window, following the pages to the end.
+ *
+ * Returns the same `{ data, error }` shape as a Supabase query so the caller's
+ * error handling does not have to special-case it.
+ */
+async function fetchAllAvailability(
+  db: ReturnType<typeof supabasePublic>,
+  from: string,
+  to: string,
+): Promise<{ data: AvailabilityRow[] | null; error: { message: string } | null }> {
+  const rows: AvailabilityRow[] = [];
+
+  for (let page = 0; ; page++) {
+    const { data, error } = await db
+      .from("availability")
+      .select()
+      .gte("date", from)
+      .lte("date", to)
+      .gt("slots_remaining", 0)
+      /* ordered so the pages partition the set deterministically. without it
+         the server may return overlapping or missing rows between calls. */
+      .order("experience_id", { ascending: true })
+      .order("date", { ascending: true })
+      .range(page * PAGE, (page + 1) * PAGE - 1);
+
+    if (error) return { data: null, error };
+    if (!data?.length) break;
+
+    rows.push(...(data as AvailabilityRow[]));
+    /* a short page is the last one */
+    if (data.length < PAGE) break;
+  }
+
+  return { data: rows, error: null };
+}
 
 /**
  * The catalogue for a window of nights.
@@ -68,11 +112,23 @@ export async function getCatalog(from: string, to: string): Promise<Catalog> {
 
   const db = supabasePublic();
 
+  /* Availability is paged rather than fetched in one call.
+   *
+   * PostgREST caps a response at 1000 rows by default and says nothing about
+   * having done so: the request succeeds and the tail is simply missing. With
+   * nineteen experiences over a sixty-night window that is 1140 rows, and the
+   * two experiences past the cap lost every one of their dates and vanished
+   * from the "tonight" filter. The page read "17 experiences" against a
+   * catalogue of nineteen, with no error anywhere.
+   *
+   * Kept as an explicit loop rather than a bigger .limit() because the cap is
+   * the server's to enforce, not ours to guess at, and the window grows with
+   * both the catalogue and the number of nights offered. */
   const [experiences, sites, operators, availability] = await Promise.all([
     db.from("experiences").select().eq("active", true),
     db.from("sites").select(),
     db.from("operators").select(),
-    db.from("availability").select().gte("date", from).lte("date", to).gt("slots_remaining", 0),
+    fetchAllAvailability(db, from, to),
   ]);
 
   const failure = [experiences, sites, operators, availability].find((r) => r.error);
@@ -89,10 +145,17 @@ export async function getCatalog(from: string, to: string): Promise<Catalog> {
   const operatorById = new Map((operators.data ?? []).map((o) => [o.id, o.name]));
 
   const datesByExperience = new Map<string, string[]>();
+  /* The seat count behind each of those dates. The search view prints it, so
+     it comes from the availability row rather than being estimated. */
+  const slotsByExperience = new Map<string, Record<string, number>>();
   for (const row of availability.data ?? []) {
     const list = datesByExperience.get(row.experience_id);
     if (list) list.push(row.date);
     else datesByExperience.set(row.experience_id, [row.date]);
+
+    const slots = slotsByExperience.get(row.experience_id) ?? {};
+    slots[row.date] = row.slots_remaining;
+    slotsByExperience.set(row.experience_id, slots);
   }
 
   const list: CatalogExperience[] = [];
@@ -115,6 +178,7 @@ export async function getCatalog(from: string, to: string): Promise<Catalog> {
       site,
       operatorName: operatorById.get(e.operator_id) ?? "Unknown operator",
       dates: (datesByExperience.get(e.id) ?? []).sort(),
+      slotsByDate: slotsByExperience.get(e.id) ?? {},
     });
   }
 

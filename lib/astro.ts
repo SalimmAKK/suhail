@@ -258,3 +258,50 @@ export function upcomingNights(count = 60, from: Date = new Date()): Date[] {
     return d;
   });
 }
+
+/* ------------------------------------------------------------------- labels
+
+   Formatted on the server and passed down as strings. Written out rather than
+   handed to Intl so the top bar cannot render one month name during SSR and a
+   different one after hydration on a machine with another locale. */
+
+const MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/** `26 Jul`. The form the top bar and the filter chips print. */
+export function shortDate(date: Date): string {
+  return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+}
+
+/** `Sun 26 Jul`, for the date field and the search filter bar. */
+export function shortDateWithDay(date: Date): string {
+  return `${DAYS[date.getDay()]} ${shortDate(date)}`;
+}
+
+/** `Jul 29` / `Wed`, the two halves of the notable-events date column. */
+export function eventDateParts(date: Date): { date: string; day: string } {
+  return { date: `${MONTHS[date.getMonth()]} ${date.getDate()}`, day: DAYS[date.getDay()] };
+}
+
+/**
+ * `Waxing crescent 4%` — the phase named and its illuminated fraction.
+ *
+ * New and full take no direction, because neither is waxing or waning in any
+ * meaningful sense at the moment it is named.
+ */
+export function moonPhrase(date: Date): string {
+  const phase = moonPhase(date);
+  const name = moonPhaseLabel(phase);
+  const percent = Math.round(phase * 100);
+
+  if (name === "new") return `New moon ${percent}%`;
+  if (name === "full") return `Full moon ${percent}%`;
+
+  const direction = isWaxing(date) ? "Waxing" : "Waning";
+  const noun = name === "quarter" ? (isWaxing(date) ? "first quarter" : "last quarter") : name;
+  return `${direction} ${noun} ${percent}%`;
+}

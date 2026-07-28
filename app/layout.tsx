@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
+import { InstallPrompt } from "@/components/layout/InstallPrompt";
 import { LaunchIntro } from "@/components/layout/LaunchIntro";
-import { MobileNav } from "@/components/layout/MobileNav";
-import { Nav } from "@/components/layout/Nav";
+import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import "./globals.css";
 
@@ -22,10 +22,73 @@ const archivo = Archivo({
   variable: "--font-archivo",
 });
 
+/* The top bar prints tonight's date and moon on every route, including the
+   handful that are still prerendered as static (/about, /contact, /sites,
+   /trips). Without this they would keep showing whatever date the build ran
+   on. An hour is well inside the resolution of a "26 Jul · waxing crescent"
+   label and leaves those pages static rather than forcing the whole tree
+   dynamic to fix a caption. */
+export const revalidate = 3600;
+
+/* VERCEL_URL is set by Vercel at build time on every deploy (preview and
+   production alike) but carries no protocol; SITE_URL is the one to set by
+   hand in the dashboard once the project has a real domain, and wins when
+   present. Without a metadataBase, every relative image path in `openGraph`
+   below resolves against nothing and Next warns on every build; sharing the
+   link produces no preview card at all. */
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+const TITLE = "Suhail — The night sky, booked by the night";
+const DESCRIPTION =
+  "Discovery and booking for Saudi Arabia's dark-sky experiences. See what the sky is doing over AlUla on the night of your trip, then book it.";
+
 export const metadata: Metadata = {
-  title: "Suhail",
-  description:
-    "Discovery and booking for Saudi Arabia's dark-sky experiences. See what the sky is doing over AlUla on the night of your trip, then book it.",
+  metadataBase: new URL(SITE_URL),
+  /* Every page in the app already writes its own full "X / Suhail" title as
+     an established house style — a `template` here would run every one of
+     them through "%s / Suhail" a second time ("Operators / Suhail / Suhail",
+     caught live on /operators). A plain string default covers the one route
+     that sets none, /discover, and lets everyone else's title stand as
+     written instead of rewriting it. */
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/",
+    siteName: "Suhail",
+    /* the same duotoned landing backdrop, real licensed stock rather than a
+       purpose-made card, until one exists */
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1502957291543-d85480254bf8?w=1200&h=630&q=80&auto=format&fit=crop",
+        width: 1200,
+        height: 630,
+        alt: "A dense starfield, licensed stock, not AlUla.",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  /* app/manifest.ts wires <link rel="manifest"> in on its own; this is the
+     part of PWA-related head metadata that isn't the manifest itself. */
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Suhail" },
+};
+
+/* themeColor moved out of Metadata and into its own export in recent Next
+   versions; kept here rather than in `metadata` above so it isn't silently
+   dropped. Matches the manifest's theme_color, which tints Android's browser
+   chrome and task switcher before install and the OS status bar after it. */
+export const viewport: Viewport = {
+  themeColor: "#c9a961",
 };
 
 export default function RootLayout({
@@ -67,16 +130,51 @@ export default function RootLayout({
             __html: `document.documentElement.classList.add("js");try{if(!sessionStorage.getItem("suhail-intro")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.intro="play";setTimeout(function(){delete document.documentElement.dataset.intro},3000)}}catch(e){}`,
           }}
         />
+        {/* The duotone ramp every content photograph runs through, referenced
+            by .photo-duotone in globals.css.
+
+            feColorMatrix flattens to luminance first; feComponentTransfer then
+            maps that single channel onto a four-stop ramp per colour channel:
+            ink #1a1d2e in the shadows, a warm brown at the quarter tone, gold
+            #c9a961 at the three-quarter, cream #faf8f3 at the top. Night sky
+            lands in the ink end and stars in the gold.
+
+            Inline rather than an external file: a filter referenced by url()
+            has to be in the same document, and one that 404s silently leaves
+            every photograph untreated. */}
+        <svg
+          aria-hidden
+          focusable="false"
+          width="0"
+          height="0"
+          className="absolute"
+          style={{ position: "absolute", width: 0, height: 0 }}
+        >
+          <filter id="nocturne-duotone" colorInterpolationFilters="sRGB">
+            <feColorMatrix
+              type="matrix"
+              values="0.2126 0.7152 0.0722 0 0
+                      0.2126 0.7152 0.0722 0 0
+                      0.2126 0.7152 0.0722 0 0
+                      0      0      0      1 0"
+            />
+            <feComponentTransfer>
+              <feFuncR type="table" tableValues="0.10 0.51 0.79 0.98" />
+              <feFuncG type="table" tableValues="0.11 0.40 0.66 0.97" />
+              <feFuncB type="table" tableValues="0.18 0.28 0.38 0.95" />
+            </feComponentTransfer>
+          </filter>
+        </svg>
+
         <SmoothScroll />
         <LaunchIntro />
-        <Nav />
-        {/* Bottom padding only: the top bar is in the flow.
-            Sections pad their own content down by --nav-clearance instead.
-            The bottom is a different matter, nothing sits behind it. */}
-        <main className="flex-1 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-0">
-          {children}
-        </main>
-        <MobileNav />
+        <ServiceWorkerRegister />
+        <InstallPrompt />
+        {/* The app chrome moved to app/(platform)/layout.tsx. The landing at /
+            is a different surface with its own nav, so the root layout now
+            carries only what is genuinely global: fonts, the duotone filter,
+            smooth scroll, the intro, and the PWA registration/install UI. */}
+        {children}
       </body>
     </html>
   );

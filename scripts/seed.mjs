@@ -22,7 +22,29 @@ import { EXPERIENCES, OPERATORS } from "../data/experiences.ts";
 
 const DRY = process.argv.includes("--dry-run");
 const NIGHTS = 90;
-const SLOTS_PER_NIGHT = 12;
+
+/* Seats left, varied per experience and per night rather than a flat number.
+ *
+ * A catalogue where every row says "12 seats left" reads as a placeholder, and
+ * the search view prints this figure. The ceiling is the experience's own
+ * group_max where it has one, so a private night for four never offers
+ * fourteen seats.
+ *
+ * Deterministic on slug plus date, so reseeding does not reshuffle inventory
+ * under a booking someone already made against it. */
+function slotsFor(slug, date, groupMax) {
+  let h = 2166136261;
+  for (const ch of `${slug}:${date}`) {
+    h ^= ch.charCodeAt(0);
+    h = Math.imul(h, 16777619);
+  }
+  const ceiling = groupMax ?? 14;
+  /* weekends run fuller, which is both true of the category and enough
+     variation to make the number look like inventory rather than a constant */
+  const weekend = [4, 5].includes(new Date(date).getDay()) ? 0.55 : 1;
+  const roll = ((h >>> 0) % 1000) / 1000;
+  return Math.max(1, Math.round(ceiling * (0.25 + roll * 0.75) * weekend));
+}
 
 /* .env.local is not loaded outside Next, so read it here. */
 function loadEnv() {
@@ -60,10 +82,13 @@ if (DRY) {
     console.log(`  ${s.slug.padEnd(24)} ${s.name}  ${s.lat}, ${s.lng}  bortle ${s.bortleClass}`);
     for (const v of s.verify) console.log(`      VERIFY: ${v}`);
   }
-  console.log(`experiences  ${EXPERIENCES.length}`);
+  const real = EXPERIENCES.filter((e) => !e.fictional).length;
+  console.log(`experiences  ${EXPERIENCES.length}  (${real} sourced, ${EXPERIENCES.length - real} fictional)`);
   for (const e of EXPERIENCES) {
-    console.log(`  ${e.slug.padEnd(24)} ${e.title}  SAR ${e.priceSar}  ${e.siteSlug}/${e.operatorSlug}`);
-    for (const v of e.verify) console.log(`      VERIFY: ${v}`);
+    const mark = e.fictional ? "FICTIONAL" : "sourced  ";
+    console.log(
+      `  ${mark} ${e.slug.padEnd(34)} ${String(e.priceSar).padStart(4)} SAR  ${String(e.durationMin).padStart(3)}m  ${e.category.padEnd(16)} ${e.siteSlug}/${e.operatorSlug}`,
+    );
   }
   console.log(`availability ${EXPERIENCES.length * NIGHTS} rows (${NIGHTS} nights x ${EXPERIENCES.length})`);
   console.log(`\nenv: NEXT_PUBLIC_SUPABASE_URL ${url ? "set" : "MISSING"}, SUPABASE_SERVICE_ROLE_KEY ${key ? "set" : "MISSING"}`);
@@ -140,13 +165,15 @@ const experiences = await upsert(
 /* Every experience is offered on every night for the demo window. Which
    nights are actually worth booking is the night picker's job, computed from
    the moon rather than baked into inventory. */
+const seedBySlug = Object.fromEntries(EXPERIENCES.map((e) => [e.slug, e]));
+
 await upsert(
   "availability",
   experiences.flatMap((e) =>
     nights(NIGHTS).map((date) => ({
       experience_id: e.id,
       date,
-      slots_remaining: SLOTS_PER_NIGHT,
+      slots_remaining: slotsFor(e.slug, date, seedBySlug[e.slug]?.groupMax ?? null),
     })),
   ),
   "experience_id,date",

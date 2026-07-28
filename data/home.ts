@@ -1,89 +1,116 @@
-/* Landing page copy.
+/* Card copy for the catalogue views.
 
    CLAUDE.md section 7: sections take content as typed props from data/, so no
    copy is hardcoded in a section component. */
 
-export type Cta = { label: string; href: string };
-
 /* PLACEHOLDER — replace with real, sourced AlUla/site photography before demo
  *
- * One Unsplash-licensed image per seeded experience, keyed by slug. All three
- * are real desert-night stock and none of them show AlUla or the site the
- * card names, which is why every card prints "PLACEHOLDER IMAGE, NOT <SITE>"
+ * One Unsplash-licensed image per seeded experience, keyed by slug. Every one
+ * is real desert or night-sky stock and none of them show AlUla or the site
+ * the card names, which is why each card carries a "stock, not <site>" tag
  * over the picture. Rule 13 allows licensed stock; rule 12 is why it says so
  * out loud instead of letting a photo imply a place.
+ *
+ * Each id was checked to resolve before it was added here. A 404 on this map
+ * is a card with a grey hole in it, and the failure is silent.
  */
+const UNSPLASH = (id: string) =>
+  `https://images.unsplash.com/${id}?w=1200&q=75&auto=format&fit=crop`;
+
 export const EXPERIENCE_IMAGES: Record<string, { src: string; alt: string }> = {
+  /* real records */
   "stargazing-at-gharameel": {
-    src: "https://images.unsplash.com/photo-1581610186406-5f6e9f9edbc1?w=1200&q=75&auto=format&fit=crop",
-    alt: "Sand dunes under a dense starfield. Stock photography from Abu Dhabi, not AlUla.",
+    src: UNSPLASH("photo-1581610186406-5f6e9f9edbc1"),
+    alt: "Sand dunes under a dense starfield. Stock photography, not AlUla.",
   },
   "stargazing-at-sharaan": {
-    src: "https://images.unsplash.com/photo-1489493173507-6feea31f12ff?w=1200&q=75&auto=format&fit=crop",
-    alt: "Desert dunes at night under stars. Stock photography from Morocco, not AlUla.",
+    src: UNSPLASH("photo-1489493173507-6feea31f12ff"),
+    alt: "Desert dunes at night under stars. Stock photography, not AlUla.",
   },
   "sharaan-safari": {
-    src: "https://images.unsplash.com/photo-1507917570388-d661984ea008?w=1200&q=75&auto=format&fit=crop",
-    alt: "The Milky Way over sand dunes. Stock photography from China, not AlUla.",
+    src: UNSPLASH("photo-1507917570388-d661984ea008"),
+    alt: "The Milky Way over sand dunes. Stock photography, not AlUla.",
+  },
+
+  /* AlGharameel */
+  "gharameel-milky-way-photography": {
+    src: UNSPLASH("photo-1582209540198-6bfd137a9e57"),
+    alt: "A rock formation silhouetted against a night sky. Stock photography, not AlUla.",
+  },
+  "gharameel-family-first-stars": {
+    src: UNSPLASH("photo-1527419105721-af1f23c86dec"),
+    alt: "Beds laid out in the open under a starry sky. Stock photography, not AlUla.",
+  },
+  "gharameel-new-moon-camp": {
+    src: UNSPLASH("photo-1638862925201-4e373cb6a630"),
+    alt: "A lit tent under the Milky Way. Stock photography, not AlUla.",
+  },
+  "gharameel-meteor-watch": {
+    src: UNSPLASH("photo-1608408908478-fe36acb430ef"),
+    alt: "People silhouetted on a rock formation under a starry night. Stock photography, not AlUla.",
+  },
+
+  /* Sharaan */
+  "sharaan-deep-sky-telescope": {
+    src: UNSPLASH("photo-1548124771-9f2040b66df8"),
+    alt: "A telescope on a hillside under a night sky. Stock photography, not AlUla.",
+  },
+  "sharaan-canyon-dinner": {
+    src: UNSPLASH("photo-1559460589-59f8520042c8"),
+    alt: "People sitting around a campfire at night. Stock photography, not AlUla.",
+  },
+  "sharaan-sunset-to-stars": {
+    src: UNSPLASH("photo-1620029288530-4ff6a684e33d"),
+    alt: "A rocky mountain under a starry night. Stock photography, not AlUla.",
+  },
+  "sharaan-private-astronomer": {
+    src: UNSPLASH("photo-1554215774-059b0d9d49d5"),
+    alt: "A person standing beside a telescope on a tripod. Stock photography, not AlUla.",
+  },
+
+  /* AlUla Manara */
+  "manara-plateau-telescope": {
+    src: UNSPLASH("photo-1566229581300-2ce436d28538"),
+    alt: "A telescope mounted outdoors. Stock photography, not AlUla.",
+  },
+  "manara-astrophotography-workshop": {
+    src: UNSPLASH("photo-1717228359912-e2f6401df18f"),
+    alt: "A telescope on a tripod in a field under the night sky. Stock photography, not AlUla.",
+  },
+  "manara-zodiacal-dawn": {
+    src: UNSPLASH("photo-1501862700950-18382cd41497"),
+    alt: "A mountain under a starry sky before dawn. Stock photography, not AlUla.",
+  },
+  "manara-observatory-preview": {
+    src: UNSPLASH("photo-1518577589972-ad2d4f44eae9"),
+    alt: "An observatory dish on a mountain peak at night. Stock photography, not AlUla.",
+  },
+
+  /* Wadi Nakhlah */
+  "nakhlah-naked-eye-walk": {
+    src: UNSPLASH("photo-1509811659822-9d273a2030a3"),
+    alt: "Mountains silhouetted against a starry night. Stock photography, not AlUla.",
+  },
+  "nakhlah-bedouin-night": {
+    src: UNSPLASH("photo-1543693259-805446e1bcc3"),
+    alt: "Three camels under a starry sky. Stock photography, not AlUla.",
+  },
+  "nakhlah-dark-sky-intro": {
+    src: UNSPLASH("photo-1570053102088-42ec524512a4"),
+    alt: "A desert landscape at night. Stock photography, not AlUla.",
+  },
+  "nakhlah-photography-basics": {
+    src: UNSPLASH("photo-1632679326346-19b4031f7c5e"),
+    alt: "A rock formation with stars behind it. Stock photography, not AlUla.",
   },
 };
 
-export type HeroImage = {
-  src: string;
-  /** what the picture actually shows, not what we wish it showed */
-  alt: string;
-  /** rendered on the image, so nobody mistakes stock for a Suhail site */
-  caption: string;
-};
-
-export type HeroContent = {
-  eyebrow: string;
-  /** one string per visual line, for LineReveal */
-  headingLines: string[];
-  sub: string;
-  primary: Cta;
-  secondary: Cta;
-  image: HeroImage;
-};
-
-export const HERO: HeroContent = {
-  eyebrow: "Tonight over AlUla",
-  headingLines: ["Look up.", "Then book."],
-  sub: "Four DarkSky-certified reserves sit north of AlUla, across one of the largest connected dark-sky parks in the world. We show what the sky will be doing on the night of your trip, then book the night that matches.",
-  primary: { label: "Pick a night", href: "/tonight" },
-  secondary: { label: "See the sites", href: "/sites" },
-  // PLACEHOLDER — replace with real, sourced AlUla/site photography before demo
-  //
-  // Unsplash-licensed stock, which clears rule 13's "real astrophotography,
-  // licensed stock, or nothing" bar. It is not AlUla and is not any of the
-  // four sites, so the alt text and the on-image caption both say so rather
-  // than letting it read as a photograph of somewhere Suhail sends people.
-  //
-  // Dunes under the Milky Way, shot at Mingsha Mountain in China. The brief
-  // suggested a snowy alpine peak, which is honestly generic but a poor
-  // stand-in for a Saudi desert product even when labelled. This at least
-  // shares its terrain with the real thing.
-  image: {
-    src: "https://images.unsplash.com/photo-1507917570388-d661984ea008?w=1600&q=80&auto=format&fit=crop",
-    alt: "The Milky Way over sand dunes at night. Stock photography of a desert in China, not AlUla.",
-    caption: "Placeholder image, not AlUla",
-  },
-};
-
-/* The homepage opens on inventory now, so it needs a header line rather than
-   a hero: one eyebrow, one headline, and a stats line built from real counts
-   at render time. */
+/* /discover opens on inventory rather than a hero: one eyebrow, one headline,
+   and a stats line built from real counts at render time. The hero this
+   replaced, and the night-picker intro copy that went with it, were removed
+   with Hero.tsx and ExperienceBoard.tsx once nothing imported either. */
 export const HOME_HEADER = {
   eyebrow: "Tonight over AlUla",
   headline: "The sky is open over AlUla.",
   sub: "Every experience running on the night you pick, at four DarkSky-certified reserves north of AlUla.",
-};
-
-export const NIGHT_PICKER: { eyebrow: string; headingLines: string[]; sub: string } = {
-  eyebrow: "Pick a night",
-  /* Short lines on purpose: the chart now shares this row, so the copy
-     column is narrower than it was and a long line wraps inside LineReveal's
-     per-line mask, which reveals it as one block rather than line by line. */
-  headingLines: ["A different sky", "every night."],
-  sub: "A full moon washes out everything faint. A new moon puts the Milky Way over the rocks. Choose a date to see which one your trip lands on.",
 };
