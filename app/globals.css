@@ -286,6 +286,24 @@ html[data-intro="play"]::after {
     animation: cell-fill 350ms var(--ease-move) forwards;
   }
 
+  /* The general-purpose version of the same idea: anything that represents a
+     measured value — a darkness scale, a cloud-cover meter, a twilight
+     window — fills in from zero width rather than fading in from
+     transparent. A fill reads as active and measured; a fade reads as
+     merely appearing, which is the wrong claim for a number the product is
+     asserting is true right now. Same convention as cell-fill: gated on .js
+     and on motion being allowed, so the bar is already at its correct final
+     width in any browser that skips this rule.
+
+     transform-origin has to be set on the element itself (inline style or a
+     paired class), not here, since "left" vs a computed midpoint depends on
+     which edge the value's zero-point actually is. */
+  .js .fill-x {
+    transform: scaleX(0);
+    animation: fill-x 450ms var(--ease-move) forwards;
+    animation-delay: var(--fill-delay, 0ms);
+  }
+
   .js .panel-enter {
     animation: panel-enter 200ms var(--ease-move);
   }
@@ -311,6 +329,14 @@ html[data-intro="play"]::after {
 
 .ambient-star {
   opacity: var(--twinkle-low, 0.3);
+}
+
+/* Unconditional: every value-fill bar in the product reads left to right, so
+   this is the default rather than something each caller has to repeat. The
+   animated scaleX(0) start state itself stays inside the .js/reduced-motion
+   gate above — this alone does nothing to an element without that class. */
+.fill-x {
+  transform-origin: left center;
 }
 
 @keyframes chart-draw {
@@ -346,6 +372,12 @@ html[data-intro="play"]::after {
 @keyframes cell-fill {
   to {
     transform: scaleY(1);
+  }
+}
+
+@keyframes fill-x {
+  to {
+    transform: scaleX(1);
   }
 }
 

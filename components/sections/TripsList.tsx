@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { CoordinateTag } from "@/components/ui/CoordinateTag";
 import { MoonPhase } from "@/components/ui/MoonPhase";
+import { Reveal } from "@/components/ui/Reveal";
+import { onSessionChange } from "@/lib/auth";
 import { isWaxing, moonPhase, parseDateKey } from "@/lib/astro";
 import { readTrips } from "@/lib/trips";
 
@@ -14,7 +16,41 @@ import { readTrips } from "@/lib/trips";
  * References come from localStorage, the bookings themselves come back from
  * the database through /api/bookings. A reference whose booking cannot be
  * found is reported rather than dropped: silently hiding it would look
- * identical to never having booked at all. */
+ * identical to never having booked at all.
+ *
+ * This is deliberately separate from /account. A guest booking made without
+ * signing in only ever lives here, on this device; an account booking (see
+ * migrations/003_accounts.sql) lives on /account and follows the traveller
+ * anywhere. The signed-in-state link below is this page's one acknowledgment
+ * that the other list exists, for whichever one a returning traveller
+ * actually meant to open. */
+
+function AccountLink() {
+  const [signedIn, setSignedIn] = useState<boolean | undefined>(undefined);
+  useEffect(() => onSessionChange((session) => setSignedIn(Boolean(session))), []);
+
+  if (signedIn === undefined) return null;
+  return (
+    <p className="mt-4 text-[14px] text-neutral-700">
+      {signedIn ? (
+        <>
+          Looking for a booking made under your account?{" "}
+          <Link href="/account" className="underline underline-offset-4">
+            View account bookings
+          </Link>
+          .
+        </>
+      ) : (
+        <>
+          <Link href="/login" className="underline underline-offset-4">
+            Sign in
+          </Link>{" "}
+          to keep bookings under an account instead of just this device.
+        </>
+      )}
+    </p>
+  );
+}
 
 type Trip = {
   reference: string;
@@ -91,10 +127,11 @@ export function TripsList() {
       <>
         <h1 className="text-h2">No bookings yet.</h1>
         <p className="mt-8 max-w-[52ch] text-neutral-700">
-          Nights you book are kept here on this device, so you can find your reference in the
-          desert with no signal. Nothing is stored anywhere else against you: there are no
-          accounts.
+          A guest booking is kept here on this device, so you can find your reference in the
+          desert with no signal. Signing in first keeps it under an account instead, which is
+          reachable from anywhere.
         </p>
+        <AccountLink />
         <Button href="/tonight" variant="primary" className="mt-8">
           Pick a night
         </Button>
@@ -110,12 +147,14 @@ export function TripsList() {
       <p className="mt-6 max-w-[52ch] text-neutral-700">
         Kept on this device. Opening Suhail in another browser will not show them.
       </p>
+      <AccountLink />
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
-        {state.trips.map((trip) => {
+        {state.trips.map((trip, i) => {
           const date = parseDateKey(trip.date);
           return (
-            <Card key={trip.reference} lift>
+            <Reveal key={trip.reference} delay={i * 70}>
+            <Card lift>
               <div className="flex items-start gap-4">
                 <MoonPhase phase={moonPhase(date)} waxing={isWaxing(date)} size={40} />
                 <div className="min-w-0">
@@ -139,6 +178,7 @@ export function TripsList() {
                 View booking
               </Link>
             </Card>
+            </Reveal>
           );
         })}
       </div>

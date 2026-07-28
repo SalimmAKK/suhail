@@ -6,6 +6,7 @@ import { ExperienceCard } from "@/components/discovery/ExperienceCard";
 import { FilterChips, type ChipDef } from "@/components/discovery/FilterChips";
 import { MapPanel } from "@/components/map/MapPanel";
 import { NightGrid } from "@/components/ui/NightGrid";
+import { Reveal } from "@/components/ui/Reveal";
 import { useFavourites } from "@/lib/useFavourites";
 import { CATEGORY_LABEL, type ExperienceCategory } from "@/data/experiences";
 import { parseDateKey, shortDateWithDay, skyQuality } from "@/lib/astro";
@@ -279,15 +280,19 @@ export function DiscoveryView({
             </p>
           ) : (
             <div className="grid grid-cols-1 content-start gap-5 md:grid-cols-2">
+              {/* Staggered 70ms apart, capped after the eighth card so a
+                  large filtered set still settles in well under a second
+                  rather than trailing off for the rows near the bottom. */}
               {filtered.map((item, i) => (
-                <ExperienceCard
-                  key={item.id}
-                  item={item}
-                  rank={i + 1}
-                  favourite={favourites.has(item.id)}
-                  onToggleFavourite={toggle}
-                  onHover={setHoveredSite}
-                />
+                <Reveal key={item.id} delay={Math.min(i, 8) * 70}>
+                  <ExperienceCard
+                    item={item}
+                    rank={i + 1}
+                    favourite={favourites.has(item.id)}
+                    onToggleFavourite={toggle}
+                    onHover={setHoveredSite}
+                  />
+                </Reveal>
               ))}
             </div>
           )}

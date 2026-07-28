@@ -179,4 +179,69 @@ await upsert(
   "experience_id,date",
 );
 
+/* Mock bookings for /operators, explicitly authorized as fictional demo data
+ * (this is a bootcamp project, not a running marketplace). Fake guests
+ * against real seeded experiences, so the admin view has something to show.
+ *
+ * Reference prefix is DEMO- rather than SUH-, for two reasons: it reads at a
+ * glance as fabricated rather than a guest's real booking, and it can never
+ * collide with anything a traveller books through the live flow, whose
+ * reference always matches the SUH-[A-Z0-9]{5} the RLS policy in
+ * migrations/001_init.sql enforces for anon inserts. This script writes
+ * through the service role, which bypasses that policy, so the different
+ * prefix is available and is what stage-7 verify's cleanup (which only ever
+ * deletes references it created itself, all SUH-) will never touch.
+ *
+ * Idempotent the same way as everything else here: keyed on reference. */
+const nightPool = nights(NIGHTS);
+const MOCK_BOOKINGS = [
+  { slug: "stargazing-at-gharameel", night: 5, guests: 2, name: "Farah Al-Otaibi", status: "confirmed" },
+  { slug: "stargazing-at-gharameel", night: 12, guests: 4, name: "Michael Brennan", status: "confirmed" },
+  { slug: "stargazing-at-sharaan", night: 8, guests: 2, name: "Noura Al-Qahtani", status: "confirmed" },
+  { slug: "stargazing-at-sharaan", night: 21, guests: 6, name: "Elena Vasquez", status: "pending" },
+  { slug: "sharaan-safari", night: 9, guests: 3, name: "Yusuf Demir", status: "confirmed" },
+  { slug: "gharameel-milky-way-photography", night: 15, guests: 2, name: "Priya Nair", status: "confirmed" },
+  { slug: "gharameel-family-first-stars", night: 18, guests: 5, name: "Khalid Al-Harbi", status: "confirmed" },
+  { slug: "gharameel-new-moon-camp", night: 27, guests: 2, name: "Sarah Whitfield", status: "cancelled" },
+  { slug: "sharaan-deep-sky-telescope", night: 22, guests: 2, name: "Omar Ziyad", status: "confirmed" },
+  { slug: "sharaan-canyon-dinner", night: 30, guests: 4, name: "Lucia Moretti", status: "confirmed" },
+  { slug: "sharaan-sunset-to-stars", night: 11, guests: 2, name: "Haruto Sato", status: "confirmed" },
+  { slug: "manara-astrophotography-workshop", night: 33, guests: 1, name: "Dana Fischer", status: "pending" },
+];
+
+function demoReference(seed) {
+  let h = 2166136261;
+  for (const ch of seed) {
+    h ^= ch.charCodeAt(0);
+    h = Math.imul(h, 16777619);
+  }
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  let n = h >>> 0;
+  for (let i = 0; i < 5; i++) {
+    out += alphabet[n % alphabet.length];
+    n = Math.floor(n / alphabet.length);
+  }
+  return `DEMO-${out}`;
+}
+
+await upsert(
+  "bookings",
+  MOCK_BOOKINGS.map((b) => {
+    const experienceId = experiences.find((e) => e.slug === b.slug)?.id;
+    if (!experienceId) throw new Error(`seed.mjs: no experience seeded for slug "${b.slug}"`);
+    const date = nightPool[b.night];
+    return {
+      experience_id: experienceId,
+      date,
+      guest_count: b.guests,
+      contact_name: b.name,
+      contact_email: `${b.name.toLowerCase().replace(/[^a-z]+/g, ".")}@example.com`,
+      status: b.status,
+      reference: demoReference(`${b.slug}:${date}:${b.name}`),
+    };
+  }),
+  "reference",
+);
+
 console.log("\nseeded");

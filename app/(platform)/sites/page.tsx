@@ -50,8 +50,9 @@ export default function Sites() {
         </p>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2">
-          {SITES.map((site) => (
-            <Card key={site.slug} lift>
+          {SITES.map((site, i) => (
+            <Reveal key={site.slug} delay={i * 70}>
+            <Card lift>
               <div className="flex items-start justify-between gap-4">
                 {/* min-w-0: a flex child's default min-width is its content
                     width, so without this the longest site name (AlGharameel
@@ -81,6 +82,7 @@ export default function Sites() {
                 View site
               </Link>
             </Card>
+            </Reveal>
           ))}
         </div>
       </Shell>

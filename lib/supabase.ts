@@ -36,15 +36,24 @@ let publicClient: SuhailClient | null = null;
  * Server code reading the public catalogue should use this rather than
  * supabaseServer(): the catalogue is anon-readable by policy, so there is no
  * reason to reach for a key that bypasses row-level security to read it.
+ *
+ * Session persistence is conditional on running in the browser. A signed-in
+ * traveller's session has to survive a reload to be worth anything, so the
+ * browser tab keeps it in localStorage (migrations/003_accounts.sql is what
+ * makes a session mean anything: it is what scopes "my bookings" to auth.uid()).
+ * A server render has no localStorage and no reason to hold a session at all,
+ * since every server call here only ever reads the public, anon-readable
+ * catalogue.
  */
 export function supabasePublic(): SuhailClient {
   /* one instance per process or tab: a new client per render leaks sockets */
   if (publicClient) return publicClient;
 
+  const browser = typeof window !== "undefined";
   publicClient = createClient<Database>(
     required("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL),
     required("NEXT_PUBLIC_SUPABASE_ANON_KEY", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-    { auth: { persistSession: false } },
+    { auth: { persistSession: browser, autoRefreshToken: browser } },
   );
   return publicClient;
 }

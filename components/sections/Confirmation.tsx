@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { CoordinateTag } from "@/components/ui/CoordinateTag";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { Reveal } from "@/components/ui/Reveal";
 import { SkyAtSlot } from "@/components/sections/SkyAtSlot";
 import { rememberTrip } from "@/lib/trips";
 import { parseDateKey } from "@/lib/astro";
@@ -50,7 +51,7 @@ export function Confirmation({
 
   return (
     <div className="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
-      <div>
+      <Reveal>
         <Eyebrow className="mb-7">Reserved</Eyebrow>
         {/* Not every seeded experience runs after dark: the Sharaan safari is
             a daytime drive. Calling that "a night" would be wrong on the one
@@ -119,29 +120,34 @@ export function Confirmation({
             Book another night
           </Link>
         </div>
-      </div>
+      </Reveal>
 
+      {/* Reveal sits inside the aside, not around it: the aside itself has to
+          stay the direct grid child for lg:self-start and its sticky
+          positioning to do anything at all. */}
       <aside className="lg:sticky lg:top-[var(--section-top)] lg:self-start">
-        <SkyAtSlot dateKey={booking.date} />
-        {experience ? (
-          <div className="mt-6 border border-divider bg-neutral-100 p-6">
-            <h2 className="text-xl">Getting there</h2>
-            <CoordinateTag
-              className="mt-3"
-              items={[experience.site.name.toUpperCase(), experience.operatorName.toUpperCase()]}
-            />
-            <p className="mt-4 text-neutral-700">
-              Meeting point and pickup are arranged by {experience.operatorName}. This build
-              does not carry their published meeting details, so it does not guess at them.
-            </p>
-            <Link
-              href={`/sites/${experience.site.slug}`}
-              className="mt-5 inline-block font-display text-label uppercase tracking-label text-accent-700 underline underline-offset-4"
-            >
-              About {experience.site.name}
-            </Link>
-          </div>
-        ) : null}
+        <Reveal delay={100}>
+          <SkyAtSlot dateKey={booking.date} />
+          {experience ? (
+            <div className="mt-6 border border-divider bg-neutral-100 p-6">
+              <h2 className="text-xl">Getting there</h2>
+              <CoordinateTag
+                className="mt-3"
+                items={[experience.site.name.toUpperCase(), experience.operatorName.toUpperCase()]}
+              />
+              <p className="mt-4 text-neutral-700">
+                Meeting point and pickup are arranged by {experience.operatorName}. This build
+                does not carry their published meeting details, so it does not guess at them.
+              </p>
+              <Link
+                href={`/sites/${experience.site.slug}`}
+                className="mt-5 inline-block font-display text-label uppercase tracking-label text-accent-700 underline underline-offset-4"
+              >
+                About {experience.site.name}
+              </Link>
+            </div>
+          ) : null}
+        </Reveal>
       </aside>
     </div>
   );

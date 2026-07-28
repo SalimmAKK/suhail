@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Ticket } from "lucide-react";
 import { BrandMark } from "@/components/layout/BrandMark";
+import { onSessionChange } from "@/lib/auth";
 import { cn, focusRing } from "@/lib/cn";
 
 /* The single top bar every view shares. 56px, 2px bottom divider, three
@@ -17,11 +19,13 @@ import { cn, focusRing } from "@/lib/cn";
    a real destination with real pages behind it, and it keeps the strip at the
    five cells the design draws.
 
-   The handoff's last cell is an avatar with a person's initials. There is no
-   account in this product, so initials would imply a signed-in traveller who
-   does not exist. The cell keeps its 28px ink square and becomes the entry to
-   My trips, which is the thing a returning traveller actually wants from that
-   corner. */
+   The handoff's last cell was an avatar with a person's initials, dropped
+   originally because there was no account in this product for initials to
+   represent. migrations/003_accounts.sql added real ones, so the cell now
+   does what it was always going to do once accounts existed: Sign in when
+   nobody is, Account once someone is. The Ticket cell stays pointed at My
+   trips regardless, since a guest booking with no account is still tracked
+   there by device. */
 
 const TABS = [
   { href: "/discover", label: "Tonight" },
@@ -40,6 +44,9 @@ function isActive(pathname: string, href: string): boolean {
 
 export function TopBar({ nightLabel }: { nightLabel: string }) {
   const pathname = usePathname();
+  const [signedIn, setSignedIn] = useState<boolean | undefined>(undefined);
+
+  useEffect(() => onSessionChange((session) => setSignedIn(Boolean(session))), []);
 
   return (
     /* Sticky, as the nav it replaces was. The three fixed-height views never
@@ -122,6 +129,23 @@ export function TopBar({ nightLabel }: { nightLabel: string }) {
               <Ticket aria-hidden size={15} strokeWidth={2.2} />
             </Link>
           </span>
+          {signedIn !== undefined ? (
+            <span className="inline-flex h-full items-center border-l border-divider">
+              <Link
+                href={signedIn ? "/account" : "/login"}
+                className={cn(
+                  "inline-flex h-full items-center px-4 text-[12px] uppercase tracking-[0.06em]",
+                  "transition-colors duration-150 ease-move",
+                  isActive(pathname, signedIn ? "/account" : "/login")
+                    ? "text-text"
+                    : "text-text/70 hover:text-text",
+                  focusRing,
+                )}
+              >
+                {signedIn ? "Account" : "Sign in"}
+              </Link>
+            </span>
+          ) : null}
         </div>
       </nav>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Reveal } from "@/components/ui/Reveal";
 import { useFavourites } from "@/lib/useFavourites";
 import { parseDateKey, shortDateWithDay } from "@/lib/astro";
 import type { ListItem } from "@/lib/present";
@@ -150,71 +151,85 @@ export function DetailView({
         </div>
 
         <div className="p-8">
-          {item.description ? (
-            <p className="mb-6 max-w-[62ch] font-display text-[22px] font-extrabold leading-[1.4] tracking-[-0.01em]">
-              {item.description}
-            </p>
-          ) : null}
+          <Reveal>
+            {item.description ? (
+              <p className="mb-6 max-w-[62ch] font-display text-[22px] font-extrabold leading-[1.4] tracking-[-0.01em]">
+                {item.description}
+              </p>
+            ) : null}
 
-          <div className="my-6 grid grid-cols-2 border-b-2 border-t-2 border-divider md:grid-cols-4">
-            <Fact label="Duration" value={item.durationLabel ?? "—"} caption="As listed" />
-            <Fact
-              label="Sky quality"
-              value={item.bortle !== null ? `B ${item.bortle}` : "—"}
-              caption="DarkSky class"
-            />
-            <Fact
-              label="Group size"
-              value={item.groupMax !== null ? `≤ ${item.groupMax}` : `From ${item.groupMin ?? 1}`}
-              caption={item.groupMax !== null ? "Per departure" : "Maximum not published"}
-            />
-            <Fact
-              label="Seats left"
-              value={seats !== null ? String(seats) : "—"}
-              caption={date ? shortDateWithDay(parseDateKey(date)) : "Pick a night"}
-              last
-            />
-          </div>
+            <div className="my-6 grid grid-cols-2 border-b-2 border-t-2 border-divider md:grid-cols-4">
+              <Fact label="Duration" value={item.durationLabel ?? "—"} caption="As listed" />
+              <Fact
+                label="Sky quality"
+                value={item.bortle !== null ? `B ${item.bortle}` : "—"}
+                caption="DarkSky class"
+              />
+              <Fact
+                label="Group size"
+                value={item.groupMax !== null ? `≤ ${item.groupMax}` : `From ${item.groupMin ?? 1}`}
+                caption={item.groupMax !== null ? "Per departure" : "Maximum not published"}
+              />
+              <Fact
+                label="Seats left"
+                value={seats !== null ? String(seats) : "—"}
+                caption={date ? shortDateWithDay(parseDateKey(date)) : "Pick a night"}
+                last
+              />
+            </div>
 
-          <p className="mb-4 max-w-[62ch] text-[15px] leading-[1.65]">{siteDescription}</p>
-          {bestFor.length ? (
-            <p className="mb-4 max-w-[62ch] text-[15px] leading-[1.65]">
-              The terrain here suits {bestFor.join(", ").replace(/-/g, " ")}, which is what the
-              night picker matches against when it recommends a site for a given date.
-            </p>
-          ) : null}
+            <p className="mb-4 max-w-[62ch] text-[15px] leading-[1.65]">{siteDescription}</p>
+            {bestFor.length ? (
+              <p className="mb-4 max-w-[62ch] text-[15px] leading-[1.65]">
+                The terrain here suits {bestFor.join(", ").replace(/-/g, " ")}, which is what the
+                night picker matches against when it recommends a site for a given date.
+              </p>
+            ) : null}
+          </Reveal>
 
           <section className="border-t-2 border-divider py-6">
-            <h2 className="mb-3.5 font-display text-[20px] font-extrabold tracking-[-0.01em]">
-              The sky on this night
-            </h2>
-            <p className="mb-4 max-w-[62ch] text-[13px] text-text/65">
-              Not the operator&rsquo;s schedule, which this listing does not publish. These are the
-              night&rsquo;s own events over AlUla.
-            </p>
-            <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-x-5 gap-y-3">
-              {timeline.map((entry, i) => (
-                <div key={`${entry.time}-${entry.title}`} className="contents">
-                  <span className="tnum pt-0.5 font-display text-[14px] font-extrabold text-accent-700">
-                    {entry.time}
-                  </span>
-                  <span
-                    className={cn(
-                      "pb-3 text-[14px] leading-[1.55]",
-                      i === timeline.length - 1 ? "" : "border-b border-divider",
-                    )}
-                  >
-                    <strong className="mb-1 block font-display text-[14px] font-extrabold">
-                      {entry.title}
-                    </strong>
-                    {entry.detail}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <Reveal>
+              <h2 className="mb-3.5 font-display text-[20px] font-extrabold tracking-[-0.01em]">
+                The sky on this night
+              </h2>
+              <p className="mb-4 max-w-[62ch] text-[13px] text-text/65">
+                Not the operator&rsquo;s schedule, which this listing does not publish. These are
+                the night&rsquo;s own events over AlUla.
+              </p>
+            </Reveal>
+            {/* One Reveal around the whole grid, not one per row: each row is
+                two direct grid children held together by display:contents on
+                its wrapper (so the time column and text column line up across
+                rows), and opacity/transform are silently no-ops on a
+                display:contents element — there is no box left to animate.
+                A per-row stagger would have compiled and rendered but simply
+                never animated anything. */}
+            <Reveal>
+              <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-x-5 gap-y-3">
+                {timeline.map((entry, i) => (
+                  <div key={`${entry.time}-${entry.title}`} className="contents">
+                    <span className="tnum pt-0.5 font-display text-[14px] font-extrabold text-accent-700">
+                      {entry.time}
+                    </span>
+                    <span
+                      className={cn(
+                        "pb-3 text-[14px] leading-[1.55]",
+                        i === timeline.length - 1 ? "" : "border-b border-divider",
+                      )}
+                    >
+                      <strong className="mb-1 block font-display text-[14px] font-extrabold">
+                        {entry.title}
+                      </strong>
+                      {entry.detail}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
           </section>
 
           <section className="border-t-2 border-divider py-6">
+            <Reveal>
             <h2 className="mb-3.5 font-display text-[20px] font-extrabold tracking-[-0.01em]">
               Where these figures come from
             </h2>
@@ -258,12 +273,14 @@ export function DetailView({
                 ))}
               </ul>
             ) : null}
+            </Reveal>
           </section>
         </div>
       </div>
 
       <aside className="border-divider bg-bg p-6 xl:border-l-2">
         <div className="xl:sticky xl:top-6">
+        <Reveal>
           <p className="text-[11px] uppercase tracking-[0.12em] text-text/60">
             Operated by {item.operatorName}
           </p>
@@ -388,6 +405,7 @@ export function DetailView({
               Demo mode, no card
             </div>
           </div>
+        </Reveal>
         </div>
       </aside>
     </div>

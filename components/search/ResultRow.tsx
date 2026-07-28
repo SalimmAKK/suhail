@@ -35,9 +35,19 @@ export function ResultRow({
          scrolls that fires constantly: it measured as 142ms of the 328ms this
          route spent rendering a thirty-step scroll. The handoff specifies a
          120ms transition for card borders, not for result rows, so this is
-         also the closer reading of it. */
-      className="relative grid grid-cols-[200px_minmax(0,1fr)_180px] items-start gap-5 border-b-2 border-divider px-7 py-5 hover:bg-text/3"
+         also the closer reading of it.
+
+         The one detail this row gets instead is a left accent bar on a
+         transform, not a colour: scaleY is compositor-only and costs nothing
+         like the background repaint above did, so it is safe on a list this
+         dense during a scroll. */
+      className="group relative grid grid-cols-[200px_minmax(0,1fr)_180px] items-start gap-5 border-b-2 border-divider px-7 py-5 hover:bg-text/3"
     >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-[3px] origin-top scale-y-0 bg-accent transition-transform duration-200 ease-move group-hover:scale-y-100 motion-reduce:transition-none"
+      />
+
       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200">
         {item.image ? (
           /* PLACEHOLDER — replace with real, sourced AlUla/site photography before demo */

@@ -90,9 +90,15 @@ Non-negotiable. Check output against this list before reporting any task complet
     it appears.
 
 ### 2.4 The platform reality rule
-16. **The product is being demoed, not sold.** No "sign up", no "trusted by",
-    no fake tour counts. Allowed: "book this night", "see the sky", "reserve".
+16. **The product is being demoed, not sold.** No "trusted by", no fake tour
+    counts. Allowed: "book this night", "see the sky", "reserve".
     Forbidden: any claim implying a running two-sided marketplace.
+    **"No sign up" is superseded**: the project owner explicitly directed
+    real client accounts (Supabase Auth, `/login`, `/account`) so a
+    traveller can see and cancel their own bookings from any device. See
+    migrations/003_accounts.sql and section 12. This is still not a
+    two-sided marketplace — operators have no self-service portal (rule 17
+    still holds) — it is one-sided account access for the traveller only.
 17. **Operators are seeded manually in v1.** No operator self-service portal.
     An `/operators` admin route may exist for demo purposes but is not linked
     from the public nav.
@@ -164,9 +170,18 @@ Non-negotiable. Check output against this list before reporting any task complet
 /book/[experienceId]       The booking flow. Date, guests, contact, mock pay.
 /book/confirmation/[id]    Confirmation screen. Real DB row, real reference.
 /about                     What Suhail is, why now, the founder note.
+/login                     Sign in or create an account. Superseded rule,
+                           see section 2.4/16 and section 12.
+/account                   Bookings made under the signed-in account, with
+                           the one write a traveller can make: cancel one
+                           of their own.
 /operators                 Admin route. Seeded operators + bookings received.
                            Not linked from public nav.
 ```
+
+This list predates several routes the app now has (`/search`, `/sky`, `/trips`,
+`/contact` among them) and was not reconciled as those shipped. Treat it as a
+partial record of intent, not a complete map of `/app`.
 
 Bottom nav on mobile has exactly **three** icons:
 `Sky` (star chart) · `Sites` (map) · `Trips` (bookings). No more, no less.
@@ -525,7 +540,12 @@ bookings
   status          text                 -- 'pending' | 'confirmed' | 'cancelled'
   reference       text unique          -- human-readable, e.g. 'SUH-4X2K9'
   created_at      timestamptz default now()
+  user_id         uuid fk auth.users.id, nullable -- migrations/003_accounts.sql
 ```
+
+`user_id` is nullable by design: a guest checkout with no account still works
+exactly as before. When set, it is what scopes the "bookings readable by
+owner" and "bookings cancellable by owner" RLS policies to `auth.uid()`.
 
 Every booking creates a real row. Data survives refresh. This is a hard
 requirement from the Ravyn brief.
@@ -570,7 +590,13 @@ From the Ravyn brief, non-negotiable:
 - One core workflow end to end: **land → pick a night → see experiences →
   book → confirmation** — every step working, no dead clicks
 - Real data persistence in Supabase, verifiable in the dashboard
-- Authentication only if needed — v1 uses email confirmation, no login
+- Authentication: **superseded.** The brief's bar was "only if needed," and
+  the project owner decided it was needed — real client accounts, not just
+  the email confirmation on the booking form. `/login` and `/account` use
+  Supabase Auth (email + password); migrations/003_accounts.sql adds the
+  nullable `user_id` on `bookings` and the two RLS policies that let a
+  signed-in traveller read and cancel only their own rows. Guest booking
+  with no account is unchanged and still the default path.
 - Built with Claude Code. Direct it well.
 
 Beyond the brief, Suhail's own bar for the demo:

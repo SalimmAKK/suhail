@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FilterBar, type FilterCell } from "@/components/search/FilterBar";
 import { ResultRow } from "@/components/search/ResultRow";
 import { MapPanel } from "@/components/map/MapPanel";
+import { Reveal } from "@/components/ui/Reveal";
 import { CATEGORY_LABEL, type ExperienceCategory } from "@/data/experiences";
 import { parseDateKey, shortDateWithDay } from "@/lib/astro";
 import { toPins, type ListItem } from "@/lib/present";
@@ -280,7 +281,9 @@ export function SearchView({
             </p>
           ) : (
             results.map((item, i) => (
-              <ResultRow key={item.id} item={item} rank={i + 1} onHover={setHoveredSite} />
+              <Reveal key={item.id} delay={Math.min(i, 6) * 60}>
+                <ResultRow item={item} rank={i + 1} onHover={setHoveredSite} />
+              </Reveal>
             ))
           )}
         </div>

@@ -82,8 +82,18 @@ export function validateBooking(input: BookingInput): BookingResult | null {
  *
  * Never fakes success: if the insert fails, the error comes back and the
  * caller shows it.
+ *
+ * `userId` is optional and comes from the caller having already checked
+ * whether anyone is signed in (lib/auth.ts's getSession). Passing it tags the
+ * booking as this account's, so it shows up on /account and can be cancelled
+ * from there later; leaving it undefined books as a guest exactly as this
+ * always worked, migrations/003_accounts.sql having made user_id nullable for
+ * precisely that reason.
  */
-export async function createBooking(input: BookingInput): Promise<BookingResult> {
+export async function createBooking(
+  input: BookingInput,
+  userId?: string | null,
+): Promise<BookingResult> {
   const invalid = validateBooking(input);
   if (invalid) return invalid;
 
@@ -102,6 +112,7 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
       contact_phone: input.contactPhone?.trim() || null,
       status: "pending",
       reference,
+      user_id: userId ?? null,
     });
 
     if (!error) return { ok: true, reference };

@@ -1,14 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { CoordinateTag } from "@/components/ui/CoordinateTag";
 import { Field } from "@/components/ui/Field";
+import { Reveal } from "@/components/ui/Reveal";
 import { SkyAtSlot } from "@/components/sections/SkyAtSlot";
 import { cn } from "@/lib/cn";
 import { createBooking, type BookingInput } from "@/lib/booking";
 import { rememberTrip } from "@/lib/trips";
+import { onSessionChange } from "@/lib/auth";
 import { parseDateKey, skyQuality } from "@/lib/astro";
 import type { CatalogExperience } from "@/lib/catalog";
 
@@ -40,6 +43,9 @@ export function BookingFlow({
   initialDate: string | null;
 }) {
   const router = useRouter();
+
+  const [userId, setUserId] = useState<string | null | undefined>(undefined);
+  useEffect(() => onSessionChange((session) => setUserId(session?.user.id ?? null)), []);
 
   const [date, setDate] = useState<string>(
     initialDate && experience.dates.includes(initialDate) ? initialDate : (experience.dates[0] ?? ""),
@@ -91,14 +97,17 @@ export function BookingFlow({
     }
 
     setSubmitting(true);
-    const result = await createBooking({
-      experienceId: experience.id,
-      date,
-      guestCount: guests,
-      contactName: name,
-      contactEmail: email,
-      contactPhone: phone || undefined,
-    });
+    const result = await createBooking(
+      {
+        experienceId: experience.id,
+        date,
+        guestCount: guests,
+        contactName: name,
+        contactEmail: email,
+        contactPhone: phone || undefined,
+      },
+      userId,
+    );
 
     if (!result.ok) {
       setSubmitting(false);
@@ -115,6 +124,7 @@ export function BookingFlow({
 
   return (
     <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16">
+      <Reveal>
       <form onSubmit={onSubmit} noValidate>
         <Group step="01" title="Which night">
           {experience.dates.length === 0 ? (
@@ -185,6 +195,28 @@ export function BookingFlow({
               onValueChange={setPhone}
             />
           </div>
+
+          {userId === undefined ? null : userId ? (
+            <p className="mt-4 text-[14px] text-neutral-700">
+              Signed in. This booking will show up on{" "}
+              <Link href="/account" className="underline underline-offset-4">
+                your account
+              </Link>
+              .
+            </p>
+          ) : (
+            <p className="mt-4 text-[14px] text-neutral-700">
+              Booking as a guest. It is still saved by reference on{" "}
+              <Link href="/trips" className="underline underline-offset-4">
+                this device
+              </Link>
+              , or{" "}
+              <Link href="/login" className="underline underline-offset-4">
+                sign in
+              </Link>{" "}
+              first to manage it from anywhere.
+            </p>
+          )}
         </Group>
 
         <Group step="04" title="Payment">
@@ -224,8 +256,13 @@ export function BookingFlow({
           </p>
         </div>
       </form>
+      </Reveal>
 
+      {/* Reveal sits inside the aside, not around it, for the same reason as
+          Confirmation.tsx: the aside has to stay the direct grid child for
+          lg:self-start and its sticky positioning to take effect. */}
       <aside className="lg:sticky lg:top-[var(--section-top)] lg:self-start">
+        <Reveal delay={100}>
         <div className="border border-divider bg-neutral-100 p-6">
           <h2 className="text-2xl">{experience.title}</h2>
           <CoordinateTag
@@ -261,6 +298,7 @@ export function BookingFlow({
             </p>
           ) : null}
         </div>
+        </Reveal>
       </aside>
     </div>
   );

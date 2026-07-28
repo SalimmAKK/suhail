@@ -65,6 +65,11 @@ export default async function Operators() {
                   ) : null}
                 </div>
 
+                {op.summary ? <p className="mt-3 text-neutral-700">{op.summary}</p> : null}
+                <p className="mt-1 font-display text-label uppercase tracking-label text-neutral-600">
+                  {op.contactEmail ?? "No public contact listed"}
+                </p>
+
                 {op.experiences.length === 0 ? (
                   <p className="mt-5 text-neutral-700">Nothing listed.</p>
                 ) : (

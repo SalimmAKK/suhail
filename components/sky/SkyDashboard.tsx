@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MoonPhase } from "@/components/ui/MoonPhase";
+import { Reveal } from "@/components/ui/Reveal";
 import { eventDateParts, parseDateKey } from "@/lib/astro";
 import type { SkyReading } from "@/lib/sky/types";
 import { cn, focusRing } from "@/lib/cn";
@@ -76,21 +77,23 @@ export function SkyDashboard({
        never scrolls away from a view that is meant to be read as one screen. */
     <div className="sky-dark grid h-[calc(100vh-var(--topbar-h))] grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px]">
       <div data-lenis-prevent className="overflow-y-auto px-8 py-6">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-accent">
-          Tonight · {dateLabel} · AlUla, {sky.coords.lat.toFixed(1)}°N
-        </p>
-        <h1 className="mt-1 font-display text-[42px] font-extrabold leading-none tracking-[-0.02em] text-[var(--sky-text)]">
-          The sky above AlUla, tonight.
-        </h1>
-        <p className="mb-6 mt-2 max-w-[62ch] text-[14px] text-[var(--sky-muted)]">
-          {moon.phrase}
-          {moon.set ? `, setting at ${moon.set}` : ""}. {twilight.darkHours} hours between
-          astronomical dusk at {twilight.astronomicalDusk} and dawn at {twilight.astronomicalDawn},
-          over four DarkSky-certified reserves at Bortle {darkness.bortle}.
-        </p>
+        <Reveal>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-accent">
+            Tonight · {dateLabel} · AlUla, {sky.coords.lat.toFixed(1)}°N
+          </p>
+          <h1 className="mt-1 font-display text-[42px] font-extrabold leading-none tracking-[-0.02em] text-[var(--sky-text)]">
+            The sky above AlUla, tonight.
+          </h1>
+          <p className="mb-6 mt-2 max-w-[62ch] text-[14px] text-[var(--sky-muted)]">
+            {moon.phrase}
+            {moon.set ? `, setting at ${moon.set}` : ""}. {twilight.darkHours} hours between
+            astronomical dusk at {twilight.astronomicalDusk} and dawn at {twilight.astronomicalDawn},
+            over four DarkSky-certified reserves at Bortle {darkness.bortle}.
+          </p>
+        </Reveal>
 
         <div className={cn("grid border-2 md:grid-cols-[1.15fr_1fr]", RULE)}>
-          <Cell title="Moon">
+          <Cell title="Moon" revealDelay={0}>
             <div className="flex items-center gap-5">
               <MoonPhase phase={moon.illumination} waxing={moon.waxing} size={96} tone="light" />
               <div>
@@ -118,7 +121,7 @@ export function SkyDashboard({
             </div>
           </Cell>
 
-          <Cell title={`Darkness · Bortle ${darkness.bortle}`} lastCol>
+          <Cell title={`Darkness · Bortle ${darkness.bortle}`} lastCol revealDelay={70}>
             <div className="mb-3 flex items-baseline gap-2">
               {/* one decimal always: an SQM that renders as "22" rather than
                   "22.0" reads as a rounder, less measured number than it is */}
@@ -129,9 +132,16 @@ export function SkyDashboard({
                 mag / arcsec²
               </span>
             </div>
+            {/* fill-x: the scale reads as measured rather than merely
+                rendered, drawing in left to right once on load. The marker is
+                an absolutely-positioned child, so it scales in together with
+                the bar rather than needing its own separate animation. */}
             <div
-              className={cn("relative h-2 border", RULE)}
-              style={{ background: "linear-gradient(90deg,#0a0908,#4a4844,#a19d99,#f3d68a)" }}
+              className={cn("relative h-2 border fill-x", RULE)}
+              style={{
+                background: "linear-gradient(90deg,#0a0908,#4a4844,#a19d99,#f3d68a)",
+                ["--fill-delay" as string]: "200ms",
+              }}
             >
               <span
                 aria-hidden
@@ -146,15 +156,20 @@ export function SkyDashboard({
             </div>
           </Cell>
 
-          <Cell title={`Astronomical twilight · ${sky.coords.lat.toFixed(1)}°N`} span lastRow={false}>
+          <Cell title={`Astronomical twilight · ${sky.coords.lat.toFixed(1)}°N`} span lastRow={false} revealDelay={140}>
             {/* room above the bar for two rows of marker labels, so they
                 never ride up into the cell heading */}
             <div className="relative pt-9">
+              {/* fill-x, delayed past the cell's own Reveal so the bar draws
+                  in once it is actually visible rather than mid-fade. This is
+                  the night's own measured window, so it earns the same
+                  "drawn, not just appearing" treatment as the darkness scale. */}
               <div
-                className={cn("relative h-8 border", RULE)}
+                className={cn("relative h-8 border fill-x", RULE)}
                 style={{
                   background:
                     "linear-gradient(90deg,#f3d68a 0%,#b96b3a 8%,#4a2d4a 20%,#0a0908 35%,#0a0908 65%,#4a2d4a 80%,#b96b3a 92%,#f3d68a 100%)",
+                  ["--fill-delay" as string]: "350ms",
                 }}
               >
                 {markers.map((m, i) => (
@@ -197,7 +212,7 @@ export function SkyDashboard({
             </p>
           </Cell>
 
-          <Cell title="What's up · zenith at midnight" lastRow>
+          <Cell title="What's up · zenith at midnight" lastRow revealDelay={210}>
             <div className="flex flex-wrap gap-2">
               {constellations.map((c) => (
                 <span
@@ -234,7 +249,7 @@ export function SkyDashboard({
             </div>
           </Cell>
 
-          <Cell title="Cloud cover · next 12h" lastCol lastRow>
+          <Cell title="Cloud cover · next 12h" lastCol lastRow revealDelay={280}>
             {/* The mock draws three decorative blurred patches. These are the
                 twelve hourly readings: each hour with meaningful cloud gets a
                 patch sized and faded by its own percentage, so the strip is
@@ -285,11 +300,13 @@ export function SkyDashboard({
       </div>
 
       <div data-lenis-prevent className={cn("overflow-y-auto border-l-2 bg-[var(--sky-rail)] p-6", RULE)}>
-        <p className="text-[11px] uppercase tracking-[0.14em] text-accent">Coming up</p>
-        <h2 className="mt-1 font-display text-[22px] font-extrabold tracking-[-0.01em] text-[var(--sky-text)]">
-          Notable events
-        </h2>
-        <p className="mt-1 text-[12px] text-[var(--sky-muted)]">Next 60 nights in the AlUla sky.</p>
+        <Reveal>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-accent">Coming up</p>
+          <h2 className="mt-1 font-display text-[22px] font-extrabold tracking-[-0.01em] text-[var(--sky-text)]">
+            Notable events
+          </h2>
+          <p className="mt-1 text-[12px] text-[var(--sky-muted)]">Next 60 nights in the AlUla sky.</p>
+        </Reveal>
 
         <div className="mt-3">
           {events.length === 0 ? (
@@ -297,35 +314,36 @@ export function SkyDashboard({
               Nothing notable falls in the next sixty nights.
             </p>
           ) : (
-            events.slice(0, 6).map((event) => {
+            events.slice(0, 6).map((event, i) => {
               const parts = eventDateParts(parseDateKey(event.date));
               return (
-                <div
-                  key={`${event.date}-${event.name}`}
-                  className={cn(
-                    "grid grid-cols-[74px_minmax(0,1fr)_auto] items-baseline gap-3.5 border-t py-3.5 last:border-b",
-                    RULE,
-                  )}
-                >
-                  <div className="font-display text-[14px] font-extrabold uppercase tracking-[-0.01em] text-accent">
-                    {parts.date}
-                    <small className="mt-0.5 block text-[10px] font-normal tracking-[0.08em] text-[var(--sky-faint)]">
-                      {parts.day}
-                    </small>
-                  </div>
-                  <div className="font-display text-[14px] font-bold leading-[1.3]">
-                    {event.name}
-                    <small className="mt-0.5 block text-[11px] font-normal uppercase tracking-[0.04em] text-[var(--sky-muted)]">
-                      {event.detail}
-                    </small>
-                  </div>
+                <Reveal key={`${event.date}-${event.name}`} delay={i * 60}>
                   <div
-                    aria-label={`${event.rating} out of 5`}
-                    className="font-display text-[12px] text-[var(--sky-muted)]"
+                    className={cn(
+                      "grid grid-cols-[74px_minmax(0,1fr)_auto] items-baseline gap-3.5 border-t py-3.5 last:border-b",
+                      RULE,
+                    )}
                   >
-                    {"★".repeat(event.rating)}
+                    <div className="font-display text-[14px] font-extrabold uppercase tracking-[-0.01em] text-accent">
+                      {parts.date}
+                      <small className="mt-0.5 block text-[10px] font-normal tracking-[0.08em] text-[var(--sky-faint)]">
+                        {parts.day}
+                      </small>
+                    </div>
+                    <div className="font-display text-[14px] font-bold leading-[1.3]">
+                      {event.name}
+                      <small className="mt-0.5 block text-[11px] font-normal uppercase tracking-[0.04em] text-[var(--sky-muted)]">
+                        {event.detail}
+                      </small>
+                    </div>
+                    <div
+                      aria-label={`${event.rating} out of 5`}
+                      className="font-display text-[12px] text-[var(--sky-muted)]"
+                    >
+                      {"★".repeat(event.rating)}
+                    </div>
                   </div>
-                </div>
+                </Reveal>
               );
             })
           )}
@@ -336,8 +354,8 @@ export function SkyDashboard({
         </p>
         <div className="mt-1">
           {siteRanking.map((site, i) => (
+            <Reveal key={site.slug} delay={i * 60}>
             <div
-              key={site.slug}
               className={cn(
                 "grid grid-cols-[28px_minmax(0,1fr)_auto_auto] items-center gap-3 border-t py-3 last:border-b",
                 RULE,
@@ -361,6 +379,7 @@ export function SkyDashboard({
                 {site.bookableTonight ? "Book" : "View"}
               </Link>
             </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -374,14 +393,21 @@ function Cell({
   span = false,
   lastCol = false,
   lastRow = false,
+  revealDelay = 0,
 }: {
   title: string;
   children: React.ReactNode;
   span?: boolean;
   lastCol?: boolean;
   lastRow?: boolean;
+  revealDelay?: number;
 }) {
   return (
+    /* The Reveal wrapper lives inside this section, not around it: the
+       section is the actual CSS grid item, and "span" cells rely on
+       md:col-span-2 landing on it directly. A wrapping div around the whole
+       section would carry that span class on the wrong element and break
+       the grid. */
     <section
       className={cn(
         "px-[22px] py-5",
@@ -391,10 +417,12 @@ function Cell({
         lastRow ? "" : "border-b-2",
       )}
     >
-      <h3 className="mb-3.5 font-display text-[12px] font-extrabold uppercase tracking-[0.14em] text-[var(--sky-faint)]">
-        {title}
-      </h3>
-      {children}
+      <Reveal delay={revealDelay}>
+        <h3 className="mb-3.5 font-display text-[12px] font-extrabold uppercase tracking-[0.14em] text-[var(--sky-faint)]">
+          {title}
+        </h3>
+        {children}
+      </Reveal>
     </section>
   );
 }

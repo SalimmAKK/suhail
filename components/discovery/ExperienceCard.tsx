@@ -21,6 +21,12 @@ import { cn, focusRing } from "@/lib/cn";
  * figure, the category tag is gold-outlined, and the operator/price row sits
  * on sand. The card ends on a band of the palette rather than trailing off
  * into the page background.
+ *
+ * Motion system: the whole card lifts 3px with a deepening shadow on hover,
+ * on top of the border darkening it already did. The one extra detail is the
+ * thumbnail itself — a slow, contained scale toward the viewer, clipped by
+ * the same overflow-hidden wrapper the corner badges already sit inside, so
+ * nothing else on the card moves or needs to be masked separately.
  */
 
 export function ExperienceCard({
@@ -40,7 +46,12 @@ export function ExperienceCard({
     <article
       onMouseEnter={() => onHover(item.siteSlug)}
       onMouseLeave={() => onHover(null)}
-      className="group relative flex flex-col border-2 border-divider bg-bg transition-colors duration-[120ms] ease-move hover:border-text"
+      className={cn(
+        "group relative flex flex-col border-2 border-divider bg-bg",
+        "transition-[transform,box-shadow,border-color] duration-200 ease-move",
+        "hover:-translate-y-1 hover:border-text hover:shadow-md",
+        "motion-reduce:transition-colors motion-reduce:duration-[120ms] motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none",
+      )}
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-200">
         {item.image ? (
@@ -50,7 +61,7 @@ export function ExperienceCard({
             alt={item.image.alt}
             fill
             sizes="(min-width: 1280px) 22vw, 45vw"
-            className="photo-duotone object-cover"
+            className="photo-duotone object-cover transition-transform duration-[550ms] ease-move group-hover:scale-[1.05] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         ) : null}
 

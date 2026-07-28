@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabase";
-import { OPERATORS as SEED_OPERATORS } from "@/data/experiences";
+import { CATEGORY_LABEL, EXPERIENCES as SEED_EXPERIENCES, OPERATORS as SEED_OPERATORS } from "@/data/experiences";
+import { SITES } from "@/data/sites";
 
 /* The admin view behind /operators.
  *
@@ -46,6 +47,9 @@ export type OperatorOverview = {
   approved: boolean;
   /** demo inventory written for the prototype, not a sourced operator */
   fictional: boolean;
+  contactEmail: string | null;
+  /** one line, what this operator actually runs. null if they have nothing seeded. */
+  summary: string | null;
   experiences: OperatorExperience[];
   bookingCount: number;
 };
@@ -57,6 +61,34 @@ export type OperatorsPage = {
 };
 
 const EMPTY: OperatorsPage = { operators: [], totalBookings: 0, error: null };
+
+const siteNameBySlug = new Map(SITES.map((s) => [s.slug, s.name]));
+
+function joinNatural(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+}
+
+/* One line, "what does this operator actually do", built from the same
+ * data/experiences.ts records the seed script writes from rather than
+ * invented for the page. Real operators (fictional: false) get a summary
+ * describing their real, sourced listings; fictional operators get one
+ * describing their fictional listings, which is the same distinction the
+ * page already carries through with the "demo inventory" badge. */
+function summaryFor(operatorSlug: string): string | null {
+  const own = SEED_EXPERIENCES.filter((e) => e.operatorSlug === operatorSlug);
+  if (own.length === 0) return null;
+
+  const categories = joinNatural([...new Set(own.map((e) => CATEGORY_LABEL[e.category]))]);
+  const sites = joinNatural(
+    [...new Set(own.map((e) => siteNameBySlug.get(e.siteSlug)))].filter(
+      (name): name is string => Boolean(name),
+    ),
+  );
+
+  return `Runs ${categories.toLowerCase()} experiences at ${sites}.`;
+}
 
 export async function getOperatorsOverview(): Promise<OperatorsPage> {
   const db = supabaseServer();
@@ -109,6 +141,8 @@ export async function getOperatorsOverview(): Promise<OperatorsPage> {
       name: op.name,
       approved: op.approved,
       fictional: fictionalBySlug.get(op.slug) ?? false,
+      contactEmail: op.contact_email,
+      summary: summaryFor(op.slug),
       experiences: ownExperiences,
       bookingCount: ownExperiences.reduce((sum, e) => sum + e.bookings.length, 0),
     };

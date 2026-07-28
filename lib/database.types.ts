@@ -1,4 +1,5 @@
-/* Types for the schema in migrations/001_init.sql.
+/* Types for the schema in migrations/001_init.sql, 002_messages.sql and
+   003_accounts.sql.
 
    Hand-written rather than generated, because generating requires a live
    project and the migration has not been run yet at the point this file is
@@ -119,6 +120,7 @@ export type Database = {
           status: BookingStatus;
           reference: string;
           created_at: string;
+          user_id: string | null;
         };
         Insert: {
           id?: string;
@@ -131,8 +133,29 @@ export type Database = {
           status?: BookingStatus;
           reference: string;
           created_at?: string;
+          user_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["bookings"]["Insert"]>;
+        Relationships: [];
+      };
+      messages: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          subject: string;
+          message: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          subject: string;
+          message: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["messages"]["Insert"]>;
         Relationships: [];
       };
     };
